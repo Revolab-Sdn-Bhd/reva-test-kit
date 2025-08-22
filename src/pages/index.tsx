@@ -4,20 +4,14 @@ import {
   StartAudio,
 } from "@livekit/components-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Inter } from "next/font/google";
 import Head from "next/head";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 
-import { PlaygroundConnect } from "@/components/PlaygroundConnect";
 import Playground from "@/components/playground/Playground";
 import { PlaygroundToast, ToastType } from "@/components/toast/PlaygroundToast";
+import { LanguageSelectionDialog } from "@/components/dialog/LanguageSelectionDialog";
 import { ConfigProvider, useConfig } from "@/hooks/useConfig";
-import {
-  ConnectionMode,
-  ConnectionProvider,
-  useConnection,
-} from "@/hooks/useConnection";
-import { useMemo } from "react";
+import { ConnectionProvider, useConnection } from "@/hooks/useConnection";
 import { ToastProvider, useToast } from "@/components/toast/ToasterProvider";
 
 const themeColors = [
@@ -30,8 +24,6 @@ const themeColors = [
   "pink",
   "teal",
 ];
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   return (
@@ -46,28 +38,31 @@ export default function Home() {
 }
 
 export function HomeInner() {
-  const { shouldConnect, wsUrl, token, mode, connect, disconnect } =
-    useConnection();
+  const { shouldConnect, wsUrl, token, connect, disconnect } = useConnection();
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
 
   const { config } = useConfig();
   const { toastMessage, setToastMessage } = useToast();
 
   const handleConnect = useCallback(
-    async (c: boolean, mode: ConnectionMode) => {
-      c ? connect(mode) : disconnect();
+    async (c: boolean) => {
+      if (c) {
+        setShowLanguageDialog(true);
+      } else {
+        disconnect();
+      }
     },
-    [connect, disconnect],
+    [disconnect]
   );
 
-  const showPG = useMemo(() => {
-    if (process.env.NEXT_PUBLIC_LIVEKIT_URL) {
-      return true;
-    }
-    if (wsUrl) {
-      return true;
-    }
-    return false;
-  }, [wsUrl]);
+  const handleLanguageSelect = useCallback(
+    async (language: "en" | "ar") => {
+      await connect(language);
+    },
+    [connect]
+  );
+
+  console.log("@test", wsUrl, token)
 
   return (
     <>
@@ -80,19 +75,15 @@ export function HomeInner() {
         />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <meta
-          property="og:image"
-          content="https://livekit.io/images/og/agents-playground.png"
-        />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/logo.svg" />
       </Head>
-      <main className="relative flex flex-col justify-center px-4 items-center h-full w-full bg-black repeating-square-background">
+      <main className="relative flex flex-col items-center justify-center w-full h-full px-4 bg-black repeating-square-background">
         <AnimatePresence>
           {toastMessage && (
             <motion.div
-              className="left-0 right-0 top-0 absolute z-10"
+              className="absolute top-0 left-0 right-0 z-10"
               initial={{ opacity: 0, translateY: -50 }}
               animate={{ opacity: 1, translateY: 0 }}
               exit={{ opacity: 0, translateY: -50 }}
@@ -101,35 +92,33 @@ export function HomeInner() {
             </motion.div>
           )}
         </AnimatePresence>
-        {showPG ? (
-          <LiveKitRoom
-            className="flex flex-col h-full w-full"
-            serverUrl={wsUrl}
-            token={token}
-            connect={shouldConnect}
-            onError={(e) => {
-              setToastMessage({ message: e.message, type: "error" });
-              console.error(e);
-            }}
-          >
-            <Playground
-              themeColors={themeColors}
-              onConnect={(c) => {
-                const m = process.env.NEXT_PUBLIC_LIVEKIT_URL ? "env" : mode;
-                handleConnect(c, m);
-              }}
-            />
-            <RoomAudioRenderer />
-            <StartAudio label="Click to enable audio playback" />
-          </LiveKitRoom>
-        ) : (
-          <PlaygroundConnect
-            accentColor={themeColors[0]}
-            onConnectClicked={(mode) => {
-              handleConnect(true, mode);
+
+        <LiveKitRoom
+          className="flex flex-col w-full h-full"
+          serverUrl={wsUrl}
+          token={token}
+          connect={shouldConnect}
+          onError={(e) => {
+            setToastMessage({ message: e.message, type: "error" });
+            console.error(e);
+          }}
+        >
+          <Playground
+            themeColors={themeColors}
+            onConnect={(c) => {
+              handleConnect(c);
             }}
           />
-        )}
+          <RoomAudioRenderer />
+          <StartAudio label="Click to enable audio playback" />
+        </LiveKitRoom>
+
+        <LanguageSelectionDialog
+          isOpen={showLanguageDialog}
+          onLanguageSelect={handleLanguageSelect}
+          onClose={() => setShowLanguageDialog(false)}
+          accentColor={config.settings.theme_color}
+        />
       </main>
     </>
   );

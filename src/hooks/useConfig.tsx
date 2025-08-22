@@ -46,8 +46,8 @@ export type UserSettings = {
 
 // Fallback if NEXT_PUBLIC_APP_CONFIG is not set
 const defaultConfig: AppConfig = {
-  title: "LiveKit Agents Playground",
-  description: "A virtual workbench for testing multimodal AI agents.",
+  title: "Reva Agents Playground",
+  description: "Reva Agents Playground",
   video_fit: "contain",
   settings: {
     editable: true,
