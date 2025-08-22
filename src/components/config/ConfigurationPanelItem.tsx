@@ -21,15 +21,15 @@ export const ConfigurationPanelItem: React.FC<ConfigurationPanelItemProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
   return (
-    <div className="w-full text-gray-300 py-4 border-b border-b-gray-800 relative">
-      <div className="flex flex-row justify-between items-center px-4 text-xs uppercase tracking-wider">
+    <div className="relative w-full py-4 text-gray-300 border-b border-b-gray-800">
+      <div className="flex flex-row items-center justify-between px-4 text-xs tracking-wider uppercase">
         <h3>{title}</h3>
         <div className="flex items-center gap-2">
           {source && (
             <span className="flex flex-row gap-2">
               <TrackToggle
-                className="px-2 py-1 bg-gray-900 text-gray-300 border border-gray-800 rounded-sm hover:bg-gray-800"
-                source={source}
+                className="px-2 py-1 text-gray-300 bg-gray-900 border border-gray-800 rounded-sm hover:bg-gray-800"
+                source={source as any}
               />
               {source === Track.Source.Camera && (
                 <PlaygroundDeviceSelector kind="videoinput" />
@@ -42,7 +42,7 @@ export const ConfigurationPanelItem: React.FC<ConfigurationPanelItemProps> = ({
           {collapsible && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="text-gray-400 hover:text-gray-300 transition-colors"
+              className="text-gray-400 transition-colors hover:text-gray-300"
             >
               <svg
                 className={`w-4 h-4 transform transition-transform ${!isCollapsed ? "rotate-180" : ""}`}
@@ -62,7 +62,7 @@ export const ConfigurationPanelItem: React.FC<ConfigurationPanelItemProps> = ({
         </div>
       </div>
       {!isCollapsed && (
-        <div className="px-4 py-2 text-xs text-gray-500 leading-normal">
+        <div className="px-4 py-2 text-xs leading-normal text-gray-500">
           {children}
         </div>
       )}
