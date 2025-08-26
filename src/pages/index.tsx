@@ -5,10 +5,10 @@ import {
 } from "@livekit/components-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Head from "next/head";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState } from "react";
 
 import Playground from "@/components/playground/Playground";
-import { PlaygroundToast, ToastType } from "@/components/toast/PlaygroundToast";
+import { PlaygroundToast } from "@/components/toast/PlaygroundToast";
 import { LanguageSelectionDialog } from "@/components/dialog/LanguageSelectionDialog";
 import { ConfigProvider, useConfig } from "@/hooks/useConfig";
 import { ConnectionProvider, useConnection } from "@/hooks/useConnection";
@@ -61,8 +61,6 @@ export function HomeInner() {
     },
     [connect]
   );
-
-  console.log("@test", wsUrl, token)
 
   return (
     <>

@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+  push:
+    branches:
+      - main
+
+env:
+  GOOGLE_ARTIFACT_REGISTRY: asia-southeast1-docker.pkg.dev
+
+jobs:
+  docker-image-build:
+    strategy:
+      matrix:
+        configs:
+          - artifact-registry-path: rewa-se/rewa/rewa-test-kit
+            artifact-registry-password: GCP_SERVICE_ACCOUNT_KEY
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.GOOGLE_ARTIFACT_REGISTRY }}/${{ matrix.configs.artifact-registry-path }}
+          tags: |
+            event=pr,type=ref,suffix=-{{sha}}
+            event=branch,type=ref,suffix=-{{sha}}
+            event=tag,type=ref,suffix=
+      - name: Login to Google Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GOOGLE_ARTIFACT_REGISTRY }}
+          username: _json_key
+          password: ${{ secrets[matrix.configs.artifact-registry-password] }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          platforms: linux/amd64
+          cache-from: type=registry,ref=${{ env.GOOGLE_ARTIFACT_REGISTRY }}/${{ matrix.configs.artifact-registry-path }}:buildcache
+          cache-to: type=registry,ref=${{ env.GOOGLE_ARTIFACT_REGISTRY }}/${{ matrix.configs.artifact-registry-path }}:buildcache,mode=max
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
