@@ -21,7 +21,7 @@ jobs:
       matrix:
         configs:
           - artifact-registry-path: rewa-se/rewa/rewa-test-kit
-            artifact-registry-password: GCP_SERVICE_ACCOUNT_KEY
+            artifact-registry-password: GCP_SERVICE_ACCOUNT
     name: Build
     runs-on: ubuntu-latest
     steps:
