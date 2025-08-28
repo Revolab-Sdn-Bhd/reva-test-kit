@@ -21,7 +21,7 @@ export const ConfigurationPanelItem: React.FC<ConfigurationPanelItemProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
   return (
-    <div className="relative w-full py-4 text-gray-300 border-b border-b-gray-800">
+    <div className="relative w-full py-4 text-gray-800 border-b border-b-gray-800">
       <div className="flex flex-row items-center justify-between px-4 text-xs tracking-wider uppercase">
         <h3>{title}</h3>
         <div className="flex items-center gap-2">

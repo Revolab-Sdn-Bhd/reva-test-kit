@@ -1,6 +1,6 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, ChevronIcon } from "./icons";
-import { useConfig } from "@/hooks/useConfig";
+import useConfigStore from "@/hooks/useConfig";
 
 type SettingType = "inputs" | "outputs" | "chat" | "theme_color";
 
@@ -55,21 +55,22 @@ const settingsDropdown: SettingValue[] = [
 ];
 
 export const SettingsDropdown = () => {
-  const { config, setUserSettings } = useConfig();
+  const settings = useConfigStore((state) => state.userSettings);
+  const setUserSettings = useConfigStore((state) => state.setUserSettings);
 
   const isEnabled = (setting: SettingValue) => {
     if (setting.type === "separator" || setting.type === "theme_color")
       return false;
     if (setting.type === "chat") {
-      return config.settings[setting.type];
+      return settings[setting.type];
     }
 
     if (setting.type === "inputs") {
       const key = setting.key as "camera" | "mic" | "screen";
-      return config.settings.inputs[key];
+      return settings.inputs[key];
     } else if (setting.type === "outputs") {
       const key = setting.key as "video" | "audio";
-      return config.settings.outputs[key];
+      return settings.outputs[key];
     }
 
     return false;
@@ -78,7 +79,7 @@ export const SettingsDropdown = () => {
   const toggleSetting = (setting: SettingValue) => {
     if (setting.type === "separator" || setting.type === "theme_color") return;
     const newValue = !isEnabled(setting);
-    const newSettings = { ...config.settings };
+    const newSettings = { ...settings };
 
     if (setting.type === "chat") {
       newSettings.chat = newValue;
@@ -92,13 +93,13 @@ export const SettingsDropdown = () => {
 
   return (
     <DropdownMenu.Root modal={false}>
-      <DropdownMenu.Trigger className="group inline-flex max-h-12 items-center gap-1 rounded-md hover:bg-gray-800 bg-gray-900 border-gray-800 p-1 pr-2 text-gray-100 my-auto text-sm flex gap-1 pl-2 py-1 h-full items-center">
+      <DropdownMenu.Trigger className="flex inline-flex items-center h-full gap-1 p-1 py-1 pl-2 pr-2 my-auto text-sm text-gray-100 bg-gray-900 border-gray-800 rounded-md group max-h-12 hover:bg-gray-800">
         Settings
         <ChevronIcon />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="z-50 flex w-60 flex-col gap-0 overflow-hidden rounded text-gray-100 border border-gray-800 bg-gray-900 py-2 text-sm"
+          className="z-50 flex flex-col gap-0 py-2 overflow-hidden text-sm text-gray-100 bg-gray-900 border border-gray-800 rounded w-60"
           sideOffset={5}
           collisionPadding={16}
         >
@@ -107,7 +108,7 @@ export const SettingsDropdown = () => {
               return (
                 <div
                   key={setting.key}
-                  className="border-t border-gray-800 my-2"
+                  className="my-2 border-t border-gray-800"
                 />
               );
             }
@@ -116,9 +117,9 @@ export const SettingsDropdown = () => {
               <DropdownMenu.Label
                 key={setting.key}
                 onClick={() => toggleSetting(setting)}
-                className="flex max-w-full flex-row items-end gap-2 px-3 py-2 text-xs hover:bg-gray-800 cursor-pointer"
+                className="flex flex-row items-end max-w-full gap-2 px-3 py-2 text-xs cursor-pointer hover:bg-gray-800"
               >
-                <div className="w-4 h-4 flex items-center">
+                <div className="flex items-center w-4 h-4">
                   {isEnabled(setting) && <CheckIcon />}
                 </div>
                 <span>{setting.title}</span>

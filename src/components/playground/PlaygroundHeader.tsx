@@ -2,7 +2,7 @@
 import { Button } from "@/components/button/Button";
 import { LoadingSVG } from "@/components/button/LoadingSVG";
 import { SettingsDropdown } from "@/components/playground/SettingsDropdown";
-import { useConfig } from "@/hooks/useConfig";
+import useConfigStore from "@/hooks/useConfig";
 import { ConnectionState } from "livekit-client";
 import { ReactNode } from "react";
 
@@ -25,7 +25,7 @@ export const PlaygroundHeader = ({
   onConnectClicked,
   connectionState,
 }: PlaygroundHeader) => {
-  const { config } = useConfig();
+  const settings = useConfigStore(state => state.userSettings);
   return (
     <div
       className={`flex gap-4 pt-4 text-${accentColor}-500 justify-between items-center shrink-0`}
@@ -40,7 +40,7 @@ export const PlaygroundHeader = ({
         </div>
       </div>
       <div className="flex items-center justify-end gap-2 basis-1/3">
-        {config.settings.editable && <SettingsDropdown />}
+        {settings.editable && <SettingsDropdown />}
         <Button
           accentColor={
             connectionState === ConnectionState.Connected ? "red" : accentColor

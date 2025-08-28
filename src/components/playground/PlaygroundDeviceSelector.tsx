@@ -35,7 +35,7 @@ export const PlaygroundDeviceSelector = ({
   return (
     <div>
       <button
-        className="flex gap-2 items-center px-2 py-1 bg-gray-900 text-gray-300 border border-gray-800 rounded-sm hover:bg-gray-800"
+        className="flex items-center gap-2 px-2 py-1 text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50"
         onClick={(e) => {
           setShowMenu(!showMenu);
           e.stopPropagation();
@@ -47,7 +47,7 @@ export const PlaygroundDeviceSelector = ({
         <ChevronSVG />
       </button>
       <div
-        className="absolute right-4 top-12 bg-gray-800 text-gray-300 border border-gray-800 rounded-sm z-10"
+        className="absolute z-10 text-gray-700 bg-white border border-gray-300 rounded-sm shadow-lg right-4 top-12"
         style={{
           display: showMenu ? "block" : "none",
         }}
@@ -60,10 +60,10 @@ export const PlaygroundDeviceSelector = ({
                 setShowMenu(false);
               }}
               className={`${
-                device.deviceId === deviceSelect.activeDeviceId
-                  ? "text-white"
-                  : "text-gray-500"
-              } bg-gray-900 text-xs py-2 px-2 cursor-pointer hover:bg-gray-800 hover:text-white`}
+                device.deviceId === deviceSelect.activeDeviceId ?
+                  "text-gray-900 font-medium"
+                : "text-gray-600"
+              } bg-white text-xs py-2 px-2 cursor-pointer hover:bg-gray-100 hover:text-gray-900`}
               key={index}
             >
               {device.label}
