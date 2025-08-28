@@ -1,6 +1,5 @@
-"use client";
-
 import React, { createContext, useCallback, useState } from "react";
+import { useEnvConfig } from "./useEnvConfig";
 
 export type ConnectionMode = "cloud" | "manual" | "env";
 
@@ -27,32 +26,43 @@ export const ConnectionProvider = ({
     shouldConnect: boolean;
   }>({ wsUrl: "", token: "", shouldConnect: false });
 
-  const connect = useCallback(async (language: "en" | "ar") => {
-    let token = "";
-    let url = "";
-    if (!process.env.LIVEKIT_URL) {
-      throw new Error("LIVEKIT_URL is not set");
-    }
-    url = process.env.LIVEKIT_URL;
+  const { envConfig } = useEnvConfig();
 
-    const aiHandlerUrl = process.env.AI_HANDLER_URL;
+  const connect = useCallback(
+    async (language: "en" | "ar") => {
+      let token = "";
+      let url = "";
+      if (!envConfig?.LIVEKIT_URL) {
+        throw new Error("LIVEKIT_URL is not set");
+      }
 
-    const accessToken = await fetch(`${aiHandlerUrl}/api/v1/livekit/tokens`, {
-      method: "POST",
-      headers: {
-        "X-Livekit-Api-Key": "APIh78QfwU9xfQs",
-        "X-Reflect-Token": "",
-      },
-      body: JSON.stringify({
-        identity: "xxx",
-        name: "xxx",
-        language: language,
-      }),
-    }).then((res) => res.json());
+      url = envConfig.LIVEKIT_URL;
 
-    token = accessToken;
-    setConnectionDetails({ wsUrl: url, token, shouldConnect: true });
-  }, []);
+      console.log(envConfig);
+
+      const aiHandlerUrl = envConfig.AI_HANDLER_URL;
+
+      try {
+        const { token } = await fetch(`${aiHandlerUrl}/api/v1/livekit/tokens`, {
+          method: "POST",
+          headers: {
+            "X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
+            "X-Reflect-Token": "",
+          },
+          body: JSON.stringify({
+            identity: "xxx",
+            name: "xxx",
+            language: language,
+          }),
+        }).then((res) => res.json());
+
+        setConnectionDetails({ wsUrl: url, token, shouldConnect: true });
+      } catch (err) {
+        console.error("Error fetching access token:", err);
+      }
+    },
+    [envConfig]
+  );
 
   const disconnect = useCallback(async () => {
     setConnectionDetails((prev) => ({ ...prev, shouldConnect: false }));
