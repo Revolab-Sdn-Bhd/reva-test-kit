@@ -152,7 +152,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     if (!jsonSettings) {
       return null;
     }
-    return JSON.parse(jsonSettings) as UserSettings;
+    return JSON.parse(jsonSettings as any) as UserSettings;
   }, [appConfig]);
 
   const setUrlSettings = useCallback(

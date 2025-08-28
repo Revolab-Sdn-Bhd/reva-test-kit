@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Button } from "@/components/button/Button";
 import { LoadingSVG } from "@/components/button/LoadingSVG";
 import { SettingsDropdown } from "@/components/playground/SettingsDropdown";

@@ -31,8 +31,8 @@ export const AttributesInspector: React.FC<AttributesInspectorProps> = ({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showSyncFlash, setShowSyncFlash] = useState(false);
   const { localParticipant } = useLocalParticipant();
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const syncFlashTimeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const syncFlashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Update local attributes when props change
   useEffect(() => {
@@ -158,10 +158,10 @@ export const AttributesInspector: React.FC<AttributesInspectorProps> = ({
         </svg>
       </div>
       {isExpanded && (
-        <div className="border border-gray-800 rounded-sm bg-gray-900/30 p-3 mb-2">
+        <div className="p-3 mb-2 border border-gray-800 rounded-sm bg-gray-900/30">
           {disabled ? (
             localAttributes.length === 0 ? (
-              <div className="text-sm text-gray-400 font-sans">
+              <div className="font-sans text-sm text-gray-400">
                 No attributes set
               </div>
             ) : (
@@ -187,15 +187,15 @@ export const AttributesInspector: React.FC<AttributesInspectorProps> = ({
                   disabled={disabled}
                 />
               ))}
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <Button
                   accentColor={themeColor}
                   onClick={handleAddAttribute}
-                  className="text-xs flex items-center gap-1"
+                  className="flex items-center gap-1 text-xs"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-3 w-3"
+                    className="w-3 h-3"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -244,11 +244,11 @@ export const AttributesInspector: React.FC<AttributesInspectorProps> = ({
           (disabled || connectionState === ConnectionState.Connected ? (
             <div className="border border-gray-800 rounded-sm bg-gray-900/30 px-3 py-2 mb-4 min-h-[40px] flex items-center">
               {metadata ? (
-                <pre className="w-full text-gray-400 text-xs bg-transparent font-mono whitespace-pre-wrap break-words m-0 p-0 border-0">
+                <pre className="w-full p-0 m-0 font-mono text-xs text-gray-400 break-words whitespace-pre-wrap bg-transparent border-0">
                   {metadata}
                 </pre>
               ) : (
-                <div className="text-sm text-gray-400 font-sans w-full text-left">
+                <div className="w-full font-sans text-sm text-left text-gray-400">
                   No metadata set
                 </div>
               )}
@@ -257,7 +257,7 @@ export const AttributesInspector: React.FC<AttributesInspectorProps> = ({
             <textarea
               value={metadata}
               onChange={(e) => onMetadataChange?.(e.target.value)}
-              className="w-full text-gray-400 text-sm bg-transparent border border-gray-800 rounded-sm px-3 py-2 font-mono mb-4"
+              className="w-full px-3 py-2 mb-4 font-mono text-sm text-gray-400 bg-transparent border border-gray-800 rounded-sm"
               placeholder="Enter metadata..."
               rows={3}
             />

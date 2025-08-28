@@ -1,5 +1,4 @@
 import { useConfig } from "@/hooks/useConfig";
-import { CLOUD_ENABLED, CloudConnect } from "../cloud/CloudConnect";
 import { Button } from "./button/Button";
 import { useState } from "react";
 import { ConnectionMode } from "@/hooks/useConnection";
@@ -7,22 +6,6 @@ import { ConnectionMode } from "@/hooks/useConnection";
 type PlaygroundConnectProps = {
   accentColor: string;
   onConnectClicked: (mode: ConnectionMode) => void;
-};
-
-const ConnectTab = ({ active, onClick, children }: any) => {
-  let className = "px-2 py-1 text-sm";
-
-  if (active) {
-    className += " border-b border-cyan-500 text-cyan-500";
-  } else {
-    className += " text-gray-500 border-b border-transparent";
-  }
-
-  return (
-    <button className={className} onClick={onClick}>
-      {children}
-    </button>
-  );
 };
 
 const TokenConnect = ({
@@ -72,10 +55,7 @@ export const PlaygroundConnect = ({
   accentColor,
   onConnectClicked,
 }: PlaygroundConnectProps) => {
-  const [showCloud, setShowCloud] = useState(true);
-  const copy = CLOUD_ENABLED
-    ? "Connect to playground with LiveKit Cloud or manually with a URL and token"
-    : "Connect to playground with a URL and token";
+  const copy = "Connect to playground with a URL and token";
   return (
     <div className="top-0 left-0 flex items-center justify-center w-full h-full gap-2 text-center bg-black/80">
       <div className="min-h-[540px]">
@@ -85,36 +65,12 @@ export const PlaygroundConnect = ({
               <h1 className="text-2xl">Connect to playground</h1>
               <p className="text-sm text-gray-500">{copy}</p>
             </div>
-            {CLOUD_ENABLED && (
-              <div className="flex justify-center gap-4 pt-2 border-t border-b border-gray-900">
-                <ConnectTab
-                  active={showCloud}
-                  onClick={() => {
-                    setShowCloud(true);
-                  }}
-                >
-                  LiveKit Cloud
-                </ConnectTab>
-                <ConnectTab
-                  active={!showCloud}
-                  onClick={() => {
-                    setShowCloud(false);
-                  }}
-                >
-                  Manual
-                </ConnectTab>
-              </div>
-            )}
           </div>
           <div className="flex flex-col flex-grow bg-gray-900/30">
-            {showCloud && CLOUD_ENABLED ? (
-              <CloudConnect accentColor={accentColor} />
-            ) : (
-              <TokenConnect
-                accentColor={accentColor}
-                onConnectClicked={onConnectClicked}
-              />
-            )}
+            <TokenConnect
+              accentColor={accentColor}
+              onConnectClicked={onConnectClicked}
+            />
           </div>
         </div>
       </div>

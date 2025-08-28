@@ -4,7 +4,7 @@ const withNextPluginPreval = createNextPluginPreval();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  output: 'export'
+  output: "standalone",
 };
 
 module.exports = withNextPluginPreval(nextConfig);
