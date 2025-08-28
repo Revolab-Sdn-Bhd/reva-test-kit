@@ -13,7 +13,7 @@ import {
   PlaygroundTile,
 } from "@/components/playground/PlaygroundTile";
 import { useConfig } from "@/hooks/useConfig";
-import { TranscriptionTile } from "@/transcriptions/TranscriptionTile";
+import { TranscriptionTile } from "@/components/transcriptions/TranscriptionTile";
 import {
   BarVisualizer,
   VideoTrack,

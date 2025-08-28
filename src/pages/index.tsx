@@ -3,16 +3,14 @@ import {
   RoomAudioRenderer,
   StartAudio,
 } from "@livekit/components-react";
-import { AnimatePresence, motion } from "framer-motion";
 import Head from "next/head";
 import { useCallback, useState } from "react";
 
 import Playground from "@/components/playground/Playground";
-import { PlaygroundToast } from "@/components/toast/PlaygroundToast";
 import { LanguageSelectionDialog } from "@/components/dialog/LanguageSelectionDialog";
-import { ConfigProvider, useConfig } from "@/hooks/useConfig";
+import { useConfig } from "@/hooks/useConfig";
 import { ConnectionProvider, useConnection } from "@/hooks/useConnection";
-import { ToastProvider, useToast } from "@/components/toast/ToasterProvider";
+import { toast } from "sonner";
 
 const themeColors = [
   "cyan",
@@ -27,13 +25,9 @@ const themeColors = [
 
 export default function Home() {
   return (
-    <ToastProvider>
-      <ConfigProvider>
-        <ConnectionProvider>
-          <HomeInner />
-        </ConnectionProvider>
-      </ConfigProvider>
-    </ToastProvider>
+    <ConnectionProvider>
+      <HomeInner />
+    </ConnectionProvider>
   );
 }
 
@@ -42,7 +36,6 @@ export function HomeInner() {
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
 
   const { config } = useConfig();
-  const { toastMessage, setToastMessage } = useToast();
 
   const handleConnect = useCallback(
     async (c: boolean) => {
@@ -78,26 +71,13 @@ export function HomeInner() {
         <link rel="icon" href="/logo.svg" />
       </Head>
       <main className="relative flex flex-col items-center justify-center w-full h-full px-4 bg-black repeating-square-background">
-        <AnimatePresence>
-          {toastMessage && (
-            <motion.div
-              className="absolute top-0 left-0 right-0 z-10"
-              initial={{ opacity: 0, translateY: -50 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              exit={{ opacity: 0, translateY: -50 }}
-            >
-              <PlaygroundToast />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         <LiveKitRoom
           className="flex flex-col w-full h-full"
           serverUrl={wsUrl}
           token={token}
           connect={shouldConnect}
           onError={(e) => {
-            setToastMessage({ message: e.message, type: "error" });
+            toast.error(e.message);
             console.error(e);
           }}
         >
