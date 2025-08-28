@@ -61,7 +61,7 @@ export const ChatMessageInput = ({
       className="flex flex-col gap-2 border-t border-t-gray-800"
       style={{ height: height }}
     >
-      <div className="flex flex-row pt-3 gap-2 items-center relative">
+      <div className="relative flex flex-row items-center gap-2 pt-3">
         <div
           className={`w-2 h-4 bg-${inputHasFocus ? accentColor : "gray"}-${
             inputHasFocus ? 500 : 800
@@ -79,7 +79,7 @@ export const ChatMessageInput = ({
         ></div>
         <input
           ref={inputRef}
-          className={`w-full text-xs caret-transparent bg-transparent opacity-25 text-gray-300 p-2 pr-6 rounded-sm focus:opacity-100 focus:outline-none focus:border-${accentColor}-700 focus:ring-1 focus:ring-${accentColor}-700`}
+          className={`w-full text-xs caret-transparent bg-transparent opacity-25 text-gray-600 p-2 pr-6 rounded-sm focus:opacity-100 focus:outline-none focus:border-${accentColor}-700 focus:ring-1 focus:ring-${accentColor}-700`}
           style={{
             paddingLeft: message.length > 0 ? "12px" : "24px",
             caretShape: "block",
@@ -103,7 +103,7 @@ export const ChatMessageInput = ({
         ></input>
         <span
           ref={hiddenInputRef}
-          className="absolute top-0 left-0 text-xs pl-3 text-amber-500 pointer-events-none opacity-0"
+          className="absolute top-0 left-0 pl-3 text-xs opacity-0 pointer-events-none text-amber-500"
         >
           {message.replaceAll(" ", "\u00a0")}
         </span>

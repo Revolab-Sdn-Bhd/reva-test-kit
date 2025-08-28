@@ -12,7 +12,7 @@ type TokenGeneratorData = {
 };
 
 const ConnectionContext = createContext<TokenGeneratorData | undefined>(
-  undefined
+  undefined,
 );
 
 export const ConnectionProvider = ({
