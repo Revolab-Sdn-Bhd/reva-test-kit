@@ -8,11 +8,11 @@ import Head from "next/head";
 import { useCallback, useState, useMemo } from "react";
 
 import Playground from "@/components/playground/Playground";
-import { PlaygroundToast, ToastType } from "@/components/toast/PlaygroundToast";
+import { PlaygroundToast } from "@/components/toast/PlaygroundToast";
 import { LanguageSelectionDialog } from "@/components/dialog/LanguageSelectionDialog";
-import { ConfigProvider, useConfig } from "@/hooks/useConfig";
+import { useConfig } from "@/hooks/useConfig";
 import { ConnectionProvider, useConnection } from "@/hooks/useConnection";
-import { ToastProvider, useToast } from "@/components/toast/ToasterProvider";
+import { useToast } from "@/components/toast/ToasterProvider";
 
 const themeColors = [
   "cyan",
@@ -27,20 +27,15 @@ const themeColors = [
 
 export default function Home() {
   return (
-    <ToastProvider>
-      <ConfigProvider>
-        <ConnectionProvider>
-          <HomeInner />
-        </ConnectionProvider>
-      </ConfigProvider>
-    </ToastProvider>
+    <ConnectionProvider>
+      <HomeInner />
+    </ConnectionProvider>
   );
 }
 
 export function HomeInner() {
   const { shouldConnect, wsUrl, token, connect, disconnect } = useConnection();
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
-
   const { config } = useConfig();
   const { toastMessage, setToastMessage } = useToast();
 
@@ -52,17 +47,15 @@ export function HomeInner() {
         disconnect();
       }
     },
-    [disconnect]
+    [disconnect],
   );
 
   const handleLanguageSelect = useCallback(
     async (language: "en" | "ar") => {
       await connect(language);
     },
-    [connect]
+    [connect],
   );
-
-  console.log("@test", wsUrl, token)
 
   return (
     <>
@@ -79,7 +72,8 @@ export function HomeInner() {
         <meta property="og:image:height" content="630" />
         <link rel="icon" href="/logo.svg" />
       </Head>
-      <main className="relative flex flex-col items-center justify-center w-full h-full px-4 bg-black repeating-square-background">
+
+      <main className="relative flex w-full h-full bg-black">
         <AnimatePresence>
           {toastMessage && (
             <motion.div
