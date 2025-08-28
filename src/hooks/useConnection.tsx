@@ -30,12 +30,12 @@ export const ConnectionProvider = ({
   const connect = useCallback(async (language: "en" | "ar") => {
     let token = "";
     let url = "";
-    if (!process.env.NEXT_PUBLIC_LIVEKIT_URL) {
-      throw new Error("NEXT_PUBLIC_LIVEKIT_URL is not set");
+    if (!process.env.LIVEKIT_URL) {
+      throw new Error("LIVEKIT_URL is not set");
     }
-    url = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+    url = process.env.LIVEKIT_URL;
 
-    const aiHandlerUrl = process.env.NEXT_PUBLIC_AI_HANDLER_URL;
+    const aiHandlerUrl = process.env.AI_HANDLER_URL;
 
     const accessToken = await fetch(`${aiHandlerUrl}/api/v1/livekit/tokens`, {
       method: "POST",
