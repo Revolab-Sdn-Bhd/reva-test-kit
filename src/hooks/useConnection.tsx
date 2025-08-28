@@ -1,7 +1,5 @@
-"use client";
-
-import getConfig from "next/config";
 import React, { createContext, useCallback, useState } from "react";
+import { useEnvConfig } from "./useEnvConfig";
 
 export type ConnectionMode = "cloud" | "manual" | "env";
 
@@ -28,23 +26,23 @@ export const ConnectionProvider = ({
     shouldConnect: boolean;
   }>({ wsUrl: "", token: "", shouldConnect: false });
 
+  const { envConfig } = useEnvConfig();
+
   const connect = useCallback(async (language: "en" | "ar") => {
     let token = "";
     let url = "";
-    if (!process.env.LIVEKIT_URL) {
+    if (!envConfig?.LIVEKIT_URL) {
       throw new Error("LIVEKIT_URL is not set");
     }
 
-    const { publicRuntimeConfig } = getConfig();
+    url = envConfig.LIVEKIT_URL;
 
-    url = publicRuntimeConfig.LIVEKIT_URL;
-
-    const aiHandlerUrl = publicRuntimeConfig.AI_HANDLER_URL;
+    const aiHandlerUrl = envConfig.AI_HANDLER_URL;
 
     const accessToken = await fetch(`${aiHandlerUrl}/api/v1/livekit/tokens`, {
       method: "POST",
       headers: {
-        "X-Livekit-Api-Key": publicRuntimeConfig.LIVEKIT_API_KEY,
+        "X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
         "X-Reflect-Token": "",
       },
       body: JSON.stringify({

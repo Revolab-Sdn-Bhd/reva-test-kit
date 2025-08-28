@@ -20,3 +20,9 @@ export interface AttributeItem {
   key: string;
   value: string;
 }
+
+export interface EnvConfig {
+  LIVEKIT_URL?: string;
+  AI_HANDLER_URL?: string;
+  LIVEKIT_API_KEY?: string;
+}

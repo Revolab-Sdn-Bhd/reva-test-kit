@@ -1,17 +1,15 @@
 import { CloudProvider } from "@/cloud/useCloud";
+import { EnvConfigProvider } from "@/hooks/useEnvConfig";
 import "@livekit/components-styles/components/participant";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import getConfig from "next/config";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { publicRuntimeConfig } = getConfig();
-  console.log("@test", { publicRuntimeConfig });
   return (
-    <CloudProvider>
-      <Component {...pageProps} />
-    </CloudProvider>
+    <EnvConfigProvider>
+      <CloudProvider>
+        <Component {...pageProps} />
+      </CloudProvider>
+    </EnvConfigProvider>
   );
 }
-
-App.getInitialProps = () => ({});
