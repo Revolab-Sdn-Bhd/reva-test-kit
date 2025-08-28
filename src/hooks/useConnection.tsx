@@ -38,28 +38,24 @@ export const ConnectionProvider = ({
 
       url = envConfig.LIVEKIT_URL;
 
-      console.log(envConfig)
+      console.log(envConfig);
 
       const aiHandlerUrl = envConfig.AI_HANDLER_URL;
 
       try {
-        const accessToken = await fetch(
-          `${aiHandlerUrl}/api/v1/livekit/tokens`,
-          {
-            method: "POST",
-            headers: {
-              "X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
-              "X-Reflect-Token": "",
-            },
-            body: JSON.stringify({
-              identity: "xxx",
-              name: "xxx",
-              language: language,
-            }),
-          }
-        ).then((res) => res.json());
+        const { token } = await fetch(`${aiHandlerUrl}/api/v1/livekit/tokens`, {
+          method: "POST",
+          headers: {
+            "X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
+            "X-Reflect-Token": "",
+          },
+          body: JSON.stringify({
+            identity: "xxx",
+            name: "xxx",
+            language: language,
+          }),
+        }).then((res) => res.json());
 
-        token = accessToken;
         setConnectionDetails({ wsUrl: url, token, shouldConnect: true });
       } catch (err) {
         console.error("Error fetching access token:", err);
