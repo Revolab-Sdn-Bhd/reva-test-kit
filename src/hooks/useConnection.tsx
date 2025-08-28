@@ -28,33 +28,47 @@ export const ConnectionProvider = ({
 
   const { envConfig } = useEnvConfig();
 
-  const connect = useCallback(async (language: "en" | "ar") => {
-    let token = "";
-    let url = "";
-    if (!envConfig?.LIVEKIT_URL) {
-      throw new Error("LIVEKIT_URL is not set");
-    }
+  console.log("@test", envConfig);
 
-    url = envConfig.LIVEKIT_URL;
+  const connect = useCallback(
+    async (language: "en" | "ar") => {
+      let token = "";
+      let url = "";
+      if (!envConfig?.LIVEKIT_URL) {
+        throw new Error("LIVEKIT_URL is not set");
+      }
 
-    const aiHandlerUrl = envConfig.AI_HANDLER_URL;
+      url = envConfig.LIVEKIT_URL;
 
-    const accessToken = await fetch(`${aiHandlerUrl}/api/v1/livekit/tokens`, {
-      method: "POST",
-      headers: {
-        "X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
-        "X-Reflect-Token": "",
-      },
-      body: JSON.stringify({
-        identity: "xxx",
-        name: "xxx",
-        language: language,
-      }),
-    }).then((res) => res.json());
+      console.log(envConfig)
 
-    token = accessToken;
-    setConnectionDetails({ wsUrl: url, token, shouldConnect: true });
-  }, []);
+      const aiHandlerUrl = envConfig.AI_HANDLER_URL;
+
+      try {
+        const accessToken = await fetch(
+          `${aiHandlerUrl}/api/v1/livekit/tokens`,
+          {
+            method: "POST",
+            headers: {
+              "X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
+              "X-Reflect-Token": "",
+            },
+            body: JSON.stringify({
+              identity: "xxx",
+              name: "xxx",
+              language: language,
+            }),
+          }
+        ).then((res) => res.json());
+
+        token = accessToken;
+        setConnectionDetails({ wsUrl: url, token, shouldConnect: true });
+      } catch (err) {
+        console.error("Error fetching access token:", err);
+      }
+    },
+    [envConfig]
+  );
 
   const disconnect = useCallback(async () => {
     setConnectionDetails((prev) => ({ ...prev, shouldConnect: false }));
