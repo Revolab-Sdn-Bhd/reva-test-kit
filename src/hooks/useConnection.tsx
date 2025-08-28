@@ -28,8 +28,6 @@ export const ConnectionProvider = ({
 
   const { envConfig } = useEnvConfig();
 
-  console.log("@test", envConfig);
-
   const connect = useCallback(
     async (language: "en" | "ar") => {
       let token = "";
