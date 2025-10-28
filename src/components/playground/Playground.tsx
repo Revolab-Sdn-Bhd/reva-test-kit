@@ -123,13 +123,13 @@ export default function Playground({
     const videoFitClassName = `object-${config.video_fit || "contain"}`;
 
     const disconnectedContent = (
-      <div className="flex items-center justify-center text-gray-700 text-center w-full h-full">
+      <div className="flex items-center justify-center w-full h-full text-center text-gray-700">
         No agent video track. Connect to get started.
       </div>
     );
 
     const loadingContent = (
-      <div className="flex flex-col items-center justify-center gap-2 text-gray-700 text-center h-full w-full">
+      <div className="flex flex-col items-center justify-center w-full h-full gap-2 text-center text-gray-700">
         <LoadingSVG />
         Waiting for agent video track…
       </div>
@@ -152,7 +152,7 @@ export default function Playground({
     }
 
     return (
-      <div className="flex flex-col w-full grow text-gray-950 bg-black rounded-sm border border-gray-800 relative">
+      <div className="relative flex flex-col w-full bg-black border border-gray-800 rounded-sm grow text-gray-950">
         {content}
       </div>
     );
@@ -172,13 +172,13 @@ export default function Playground({
 
   const audioTileContent = useMemo(() => {
     const disconnectedContent = (
-      <div className="flex flex-col items-center justify-center gap-2 text-gray-700 text-center w-full">
+      <div className="flex flex-col items-center justify-center w-full gap-2 text-center text-gray-700">
         No agent audio track. Connect to get started.
       </div>
     );
 
     const waitingContent = (
-      <div className="flex flex-col items-center gap-2 text-gray-700 text-center w-full">
+      <div className="flex flex-col items-center w-full gap-2 text-center text-gray-700">
         <LoadingSVG />
         Waiting for agent audio track…
       </div>
@@ -248,7 +248,7 @@ export default function Playground({
 
   const settingsTileContent = useMemo(() => {
     return (
-      <div className="flex flex-col h-full w-full items-start overflow-y-auto">
+      <div className="flex flex-col items-start w-full h-full overflow-y-auto">
         {config.description && (
           <ConfigurationPanelItem title="Description">
             {config.description}
@@ -341,13 +341,13 @@ export default function Playground({
                   disabled={true}
                 />
               )}
-            <p className="text-xs text-gray-500 text-right">
+            <p className="text-xs text-right text-gray-500">
               Set an agent name to use{" "}
               <a
                 href="https://docs.livekit.io/agents/worker/dispatch#explicit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-500 hover:text-gray-300 underline"
+                className="text-gray-500 underline hover:text-gray-300"
               >
                 explicit dispatch
               </a>
@@ -410,7 +410,7 @@ export default function Playground({
           </div>
         </ConfigurationPanelItem>
 
-        {roomState === ConnectionState.Connected &&
+        {/* {roomState === ConnectionState.Connected &&
           config.settings.inputs.screen && (
             <ConfigurationPanelItem
               title="Screen"
@@ -419,18 +419,18 @@ export default function Playground({
               {localScreenTrack ? (
                 <div className="relative">
                   <VideoTrack
-                    className="rounded-sm border border-gray-800 opacity-70 w-full"
+                    className="w-full border border-gray-800 rounded-sm opacity-70"
                     trackRef={localScreenTrack}
                   />
                 </div>
               ) : (
-                <div className="flex items-center justify-center text-gray-700 text-center w-full h-full">
+                <div className="flex items-center justify-center w-full h-full text-center text-gray-700">
                   Press the button above to share your screen.
                 </div>
               )}
             </ConfigurationPanelItem>
-          )}
-        {roomState === ConnectionState.Connected && voiceAssistant.agent && (
+          )} */}
+        {/* {roomState === ConnectionState.Connected && voiceAssistant.agent && (
           <RpcPanel
             config={config}
             rpcMethod={rpcMethod}
@@ -439,17 +439,17 @@ export default function Playground({
             setRpcPayload={setRpcPayload}
             handleRpcCall={handleRpcCall}
           />
-        )}
-        {localCameraTrack && (
+        )} */}
+        {/* {localCameraTrack && (
           <ConfigurationPanelItem title="Camera" source={Track.Source.Camera}>
             <div className="relative">
               <VideoTrack
-                className="rounded-sm border border-gray-800 opacity-70 w-full"
+                className="w-full border border-gray-800 rounded-sm opacity-70"
                 trackRef={localCameraTrack}
               />
             </div>
           </ConfigurationPanelItem>
-        )}
+        )} */}
         {localMicTrack && (
           <ConfigurationPanelItem
             title="Microphone"
@@ -542,7 +542,7 @@ export default function Playground({
       <PlaygroundTile
         padding={false}
         backgroundColor="gray-950"
-        className="h-full w-full basis-1/4 items-start overflow-y-auto flex"
+        className="flex items-start w-full h-full overflow-y-auto basis-1/4"
         childrenClassName="h-full grow items-start"
       >
         {settingsTileContent}
@@ -567,7 +567,7 @@ export default function Playground({
         className={`flex gap-4 py-4 grow w-full selection:bg-${config.settings.theme_color}-900`}
         style={{ height: `calc(100% - ${headerHeight}px)` }}
       >
-        <div className="flex flex-col grow basis-1/2 gap-4 h-full lg:hidden">
+        <div className="flex flex-col h-full gap-4 grow basis-1/2 lg:hidden">
           <PlaygroundTabbedTile
             className="h-full"
             tabs={mobileTabs}
@@ -604,7 +604,7 @@ export default function Playground({
         {config.settings.chat && (
           <PlaygroundTile
             title="Chat"
-            className="h-full grow basis-1/4 hidden lg:flex"
+            className="hidden h-full grow basis-1/4 lg:flex"
           >
             {chatTileContent}
           </PlaygroundTile>
