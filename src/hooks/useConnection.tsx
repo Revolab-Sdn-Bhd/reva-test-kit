@@ -47,11 +47,11 @@ export const ConnectionProvider = ({
           method: "POST",
           headers: {
             "X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
-            "X-Reflect-Token": "",
+            "X-Reflect-Token": "REFLECT_TOKEN",
           },
           body: JSON.stringify({
-            identity: "xxx",
-            name: "xxx",
+            identity: "test_identity",
+            name: "test_name",
             language: language,
           }),
         }).then((res) => res.json());
