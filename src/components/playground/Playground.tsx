@@ -58,6 +58,7 @@ export default function Playground({
   const { localParticipant } = useLocalParticipant();
 
   const voiceAssistant = useVoiceAssistant();
+  const state = voiceAssistant.state;
 
   const roomState = useConnectionState();
   const tracks = useTracks();
@@ -74,30 +75,64 @@ export default function Playground({
     }
   }, [config, localParticipant, roomState]);
 
+  room?.registerTextStreamHandler(
+    "escalated",
+    async (reader, participantInfo) => {
+      const info = reader.info;
+      console.log(
+        `Received text stream (escalated) from ${participantInfo.identity}\n` +
+          `  Topic: ${info.topic}\n` +
+          `  Timestamp: ${info.timestamp}\n` +
+          `  ID: ${info.id}\n` +
+          `  Size: ${info.size}` // Optional, only available if the stream was sent with `sendText`
+      );
+      // Option 2: Get the entire text after the stream completes.
+      const text = await reader.readAll();
+      console.log(`Received text: ${text}`);
+    }
+  );
+
+  room?.registerTextStreamHandler(
+    "navigationContext",
+    async (reader, participantInfo) => {
+      const info = reader.info;
+      console.log(
+        `Received text stream (navigationContext) from ${participantInfo.identity}\n` +
+          `  Topic: ${info.topic}\n` +
+          `  Timestamp: ${info.timestamp}\n` +
+          `  ID: ${info.id}\n` +
+          `  Size: ${info.size}` // Optional, only available if the stream was sent with `sendText`
+      );
+      // Option 2: Get the entire text after the stream completes.
+      const text = await reader.readAll();
+      console.log(`Received text: ${text}`);
+    }
+  );
+
   const agentVideoTrack = tracks.find(
     (trackRef) =>
       trackRef.publication.kind === Track.Kind.Video &&
-      trackRef.participant.isAgent,
+      trackRef.participant.isAgent
   );
 
   const localTracks = tracks.filter(
-    ({ participant }) => participant instanceof LocalParticipant,
+    ({ participant }) => participant instanceof LocalParticipant
   );
   const localCameraTrack = localTracks.find(
-    ({ source }) => source === Track.Source.Camera,
+    ({ source }) => source === Track.Source.Camera
   );
   const localScreenTrack = localTracks.find(
-    ({ source }) => source === Track.Source.ScreenShare,
+    ({ source }) => source === Track.Source.ScreenShare
   );
   const localMicTrack = localTracks.find(
-    ({ source }) => source === Track.Source.Microphone,
+    ({ source }) => source === Track.Source.Microphone
   );
 
   const onDataReceived = useCallback(
     (msg: any) => {
       if (msg.topic === "transcription") {
         const decoded = JSON.parse(
-          new TextDecoder("utf-8").decode(msg.payload),
+          new TextDecoder("utf-8").decode(msg.payload)
         );
         let timestamp = new Date().getTime();
         if ("timestamp" in decoded && decoded.timestamp > 0) {
@@ -114,7 +149,7 @@ export default function Playground({
         ]);
       }
     },
-    [transcripts],
+    [transcripts]
   );
 
   useDataChannel(onDataReceived);
@@ -162,11 +197,11 @@ export default function Playground({
     document.body.style.setProperty(
       "--lk-theme-color",
       // @ts-ignore
-      tailwindTheme.colors[config.settings.theme_color]["500"],
+      tailwindTheme.colors[config.settings.theme_color]["500"]
     );
     document.body.style.setProperty(
       "--lk-drop-shadow",
-      `var(--lk-theme-color) 0px 0px 18px`,
+      `var(--lk-theme-color) 0px 0px 18px`
     );
   }, [config.settings.theme_color]);
 
@@ -260,9 +295,9 @@ export default function Playground({
             <EditableNameValueRow
               name="Room name"
               value={
-                roomState === ConnectionState.Connected
-                  ? name
-                  : config.settings.room_name
+                roomState === ConnectionState.Connected ?
+                  name
+                : config.settings.room_name
               }
               valueColor={`${config.settings.theme_color}-500`}
               onValueChange={(value) => {
@@ -276,16 +311,14 @@ export default function Playground({
             <NameValueRow
               name="Status"
               value={
-                roomState === ConnectionState.Connecting ? (
+                roomState === ConnectionState.Connecting ?
                   <LoadingSVG diameter={16} strokeWidth={2} />
-                ) : (
-                  roomState.charAt(0).toUpperCase() + roomState.slice(1)
-                )
+                : roomState.charAt(0).toUpperCase() + roomState.slice(1)
               }
               valueColor={
-                roomState === ConnectionState.Connected
-                  ? `${config.settings.theme_color}-500`
-                  : "gray-500"
+                roomState === ConnectionState.Connected ?
+                  `${config.settings.theme_color}-500`
+                : "gray-500"
               }
             />
           </div>
@@ -296,9 +329,9 @@ export default function Playground({
             <EditableNameValueRow
               name="Agent name"
               value={
-                roomState === ConnectionState.Connected
-                  ? config.settings.agent_name || "None"
-                  : config.settings.agent_name || ""
+                roomState === ConnectionState.Connected ?
+                  config.settings.agent_name || "None"
+                : config.settings.agent_name || ""
               }
               valueColor={`${config.settings.theme_color}-500`}
               onValueChange={(value) => {
@@ -312,25 +345,22 @@ export default function Playground({
             <NameValueRow
               name="Identity"
               value={
-                voiceAssistant.agent ? (
-                  voiceAssistant.agent.identity
-                ) : roomState === ConnectionState.Connected ? (
+                voiceAssistant.agent ? voiceAssistant.agent.identity
+                : roomState === ConnectionState.Connected ?
                   <LoadingSVG diameter={12} strokeWidth={2} />
-                ) : (
-                  "No agent connected"
-                )
+                : "No agent connected"
               }
               valueColor={
-                voiceAssistant.agent
-                  ? `${config.settings.theme_color}-500`
-                  : "gray-500"
+                voiceAssistant.agent ?
+                  `${config.settings.theme_color}-500`
+                : "gray-500"
               }
             />
             {roomState === ConnectionState.Connected &&
               voiceAssistant.agent && (
                 <AttributesInspector
                   attributes={Object.entries(
-                    agentAttributes.attributes || {},
+                    agentAttributes.attributes || {}
                   ).map(([key, value], index) => ({
                     id: `agent-attr-${index}`,
                     key,
@@ -361,9 +391,9 @@ export default function Playground({
             <EditableNameValueRow
               name="Name"
               value={
-                roomState === ConnectionState.Connected
-                  ? localParticipant?.name || ""
-                  : config.settings.participant_name || ""
+                roomState === ConnectionState.Connected ?
+                  localParticipant?.name || ""
+                : config.settings.participant_name || ""
               }
               valueColor={`${config.settings.theme_color}-500`}
               onValueChange={(value) => {
@@ -377,9 +407,9 @@ export default function Playground({
             <EditableNameValueRow
               name="Identity"
               value={
-                roomState === ConnectionState.Connected
-                  ? localParticipant?.identity || ""
-                  : config.settings.participant_id || ""
+                roomState === ConnectionState.Connected ?
+                  localParticipant?.identity || ""
+                : config.settings.participant_id || ""
               }
               valueColor={`${config.settings.theme_color}-500`}
               onValueChange={(value) => {
@@ -576,9 +606,9 @@ export default function Playground({
         </div>
         <div
           className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${
-            !config.settings.outputs.audio && !config.settings.outputs.video
-              ? "hidden"
-              : "flex"
+            !config.settings.outputs.audio && !config.settings.outputs.video ?
+              "hidden"
+            : "flex"
           }`}
         >
           {config.settings.outputs.video && (
