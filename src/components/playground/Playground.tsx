@@ -33,6 +33,7 @@ import tailwindTheme from "../../lib/tailwindTheme.preval";
 import { EditableNameValueRow } from "@/components/config/NameValueRow";
 import { AttributesInspector } from "@/components/config/AttributesInspector";
 import { RpcPanel } from "./RpcPanel";
+import { useLivekitData } from "@/hooks/useLivekitData";
 
 export interface PlaygroundMeta {
   name: string;
@@ -75,45 +76,7 @@ export default function Playground({
     }
   }, [config, localParticipant, roomState]);
 
-  // Register text stream handlers once when room is available
-  useEffect(() => {
-    if (!room) return;
-
-    const escalatedHandler = async (reader: any, participantInfo: any) => {
-      const info = reader.info;
-      console.log(
-        `Received text stream (escalated) from ${participantInfo.identity}\n` +
-          `  Topic: ${info.topic}\n` +
-          `  Timestamp: ${info.timestamp}\n` +
-          `  ID: ${info.id}\n` +
-          `  Size: ${info.size}`
-      );
-      const text = await reader.readAll();
-      console.log(`Received text: ${text}`);
-    };
-
-    const navigationHandler = async (reader: any, participantInfo: any) => {
-      const info = reader.info;
-      console.log(
-        `Received text stream (navigationContext) from ${participantInfo.identity}\n` +
-          `  Topic: ${info.topic}\n` +
-          `  Timestamp: ${info.timestamp}\n` +
-          `  ID: ${info.id}\n` +
-          `  Size: ${info.size}`
-      );
-      const text = await reader.readAll();
-      console.log(`Received text: ${text}`);
-    };
-
-    room.registerTextStreamHandler("escalated", escalatedHandler);
-    room.registerTextStreamHandler("navigationContext", navigationHandler);
-
-    // Cleanup: unregister handlers when component unmounts
-    return () => {
-      room.unregisterTextStreamHandler("escalated");
-      room.unregisterTextStreamHandler("navigationContext");
-    };
-  }, [room]);
+  useLivekitData(room);
 
   const agentVideoTrack = tracks.find(
     (trackRef) =>
