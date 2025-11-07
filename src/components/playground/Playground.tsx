@@ -75,39 +75,45 @@ export default function Playground({
     }
   }, [config, localParticipant, roomState]);
 
-  room?.registerTextStreamHandler(
-    "escalated",
-    async (reader, participantInfo) => {
+  // Register text stream handlers once when room is available
+  useEffect(() => {
+    if (!room) return;
+
+    const escalatedHandler = async (reader: any, participantInfo: any) => {
       const info = reader.info;
       console.log(
         `Received text stream (escalated) from ${participantInfo.identity}\n` +
           `  Topic: ${info.topic}\n` +
           `  Timestamp: ${info.timestamp}\n` +
           `  ID: ${info.id}\n` +
-          `  Size: ${info.size}` // Optional, only available if the stream was sent with `sendText`
+          `  Size: ${info.size}`
       );
-      // Option 2: Get the entire text after the stream completes.
       const text = await reader.readAll();
       console.log(`Received text: ${text}`);
-    }
-  );
+    };
 
-  room?.registerTextStreamHandler(
-    "navigationContext",
-    async (reader, participantInfo) => {
+    const navigationHandler = async (reader: any, participantInfo: any) => {
       const info = reader.info;
       console.log(
         `Received text stream (navigationContext) from ${participantInfo.identity}\n` +
           `  Topic: ${info.topic}\n` +
           `  Timestamp: ${info.timestamp}\n` +
           `  ID: ${info.id}\n` +
-          `  Size: ${info.size}` // Optional, only available if the stream was sent with `sendText`
+          `  Size: ${info.size}`
       );
-      // Option 2: Get the entire text after the stream completes.
       const text = await reader.readAll();
       console.log(`Received text: ${text}`);
-    }
-  );
+    };
+
+    room.registerTextStreamHandler("escalated", escalatedHandler);
+    room.registerTextStreamHandler("navigationContext", navigationHandler);
+
+    // Cleanup: unregister handlers when component unmounts
+    return () => {
+      room.unregisterTextStreamHandler("escalated");
+      room.unregisterTextStreamHandler("navigationContext");
+    };
+  }, [room]);
 
   const agentVideoTrack = tracks.find(
     (trackRef) =>
