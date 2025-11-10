@@ -2,7 +2,6 @@
 
 import { getCookie, setCookie } from "cookies-next";
 import jsYaml from "js-yaml";
-import { useRouter } from "next/navigation";
 import React, {
 	createContext,
 	useCallback,
@@ -104,23 +103,24 @@ const ConfigContext = createContext<ConfigData | undefined>(undefined);
 
 export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 	const appConfig = useAppConfig();
-	const router = useRouter();
 	const [localColorOverride, setLocalColorOverride] = useState<string | null>(
 		null,
 	);
 
 	const getSettingsFromUrl = useCallback(() => {
-		if (typeof window === "undefined") {
+		if (typeof globalThis.window === "undefined") {
 			return null;
 		}
-		if (!window.location.hash) {
+		if (!globalThis.location.hash) {
 			return null;
 		}
 		const appConfigFromSettings = appConfig;
 		if (appConfigFromSettings.settings.editable === false) {
 			return null;
 		}
-		const params = new URLSearchParams(window.location.hash.replace("#", ""));
+		const params = new URLSearchParams(
+			globalThis.location.hash.replace("#", ""),
+		);
 		return {
 			editable: true,
 			chat: params.get("chat") === "1",
@@ -155,22 +155,22 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 		return JSON.parse(jsonSettings as any) as UserSettings;
 	}, [appConfig]);
 
-	const setUrlSettings = useCallback(
-		(us: UserSettings) => {
-			const obj = new URLSearchParams({
-				cam: boolToString(us.inputs.camera),
-				mic: boolToString(us.inputs.mic),
-				screen: boolToString(us.inputs.screen),
-				video: boolToString(us.outputs.video),
-				audio: boolToString(us.outputs.audio),
-				chat: boolToString(us.chat),
-				theme_color: us.theme_color || "cyan",
-			});
-			// Note: We don't set ws_url and token to the URL on purpose
-			router.replace(`/#${obj.toString()}`);
-		},
-		[router],
-	);
+	const setUrlSettings = useCallback((us: UserSettings) => {
+		const obj = new URLSearchParams({
+			cam: boolToString(us.inputs.camera),
+			mic: boolToString(us.inputs.mic),
+			screen: boolToString(us.inputs.screen),
+			video: boolToString(us.outputs.video),
+			audio: boolToString(us.outputs.audio),
+			chat: boolToString(us.chat),
+			theme_color: us.theme_color || "cyan",
+		});
+		// Note: We don't set ws_url and token to the URL on purpose
+		// Update hash on current page instead of navigating to root
+		if (typeof window !== "undefined") {
+			window.location.hash = obj.toString();
+		}
+	}, []);
 
 	const setCookieSettings = useCallback((us: UserSettings) => {
 		const json = JSON.stringify(us);

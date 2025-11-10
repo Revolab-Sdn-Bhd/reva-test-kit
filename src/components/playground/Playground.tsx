@@ -592,7 +592,7 @@ export default function Playground({
 							: "flex"
 					}`}
 				>
-					{config.settings.outputs.video && (
+					{/* {config.settings.outputs.video && (
 						<PlaygroundTile
 							title="Agent Video"
 							className="w-full h-full grow"
@@ -600,7 +600,7 @@ export default function Playground({
 						>
 							{videoTileContent}
 						</PlaygroundTile>
-					)}
+					)} */}
 					{config.settings.outputs.audio && (
 						<PlaygroundTile
 							title="Agent Audio"

@@ -8,12 +8,19 @@ import "@livekit/components-styles/components/participant";
 import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }: AppProps) {
+	const getLayout =
+		(
+			Component as typeof Component & {
+				getLayout?: (page: React.ReactElement) => React.ReactNode;
+			}
+		).getLayout ?? ((page) => page);
+
 	return (
 		<EnvConfigProvider>
 			<ConfigProvider>
 				<ConnectionProvider>
 					<Toaster position="top-right" />
-					<Component {...pageProps} />
+					{getLayout(<Component {...pageProps} />)}
 				</ConnectionProvider>
 			</ConfigProvider>
 		</EnvConfigProvider>

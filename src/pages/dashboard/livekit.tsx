@@ -47,37 +47,39 @@ const LiveKitPage = () => {
 	);
 
 	return (
-		<DashboardLayout>
-			<div className="relative flex flex-col items-center justify-center w-full h-full px-4 bg-black repeating-square-background">
-				<LiveKitRoom
-					className="flex flex-col w-full h-full"
-					serverUrl={wsUrl}
-					token={token}
-					connect={shouldConnect}
-					onError={(e) => {
-						toast.error(e.message);
-						console.error(e);
+		<div className="relative flex flex-col items-center justify-center w-full h-full px-4 bg-black repeating-square-background">
+			<LiveKitRoom
+				className="flex flex-col w-full h-full"
+				serverUrl={wsUrl}
+				token={token}
+				connect={shouldConnect}
+				onError={(e) => {
+					toast.error(e.message);
+					console.error(e);
+				}}
+			>
+				<Playground
+					themeColors={themeColors}
+					onConnect={(c) => {
+						handleConnect(c);
 					}}
-				>
-					<Playground
-						themeColors={themeColors}
-						onConnect={(c) => {
-							handleConnect(c);
-						}}
-					/>
-					<RoomAudioRenderer />
-					<StartAudio label="Click to enable audio playback" />
-				</LiveKitRoom>
-
-				<LanguageSelectionDialog
-					isOpen={showLanguageDialog}
-					onLanguageSelect={handleLanguageSelect}
-					onClose={() => setShowLanguageDialog(false)}
-					accentColor={config.settings.theme_color}
 				/>
-			</div>
-		</DashboardLayout>
+				<RoomAudioRenderer />
+				<StartAudio label="Click to enable audio playback" />
+			</LiveKitRoom>
+
+			<LanguageSelectionDialog
+				isOpen={showLanguageDialog}
+				onLanguageSelect={handleLanguageSelect}
+				onClose={() => setShowLanguageDialog(false)}
+				accentColor={config.settings.theme_color}
+			/>
+		</div>
 	);
 };
 
 export default LiveKitPage;
+
+LiveKitPage.getLayout = (page: React.ReactNode) => {
+	return <DashboardLayout>{page}</DashboardLayout>;
+};
