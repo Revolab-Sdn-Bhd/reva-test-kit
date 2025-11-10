@@ -47,7 +47,7 @@ export default function Home() {
       setAuth(username);
       toast.success("Sign-in successful");
 
-      router.replace("/");
+      router.replace("/dashboard/livekit");
     } catch (err) {
       console.error("Sign-in error:", err);
       setError("Sign-in failed. Please check your credentials.");
@@ -60,7 +60,7 @@ export default function Home() {
     if (auth) {
       router.replace("/dashboard/livekit");
     }
-  }, [auth, router]);
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-50">

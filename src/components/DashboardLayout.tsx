@@ -40,7 +40,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     if (!auth) {
       router.replace("/");
     }
-  }, [auth, router]);
+  }, []);
 
   const handleLogout = () => {
     clearAuth();
@@ -52,24 +52,24 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-900">
       {/* Sidebar */}
       <aside
-        className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+        className={`border-r transition-all duration-300 ${
           isCollapsed ? "w-16" : "w-64"
-        }`}
+        } bg-gray-800 border-gray-700`}
       >
         <div className="flex flex-col h-full">
           {/* Logo/Brand & Toggle */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
             {!isCollapsed && (
-              <h1 className="text-xl font-bold text-gray-900 text-nowrap">
+              <h1 className="text-xl font-bold text-gray-100 text-nowrap">
                 Reva Test Kit
               </h1>
             )}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+              className="p-2 text-gray-300 transition-colors rounded-lg hover:bg-gray-700"
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {isCollapsed ?
@@ -88,10 +88,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3  rounded-lg transition-colors ${
-                    isActive ?
-                      "bg-blue-50 text-blue-600 font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
+                  className={`flex items-center gap-3 rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-blue-900 text-blue-400 font-medium"
+                      : "text-gray-200 hover:bg-gray-700"
                   } ${isCollapsed ? "px-2 py-3" : "px-4 py-3"}`}
                   title={isCollapsed ? item.label : undefined}
                 >
@@ -103,10 +103,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </nav>
 
           {/* Logout Button */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-700">
             <button
               onClick={handleLogout}
-              className={`flex items-center gap-3 w-full rounded-lg transition-colors text-gray-700 hover:bg-gray-100 ${
+              className={`flex items-center gap-3 w-full rounded-lg transition-colors text-gray-200 hover:bg-gray-700 ${
                 isCollapsed ? "px-2 py-3" : "px-4 py-3"
               }`}
               title={isCollapsed ? "Logout" : undefined}
