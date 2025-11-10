@@ -1,71 +1,73 @@
-import { ReactNode, useState } from "react";
-import { PlaygroundDeviceSelector } from "@/components/playground/PlaygroundDeviceSelector";
 import { TrackToggle } from "@livekit/components-react";
 import { Track } from "livekit-client";
+import { type ReactNode, useState } from "react";
+import { PlaygroundDeviceSelector } from "@/components/playground/PlaygroundDeviceSelector";
 
 type ConfigurationPanelItemProps = {
-  title: string;
-  children?: ReactNode;
-  source?: Track.Source;
-  collapsible?: boolean;
-  defaultCollapsed?: boolean;
+	title: string;
+	children?: ReactNode;
+	source?: Track.Source;
+	collapsible?: boolean;
+	defaultCollapsed?: boolean;
 };
 
 export const ConfigurationPanelItem: React.FC<ConfigurationPanelItemProps> = ({
-  children,
-  title,
-  source,
-  collapsible = false,
-  defaultCollapsed = false,
+	children,
+	title,
+	source,
+	collapsible = false,
+	defaultCollapsed = false,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+	const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
-  return (
-    <div className="relative w-full py-4 text-gray-300 border-b border-b-gray-800">
-      <div className="flex flex-row items-center justify-between px-4 text-xs tracking-wider uppercase">
-        <h3>{title}</h3>
-        <div className="flex items-center gap-2">
-          {source && (
-            <span className="flex flex-row gap-2">
-              <TrackToggle
-                className="px-2 py-1 text-gray-300 bg-gray-900 border border-gray-800 rounded-sm hover:bg-gray-800"
-                source={source as any}
-              />
-              {source === Track.Source.Camera && (
-                <PlaygroundDeviceSelector kind="videoinput" />
-              )}
-              {source === Track.Source.Microphone && (
-                <PlaygroundDeviceSelector kind="audioinput" />
-              )}
-            </span>
-          )}
-          {collapsible && (
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="text-gray-400 transition-colors hover:text-gray-300"
-            >
-              <svg
-                className={`w-4 h-4 transform transition-transform ${!isCollapsed ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
-      {!isCollapsed && (
-        <div className="px-4 py-2 text-xs leading-normal text-gray-500">
-          {children}
-        </div>
-      )}
-    </div>
-  );
+	return (
+		<div className="relative w-full py-4 text-gray-300 border-b border-b-gray-800">
+			<div className="flex flex-row items-center justify-between px-4 text-xs tracking-wider uppercase">
+				<h3>{title}</h3>
+				<div className="flex items-center gap-2">
+					{source && (
+						<span className="flex flex-row gap-2">
+							<TrackToggle
+								className="px-2 py-1 text-gray-300 bg-gray-900 border border-gray-800 rounded-sm hover:bg-gray-800"
+								source={source as any}
+							/>
+							{source === Track.Source.Camera && (
+								<PlaygroundDeviceSelector kind="videoinput" />
+							)}
+							{source === Track.Source.Microphone && (
+								<PlaygroundDeviceSelector kind="audioinput" />
+							)}
+						</span>
+					)}
+					{collapsible && (
+						<button
+							onClick={() => setIsCollapsed(!isCollapsed)}
+							className="text-gray-400 transition-colors hover:text-gray-300"
+							type="button"
+						>
+							<svg
+								className={`w-4 h-4 transform transition-transform ${!isCollapsed ? "rotate-180" : ""}`}
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<title>Toggle collapse</title>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M19 9l-7 7-7-7"
+								/>
+							</svg>
+						</button>
+					)}
+				</div>
+			</div>
+			{!isCollapsed && (
+				<div className="px-4 py-2 text-xs leading-normal text-gray-500">
+					{children}
+				</div>
+			)}
+		</div>
+	);
 };
