@@ -106,7 +106,6 @@ export const useWebSocket = () => {
 				const ws = new WebSocket(wsUrl);
 
 				ws.onopen = () => {
-					console.log("@test", "WebSocket connected");
 					setIsConnected(true);
 					addLog("info", "WebSocket connected successfully");
 				};
