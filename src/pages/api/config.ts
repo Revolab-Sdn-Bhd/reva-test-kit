@@ -5,5 +5,6 @@ export default function handler(_: NextApiRequest, res: NextApiResponse) {
 		LIVEKIT_URL: process.env.LIVEKIT_URL,
 		AI_HANDLER_URL: process.env.AI_HANDLER_URL,
 		LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
+		CHAT_SERVICE_URL: process.env.CHAT_SERVICE_URL,
 	});
 }

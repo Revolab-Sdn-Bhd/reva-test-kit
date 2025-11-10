@@ -37,8 +37,6 @@ export const ConnectionProvider = ({
 
 			url = envConfig.LIVEKIT_URL;
 
-			console.log(envConfig);
-
 			const aiHandlerUrl = envConfig.AI_HANDLER_URL;
 
 			try {
