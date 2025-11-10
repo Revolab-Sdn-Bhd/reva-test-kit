@@ -26,7 +26,8 @@ export default function PostLoginPage() {
   const handleConnect = () => {
     const isDevelopment = process.env.NODE_ENV === "development";
     const wsProtocol = isDevelopment ? "ws://" : "wss://";
-    const wsHost = process.env.CHAT_SERVICE_URL || "";
+    const wsHost =
+      process.env.CHAT_SERVICE_URL || "reva-chat.revocall-staging.com";
     const wsUrl = `${wsProtocol}${wsHost}/ws/chat`;
 
     connect({
