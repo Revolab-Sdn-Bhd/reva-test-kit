@@ -13,13 +13,7 @@ export const useAudioRecorder = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      // Use Opus codec if available
-      const mimeType =
-        MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ?
-          "audio/webm;codecs=opus"
-        : "audio/webm";
-
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -66,14 +60,16 @@ export const useAudioRecorder = () => {
             streamRef.current = null;
           }
 
-          // Create blob from chunks (already in Opus format)
-          const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm";
+          // Create blob from chunks
           const audioBlob = new Blob(audioChunksRef.current, {
-            type: mimeType,
+            type: "audio/webm",
           });
 
-          // Convert to base64
-          const base64 = await blobToBase64(audioBlob);
+          // Convert to WAV format
+          const wavBlob = await convertToWav(audioBlob);
+
+          // Convert to base64 with proper header
+          const base64 = await blobToBase64(wavBlob);
 
           setIsRecording(false);
           setRecordingTime(0);
@@ -118,17 +114,96 @@ export const useAudioRecorder = () => {
   };
 };
 
-// Helper function to convert blob to base64
+// Helper function to convert blob to base64 with proper header
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      // Remove the data URL prefix (e.g., "data:audio/webm;base64,")
+      // Extract just the base64 data without the data URL prefix
       const base64Data = base64String.split(",")[1];
-      resolve(base64Data);
+      // Return with proper audio/mpeg header
+      resolve(`data:audio/mpeg;base64,${base64Data}`);
     };
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
+};
+
+// Helper function to convert webm to wav
+const convertToWav = async (webmBlob: Blob): Promise<Blob> => {
+  const audioContext = new AudioContext();
+  const arrayBuffer = await webmBlob.arrayBuffer();
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  // Convert to WAV format
+  const wavBuffer = audioBufferToWav(audioBuffer);
+  return new Blob([wavBuffer], { type: "audio/wav" });
+};
+
+// Convert AudioBuffer to WAV format
+const audioBufferToWav = (audioBuffer: AudioBuffer): ArrayBuffer => {
+  const numberOfChannels = audioBuffer.numberOfChannels;
+  const sampleRate = audioBuffer.sampleRate;
+  const format = 1; // PCM
+  const bitDepth = 16;
+
+  const bytesPerSample = bitDepth / 8;
+  const blockAlign = numberOfChannels * bytesPerSample;
+
+  const data = [];
+  for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+    data.push(audioBuffer.getChannelData(i));
+  }
+
+  const interleaved = interleave(data);
+  const dataLength = interleaved.length * bytesPerSample;
+  const buffer = new ArrayBuffer(44 + dataLength);
+  const view = new DataView(buffer);
+
+  // Write WAV header
+  writeString(view, 0, "RIFF");
+  view.setUint32(4, 36 + dataLength, true);
+  writeString(view, 8, "WAVE");
+  writeString(view, 12, "fmt ");
+  view.setUint32(16, 16, true); // Subchunk1Size
+  view.setUint16(20, format, true);
+  view.setUint16(22, numberOfChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitDepth, true);
+  writeString(view, 36, "data");
+  view.setUint32(40, dataLength, true);
+
+  // Write audio data
+  let offset = 44;
+  for (let i = 0; i < interleaved.length; i++) {
+    const sample = Math.max(-1, Math.min(1, interleaved[i]));
+    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+    offset += 2;
+  }
+
+  return buffer;
+};
+
+const interleave = (channelData: Float32Array[]): Float32Array => {
+  const length = channelData[0].length;
+  const numberOfChannels = channelData.length;
+  const result = new Float32Array(length * numberOfChannels);
+
+  let offset = 0;
+  for (let i = 0; i < length; i++) {
+    for (let channel = 0; channel < numberOfChannels; channel++) {
+      result[offset++] = channelData[channel][i];
+    }
+  }
+
+  return result;
+};
+
+const writeString = (view: DataView, offset: number, string: string) => {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.codePointAt(i) || 0);
+  }
 };
