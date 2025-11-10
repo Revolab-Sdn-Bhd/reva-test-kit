@@ -28,13 +28,39 @@ type WebSocketConfig = {
 	token: string;
 	language: string;
 	platform: string;
+	sessionId?: string;
 };
+
+export enum EventType {
+	AUTH = "AUTH",
+	MESSAGE = "MESSAGE",
+	AUDIO = "AUDIO",
+	RATE = "RATE",
+	LANGUAGE = "LANGUAGE",
+	ASSISTANCE = "ASSISTANCE",
+	DELETEAUDIO = "DELETEAUDIO",
+	USERRATEREPLY = "USERRATEREPLY",
+	ERROR = "ERROR",
+	ALERT = "ALERT",
+	RENEW_TOKEN = "RENEW_TOKEN",
+	ENDSESSION = "ENDSESSION",
+	LIVE_AGENT_MESSAGE = "LIVE_AGENT_MESSAGE",
+	NAVIGATE = "NAVIGATE",
+	HISTORYMESSAGE = "HISTORYMESSAGE",
+	SESSION_LANGUAGE = "SESSION_LANGUAGE",
+}
 
 export const useWebSocket = () => {
 	const [isConnected, setIsConnected] = useState(false);
 	const [logs, setLogs] = useState<LogEntry[]>([]);
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const wsRef = useRef<WebSocket | null>(null);
+	const configRef = useRef<WebSocketConfig | null>(null);
+
+	const [chatInfo, setChatInfo] = useState<{
+		chatId: string;
+		sessionId: string;
+	} | null>(null);
 
 	const addLog = useCallback((type: LogEntry["type"], message: string) => {
 		const timestamp = new Date().toLocaleTimeString();
@@ -62,9 +88,17 @@ export const useWebSocket = () => {
 				return;
 			}
 
-			const wsUrl = `${config.url}?token=${encodeURIComponent(
+			// Store config for reconnection
+			configRef.current = config;
+
+			let wsUrl = `${config.url}?token=${encodeURIComponent(
 				config.token,
 			)}&language=${config.language}&platform=${config.platform}`;
+
+			// Add sessionId if provided
+			if (config.sessionId) {
+				wsUrl += `&sessionId=${encodeURIComponent(config.sessionId)}`;
+			}
 
 			addLog("info", `Connecting to ${wsUrl}`);
 
@@ -72,31 +106,81 @@ export const useWebSocket = () => {
 				const ws = new WebSocket(wsUrl);
 
 				ws.onopen = () => {
+					console.log("@test", "WebSocket connected");
 					setIsConnected(true);
 					addLog("info", "WebSocket connected successfully");
 				};
 
 				ws.onmessage = (event) => {
-					addLog("receive", `Received: ${event.data}`);
+					addLog("receive", `${event.data}`);
 					try {
 						const parsed = JSON.parse(event.data);
-						// Handle new message format with event and data
-						if (parsed.event === "MESSAGE" && parsed.data) {
-							if (parsed.data.type === "to") {
-								// skip
-								return;
-							}
 
-							const msgData = parsed.data;
-							const message: ChatMessage = {
-								id: msgData.messageId || Date.now().toString(),
-								sender: "agent",
-								content: msgData.message || event.data,
-								timestamp: new Date().toLocaleTimeString(),
-								actions: msgData.actions,
-								extraMsg: msgData.extra_msg,
-							};
-							setMessages((prev) => [...prev, message]);
+						if (parsed.data) {
+							switch (parsed.event) {
+								case EventType.MESSAGE:
+									{
+										if (parsed.data.type === "to") {
+											const chatId = parsed.data.chatId;
+											const sessionId = parsed.data.id;
+
+											setChatInfo({ chatId, sessionId });
+											return;
+										}
+										const msgData = parsed.data;
+										const message: ChatMessage = {
+											id: msgData.messageId || Date.now().toString(),
+											sender: "agent",
+											content: msgData.message || event.data,
+											timestamp: new Date().toLocaleTimeString(),
+											actions: msgData.actions,
+											extraMsg: msgData.extra_msg,
+										};
+										setMessages((prev) => [...prev, message]);
+									}
+									break;
+								case EventType.RENEW_TOKEN:
+									{
+										const newSessionId = parsed.data.id;
+										addLog("info", `Received new session ID: ${newSessionId}`);
+
+										ws.send(
+											JSON.stringify({
+												event: "AUTH",
+												data: newSessionId,
+											}),
+										);
+									}
+									break;
+								case EventType.HISTORYMESSAGE:
+									{
+										const historyMessages = parsed.data.message;
+										if (Array.isArray(historyMessages)) {
+											const formattedMessages: ChatMessage[] =
+												historyMessages.map((msg: any, idx: number) => ({
+													id: `${Date.now()}-${idx}`,
+													sender: msg.type === "from" ? "agent" : "user",
+													content: msg.message,
+													timestamp: new Date(
+														msg.timestamp,
+													).toLocaleTimeString(),
+												}));
+											setMessages((prev) => [...prev, ...formattedMessages]);
+										}
+									}
+									break;
+								case EventType.SESSION_LANGUAGE:
+									{
+										const chatId = parsed.data.chatId;
+										const sessionId = parsed.data.id;
+
+										setChatInfo({ chatId, sessionId });
+									}
+									break;
+								default:
+									addLog("error", `Unhandled event type: ${parsed.event}`);
+									break;
+							}
 						}
 					} catch {
 						addMessage("agent", event.data);
@@ -228,6 +312,7 @@ export const useWebSocket = () => {
 
 	const clearMessages = useCallback(() => {
 		setMessages([]);
+		setChatInfo(null);
 	}, []);
 
 	useEffect(() => {
@@ -248,5 +333,6 @@ export const useWebSocket = () => {
 		sendAction,
 		clearLogs,
 		clearMessages,
+		chatInfo,
 	};
 };
