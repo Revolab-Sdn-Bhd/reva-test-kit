@@ -31,6 +31,7 @@ import {
 	EditableNameValueRow,
 	NameValueRow,
 } from "@/components/config/NameValueRow";
+import EscalatedDialog from "@/components/dialog/EscalatedDialog";
 import { PlaygroundHeader } from "@/components/playground/PlaygroundHeader";
 import {
 	type PlaygroundTab,
@@ -83,7 +84,15 @@ export default function Playground({
 		}
 	}, [config, localParticipant, roomState]);
 
-	useLivekitData(room);
+	const { escalationData, clearEscalation } = useLivekitData(room);
+	const [showEscalatedDialog, setShowEscalatedDialog] = useState(false);
+
+	// Show dialog when escalation data is received
+	useEffect(() => {
+		if (escalationData) {
+			setShowEscalatedDialog(true);
+		}
+	}, [escalationData]);
 
 	const agentVideoTrack = tracks.find(
 		(trackRef) =>
@@ -629,6 +638,16 @@ export default function Playground({
 					{settingsTileContent}
 				</PlaygroundTile>
 			</div>
+
+			{/* Escalated Dialog */}
+			<EscalatedDialog
+				isOpen={showEscalatedDialog}
+				waLink={escalationData?.waLink || ""}
+				onClose={() => {
+					setShowEscalatedDialog(false);
+					clearEscalation();
+				}}
+			/>
 		</>
 	);
 }

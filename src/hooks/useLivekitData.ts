@@ -1,9 +1,31 @@
 import { type Room, RoomEvent } from "livekit-client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+enum LivekitDataTopic {
+	ESCALATED = "escalated",
+	NAVIGATION_CONTEXT = "navigationContext",
+}
+
+interface EscalationData {
+	waLink: string;
+	chatId: string;
+}
 
 export function useLivekitData(room: Room | null) {
+	const [escalationData, setEscalationData] = useState<EscalationData | null>(
+		null,
+	);
+
 	useEffect(() => {
 		if (!room) return;
+
+		/**
+
+  "message": "{\"escalated_voice\": {\"escalated\": true, \"wa_link\": \"https://wa.me/962792777027\", \"chat_id\": \"06912df4-eaa8-75fe-8000-d2fab871ad6c\"}}",
+  "topic": "escalated",
+  "from": "agent-AJ_5sLTHMRiwWbD"
+}
+		 */
 
 		const onDataReceived = (
 			payload: any,
@@ -17,6 +39,24 @@ export function useLivekitData(room: Room | null) {
 				topic,
 				from: participant.identity,
 			});
+
+			if (topic === LivekitDataTopic.ESCALATED) {
+				try {
+					const data = JSON.parse(message);
+					// Message format: {"escalated_voice": {"escalated": true, "wa_link": "...", "chat_id": "..."}}
+					if (data.escalated_voice) {
+						const { wa_link, chat_id } = data.escalated_voice;
+						if (wa_link) {
+							setEscalationData({
+								waLink: wa_link,
+								chatId: chat_id,
+							});
+						}
+					}
+				} catch (error) {
+					console.error("Failed to parse escalation data:", error);
+				}
+			}
 		};
 
 		room.on(RoomEvent.DataReceived, onDataReceived);
@@ -25,4 +65,9 @@ export function useLivekitData(room: Room | null) {
 			room.off(RoomEvent.DataReceived, onDataReceived);
 		};
 	}, [room]);
+
+	return {
+		escalationData,
+		clearEscalation: () => setEscalationData(null),
+	};
 }

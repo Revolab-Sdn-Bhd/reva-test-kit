@@ -2,7 +2,7 @@ import type React from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type ButtonProps = {
-	accentColor: string;
+	accentColor?: string;
 	children: ReactNode;
 	className?: string;
 	disabled?: boolean;

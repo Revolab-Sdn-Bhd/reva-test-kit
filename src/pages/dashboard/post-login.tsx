@@ -132,7 +132,7 @@ function PostLoginContent() {
 				<WebsocketLogs />
 			</div>
 
-			<ChatScreen />
+			<ChatScreen token={token} />
 		</div>
 	);
 }
