@@ -113,7 +113,8 @@ const ChatScreen = ({ token }: ChatScreenProps) => {
     try {
       const isDevelopment = process.env.NODE_ENV === "development";
       const protocol = isDevelopment ? "http://" : "https://";
-      const host = isDevelopment ? "localhost:3000" : envConfig?.CHAT_SERVICE_URL;
+      const host =
+        isDevelopment ? "localhost:3000" : envConfig?.CHAT_SERVICE_URL;
       const chatUrl = `${protocol}${host}`;
 
       const jwt = await generateIntrospectToken(chatUrl, token);
@@ -171,8 +172,10 @@ const ChatScreen = ({ token }: ChatScreenProps) => {
   }, [messages]);
 
   useEffect(() => {
-    handleLoadSessions();
-  }, [token]);
+    if (envConfig?.CHAT_SERVICE_URL) {
+      handleLoadSessions();
+    }
+  }, [token, envConfig?.CHAT_SERVICE_URL]);
 
   return (
     <div className="flex flex-col w-1/2 bg-gray-800 border border-gray-700 rounded-lg shadow">
