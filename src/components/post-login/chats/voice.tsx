@@ -143,12 +143,14 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
     );
 
     const visualizerContent = (
-      <div className="flex items-center justify-center w-full h-full [--lk-va-bar-width:8px] [--lk-va-bar-gap:8px] [--lk-fg:#a78bfa]">
+      <div
+        className={`flex items-center justify-center w-full h-48 [--lk-va-bar-width:30px] [--lk-va-bar-gap:20px] [--lk-fg:var(--lk-theme-color)]`}
+      >
         <BarVisualizer
           state={voiceAssistant.state}
           trackRef={voiceAssistant.audioTrack}
-          barCount={50}
-          options={{ minHeight: 10 }}
+          barCount={5}
+          options={{ minHeight: 20 }}
         />
       </div>
     );
@@ -165,15 +167,15 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
   }, [voiceAssistant.audioTrack, roomState, voiceAssistant.state]);
 
   return (
-    <div className="flex flex-col items-center justify-between h-full p-8 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
+    <div className="flex flex-col items-center justify-between h-full p-8 bg-gradient-to-b from-gray-900 via-[#800080]/20 to-gray-900">
       {/* Center - Audio Visualizer */}
       <div className="flex items-center justify-center flex-1">
         <div className="relative">
           {/* Circular background */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600/30 to-blue-600/30 blur-3xl" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#800080]/30 to-blue-600/30 blur-3xl" />
 
           {/* Visualizer container */}
-          <div className="relative flex items-center justify-center border rounded-full w-96 h-96 bg-gradient-to-br from-purple-900/50 to-blue-900/50 backdrop-blur-lg border-purple-500/30">
+          <div className="relative flex items-center justify-center border rounded-full w-96 h-96 bg-gradient-to-br from-[#800080]/50 to-blue-900/50 backdrop-blur-lg border-[#800080]/30">
             {audioTileContent}
           </div>
         </div>
@@ -206,7 +208,7 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
             className={`flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${
               isMuted ?
                 "bg-red-600 hover:bg-red-700"
-              : "bg-purple-600/80 hover:bg-purple-700"
+              : "bg-[#800080]/80 hover:bg-[#800080]"
             } backdrop-blur-lg border-2 border-white/20`}
             title={isMuted ? "Unmute" : "Mute"}
           >
