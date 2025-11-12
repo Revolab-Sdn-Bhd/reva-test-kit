@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { FaMicrophone } from "react-icons/fa";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
 const ChatMessageSection = () => {
@@ -34,7 +35,23 @@ const ChatMessageSection = () => {
 							<div className="mb-1 text-sm font-medium">
 								{msg.sender === "user" ? "You" : "Agent"}
 							</div>
-							<div>{msg.content}</div>
+
+							{/* Audio message */}
+							{msg.type === "audio" ? (
+								<div className="flex items-center gap-3 pb-1">
+									<div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#c59100]">
+										<FaMicrophone />
+									</div>
+									<div className="flex flex-col">
+										<span className="text-sm font-medium">Voice Message</span>
+										{msg.content && (
+											<span className="text-xs opacity-80">{msg.content}</span>
+										)}
+									</div>
+								</div>
+							) : (
+								<div>{msg.content}</div>
+							)}
 
 							{/* Extra message */}
 							{msg.extraMsg && (

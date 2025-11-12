@@ -1,5 +1,5 @@
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
-import type { TabType } from "../chat-screen";
+import { TabType } from "../chat-screen";
 
 const ChatHeaderSection = ({
 	activeTab,
@@ -36,7 +36,7 @@ const ChatHeaderSection = ({
 			<div className="flex px-4">
 				<button
 					type="button"
-					onClick={() => setActiveTab("chat")}
+					onClick={() => setActiveTab(TabType.CHAT)}
 					className={`px-4 py-2 text-sm font-medium transition-colors ${
 						activeTab === "chat"
 							? "text-blue-400 border-b-2 border-blue-400"
@@ -47,7 +47,7 @@ const ChatHeaderSection = ({
 				</button>
 				<button
 					type="button"
-					onClick={() => setActiveTab("history")}
+					onClick={() => setActiveTab(TabType.HISTORY)}
 					className={`px-4 py-2 text-sm font-medium transition-colors ${
 						activeTab === "history"
 							? "text-blue-400 border-b-2 border-blue-400"

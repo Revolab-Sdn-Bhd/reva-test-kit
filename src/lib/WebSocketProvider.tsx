@@ -21,6 +21,7 @@ type WebSocketContextType = {
 	sendAction: (action: MessageAction, messageId?: string) => boolean;
 	clearLogs: () => void;
 	clearMessages: () => void;
+	clearTranscribing: () => void;
 	chatInfo: {
 		chatId: string;
 		sessionId: string;
