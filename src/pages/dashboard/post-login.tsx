@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import ChatScreen from "@/components/post-login/tabs/chat-screen";
+import ChatScreen from "@/components/post-login/chat-screen";
 import ConnectionTab from "@/components/post-login/tabs/connection";
 import CustomPayloadTab from "@/components/post-login/tabs/custom-payload";
 import WebsocketLogs from "@/components/post-login/websocket-logs";
