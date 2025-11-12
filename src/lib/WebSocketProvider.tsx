@@ -12,6 +12,7 @@ type WebSocketConfig = {
 
 type WebSocketContextType = {
 	isConnected: boolean;
+	isTranscribing: boolean;
 	logs: LogEntry[];
 	messages: ChatMessage[];
 	connect: (config: WebSocketConfig) => void;
