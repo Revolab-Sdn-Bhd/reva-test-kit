@@ -22,6 +22,7 @@ export type ChatMessage = {
 	actions?: MessageAction[];
 	extraMsg?: string;
 	type?: "message" | "audio";
+	audioUrl?: string;
 };
 
 type WebSocketConfig = {
@@ -89,6 +90,100 @@ export const useWebSocket = () => {
 		[],
 	);
 
+	const handleMessageReceived = (ws: WebSocket, event: MessageEvent) => {
+		addLog("receive", `${event.data}`);
+		setIsTranscribing(false);
+		try {
+			const parsed = JSON.parse(event.data);
+
+			if (parsed.data) {
+				switch (parsed.event) {
+					case EventType.MESSAGE:
+						{
+							if (parsed.data.type === "to") {
+								const chatId = parsed.data.chatId;
+								const sessionId = parsed.data.id;
+
+								setChatInfo({ chatId, sessionId });
+								return;
+							}
+							const msgData = parsed.data;
+							const message: ChatMessage = {
+								id: msgData.messageId || Date.now().toString(),
+								sender: "agent",
+								content: msgData.message,
+								timestamp: new Date().toLocaleTimeString(),
+								actions: msgData.actions,
+								extraMsg: msgData.extra_msg,
+							};
+							setMessages((prev) => [...prev, message]);
+						}
+						break;
+					case EventType.RENEW_TOKEN:
+						{
+							const newSessionId = parsed.data.id;
+							addLog("info", `Received new session ID: ${newSessionId}`);
+
+							ws.send(
+								JSON.stringify({
+									event: "AUTH",
+									data: newSessionId,
+								}),
+							);
+						}
+						break;
+					case EventType.HISTORYMESSAGE:
+						{
+							const historyMessages = parsed.data.message;
+							if (Array.isArray(historyMessages)) {
+								const formattedMessages: ChatMessage[] = historyMessages.map(
+									(msg: any, idx: number) => ({
+										id: `${Date.now()}-${idx}`,
+										sender: msg.type === "from" ? "agent" : "user",
+										content: msg.message,
+										timestamp: new Date(msg.timestamp).toLocaleTimeString(),
+									}),
+								);
+								setMessages((prev) => [...prev, ...formattedMessages]);
+							}
+						}
+						break;
+					case EventType.SESSION_LANGUAGE:
+						{
+							const chatId = parsed.data.chatId;
+							const sessionId = parsed.data.id;
+
+							setChatInfo({ chatId, sessionId });
+						}
+						break;
+
+					case EventType.AUDIO:
+						{
+							// Handle audio transcription response
+							if (parsed.data.type === "to" && parsed.data.message) {
+								const message: ChatMessage = {
+									id: parsed.data.messageId || Date.now().toString(),
+									sender: "agent",
+									content: parsed.data.message,
+									timestamp: new Date().toLocaleTimeString(),
+									type: "audio",
+									audioUrl: parsed.data.audio_url,
+									actions: parsed.data.actions,
+								};
+								setMessages((prev) => [...prev, message]);
+							}
+						}
+						break;
+					default:
+						addLog("error", `Unhandled event type: ${parsed.event}`);
+						break;
+				}
+			}
+		} catch {
+			addMessage("agent", event.data);
+		}
+	};
+
 	const connect = useCallback(
 		(config: WebSocketConfig) => {
 			if (wsRef.current) {
@@ -119,80 +214,7 @@ export const useWebSocket = () => {
 				};
 
 				ws.onmessage = (event) => {
-					addLog("receive", `${event.data}`);
-					setIsTranscribing(false);
-					try {
-						const parsed = JSON.parse(event.data);
-
-						if (parsed.data) {
-							switch (parsed.event) {
-								case EventType.MESSAGE:
-									{
-										if (parsed.data.type === "to") {
-											const chatId = parsed.data.chatId;
-											const sessionId = parsed.data.id;
-
-											setChatInfo({ chatId, sessionId });
-											return;
-										}
-										const msgData = parsed.data;
-										const message: ChatMessage = {
-											id: msgData.messageId || Date.now().toString(),
-											sender: "agent",
-											content: msgData.message,
-											timestamp: new Date().toLocaleTimeString(),
-											actions: msgData.actions,
-											extraMsg: msgData.extra_msg,
-										};
-										setMessages((prev) => [...prev, message]);
-									}
-									break;
-								case EventType.RENEW_TOKEN:
-									{
-										const newSessionId = parsed.data.id;
-										addLog("info", `Received new session ID: ${newSessionId}`);
-
-										ws.send(
-											JSON.stringify({
-												event: "AUTH",
-												data: newSessionId,
-											}),
-										);
-									}
-									break;
-								case EventType.HISTORYMESSAGE:
-									{
-										const historyMessages = parsed.data.message;
-										if (Array.isArray(historyMessages)) {
-											const formattedMessages: ChatMessage[] =
-												historyMessages.map((msg: any, idx: number) => ({
-													id: `${Date.now()}-${idx}`,
-													sender: msg.type === "from" ? "agent" : "user",
-													content: msg.message,
-													timestamp: new Date(
-														msg.timestamp,
-													).toLocaleTimeString(),
-												}));
-											setMessages((prev) => [...prev, ...formattedMessages]);
-										}
-									}
-									break;
-								case EventType.SESSION_LANGUAGE:
-									{
-										const chatId = parsed.data.chatId;
-										const sessionId = parsed.data.id;
-
-										setChatInfo({ chatId, sessionId });
-									}
-									break;
-								default:
-									addLog("error", `Unhandled event type: ${parsed.event}`);
-									break;
-							}
-						}
-					} catch {
-						addMessage("agent", event.data);
-					}
+					handleMessageReceived(ws, event);
 				};
 
 				ws.onerror = () => {
