@@ -14,12 +14,106 @@ export type MessageAction = {
 	description: string;
 };
 
+export type PostConfirmation = {
+	partyId: string;
+	chatId: string;
+	eventType: string;
+	transactionStatus: string;
+	transactionId: string;
+};
+
+export type SavingSpaceWidget = {
+	type: string;
+	text: string;
+	items: SavingSpaceItem[];
+};
+
+export type MultiCurrencyWidget = {
+	type: string;
+	text: string;
+	items: MultiCurrencyItem[];
+};
+
+export type SavingSpaceItem = {
+	title: string;
+	icon: string;
+	type: string;
+	savingSpaceId: string;
+	availableBalance: {
+		currency: string;
+		amount: number;
+	};
+	savingSpaceTargetBalance?: {
+		currency: string;
+		amount: number;
+	};
+	buttons: WidgetButton[];
+	payload: {
+		event: string;
+		data: string;
+	};
+};
+
+export type MultiCurrencyItem = {
+	title: string;
+	icon: string;
+	type: string;
+	accountNumber: string;
+	availableBalance: {
+		currency: string;
+		amount: number;
+	};
+	buttons: WidgetButton[];
+	payload: {
+		event: string;
+		data: string;
+	};
+};
+
+type WidgetButton = {
+	type: string;
+	title: string;
+	payload: {
+		event: string;
+		data: string;
+	};
+};
+
+export type MessageWidget = SavingSpaceWidget | MultiCurrencyWidget;
+
+export type PreConfirmPayload = SavingSpacePayload | MultiCurrencyPayload;
+
+export interface Form {
+	title: string;
+	fields: {
+		label: string;
+		value: string;
+	}[];
+}
+
+export interface SavingSpacePayload {
+	savingSpaceId: string;
+	savingSpaceName: string;
+	instructedAmount: {
+		currency: string;
+		amount: number;
+	};
+}
+
+export interface MultiCurrencyPayload {
+	confirmationToken: string;
+}
+
 export type ChatMessage = {
 	id: string;
 	sender: "user" | "agent";
 	content: string;
 	timestamp: string;
 	actions?: MessageAction[];
+	widgets?: MessageWidget[];
+	eventType?: string;
+	form?: Form;
+	payload?: PreConfirmPayload;
 	extraMsg?: string;
 	type?: "message" | "audio";
 	audioUrl?: string;
@@ -51,6 +145,9 @@ export enum EventType {
 	HISTORYMESSAGE = "HISTORYMESSAGE",
 	SESSION_LANGUAGE = "SESSION_LANGUAGE",
 	CALL_STATUS = "CALL_STATUS",
+	POST_CONFIRMATION = "POST_CONFIRMATION",
+	SELECT_ACCOUNT = "SELECT_ACCOUNT",
+	PRE_CONFIRMATION = "PRE_CONFIRMATION",
 }
 
 export const useWebSocket = () => {
@@ -114,6 +211,7 @@ export const useWebSocket = () => {
 								content: msgData.message,
 								timestamp: new Date().toLocaleTimeString(),
 								actions: msgData.actions,
+								widgets: msgData.widgets,
 								extraMsg: msgData.extra_msg,
 							};
 							setMessages((prev) => [...prev, message]);
@@ -172,6 +270,64 @@ export const useWebSocket = () => {
 								};
 								setMessages((prev) => [...prev, message]);
 							}
+						}
+						break;
+					case EventType.RATE:
+						{
+							if (parsed.data.type === "to") {
+								const chatId = parsed.data.chatId;
+								const sessionId = parsed.data.id;
+
+								setChatInfo({ chatId, sessionId });
+								return;
+							}
+							// Handle rate response
+							const msgData = parsed.data;
+							const message: ChatMessage = {
+								id: msgData.messageId || Date.now().toString(),
+								sender: "agent",
+								content: msgData.message,
+								timestamp: new Date().toLocaleTimeString(),
+								actions: msgData.actions,
+							};
+							setMessages((prev) => [...prev, message]);
+						}
+						break;
+					case EventType.ASSISTANCE:
+						{
+							if (parsed.data.type === "to") {
+								const chatId = parsed.data.chatId;
+								const sessionId = parsed.data.id;
+
+								setChatInfo({ chatId, sessionId });
+								return;
+							}
+							const msgData = parsed.data;
+							const message: ChatMessage = {
+								id: msgData.messageId || Date.now().toString(),
+								sender: "agent",
+								content: msgData.message,
+								timestamp: new Date().toLocaleTimeString(),
+								actions: msgData.actions,
+							};
+							setMessages((prev) => [...prev, message]);
+						}
+						break;
+					case EventType.SELECT_ACCOUNT:
+						break;
+					case EventType.PRE_CONFIRMATION:
+						{
+							const msgData = parsed.data;
+							const message: ChatMessage = {
+								id: msgData.messageId || Date.now().toString(),
+								sender: "agent",
+								content: msgData.message,
+								timestamp: new Date().toLocaleTimeString(),
+								eventType: msgData.eventType,
+								form: msgData.form,
+								payload: msgData.payload,
+							};
+							setMessages((prev) => [...prev, message]);
 						}
 						break;
 					default:
@@ -281,6 +437,10 @@ export const useWebSocket = () => {
 							addMessage("user", messageToDisplay, "audio");
 						}
 						break;
+					case EventType.POST_CONFIRMATION:
+						break;
+					case EventType.SELECT_ACCOUNT:
+						break;
 					default: {
 						const messageToDisplay =
 							displayMessage ||
@@ -338,6 +498,15 @@ export const useWebSocket = () => {
 						event: "ENDSESSION",
 						data: {},
 					};
+				} else if (action.event === "SELECT_ACCOUNT") {
+					payload = {
+						event: action.event,
+						data: action.value,
+					};
+					const payloadStr = JSON.stringify(payload);
+					wsRef.current.send(payloadStr);
+					addLog("send", `Sent action: ${payloadStr}`);
+					return true;
 				} else {
 					// Generic action handler
 					payload = {
@@ -349,6 +518,40 @@ export const useWebSocket = () => {
 				const payloadStr = JSON.stringify(payload);
 				wsRef.current.send(payloadStr);
 				addLog("send", `Sent action: ${payloadStr}`);
+				addMessage("user", action.name);
+				return true;
+			} catch (error) {
+				addLog("error", `Failed to send action: ${error}`);
+				return false;
+			}
+		},
+		[addLog, addMessage],
+	);
+
+	const sendPostConfirmation = useCallback(
+		(data: PostConfirmation, event: string) => {
+			if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+				addLog("error", "WebSocket is not connected");
+				return false;
+			}
+
+			try {
+				let payload: object = {};
+
+				payload = {
+					event: event,
+					data: {
+						partyId: data.partyId,
+						chatId: data.chatId,
+						eventType: data.eventType,
+						transactionId: data.transactionId,
+						transactionStatus: data.transactionStatus,
+					},
+				};
+
+				const payloadStr = JSON.stringify(payload);
+				wsRef.current.send(payloadStr);
+				addLog("send", `Sent Post Confirmation: ${payloadStr}`);
 				return true;
 			} catch (error) {
 				addLog("error", `Failed to send action: ${error}`);
@@ -383,6 +586,7 @@ export const useWebSocket = () => {
 		disconnect,
 		sendMessage,
 		sendAction,
+		sendPostConfirmation,
 		clearLogs,
 		clearMessages,
 		chatInfo,

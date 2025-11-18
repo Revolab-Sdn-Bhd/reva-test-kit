@@ -1,6 +1,14 @@
 import { useEffect, useRef } from "react";
 import { FaMicrophone } from "react-icons/fa";
+import type {
+	MessageWidget,
+	MultiCurrencyWidget,
+	SavingSpaceWidget,
+} from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
+import PreConfirmationCard from "../pre-confirm-card";
+import MultiCurrencyWidgetComponent from "../widget/multi-currency";
+import SavingSpaceWidgetComponent from "../widget/saving-space";
 
 const ChatMessageSection = () => {
 	const { messages, sendAction } = useWebSocketContext();
@@ -11,6 +19,26 @@ const ChatMessageSection = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages]);
 
+	const renderWidget = (widget: MessageWidget, messageId: string) => {
+		if (widget.type === "savingspace") {
+			return (
+				<SavingSpaceWidgetComponent
+					widget={widget as SavingSpaceWidget}
+					messageId={messageId}
+				/>
+			);
+		}
+		if (widget.type === "multicurrency") {
+			return (
+				<MultiCurrencyWidgetComponent
+					widget={widget as MultiCurrencyWidget}
+					messageId={messageId}
+				/>
+			);
+		}
+		return null;
+	};
+
 	return (
 		<div className="flex-1 min-h-0 p-6 space-y-4 overflow-y-auto">
 			{messages.length === 0 ? (
@@ -19,7 +47,8 @@ const ChatMessageSection = () => {
 				</div>
 			) : (
 				messages.map((msg) => {
-					if (!msg.content) return null;
+					const hasPreConfirmation = msg.eventType && msg.form && msg.payload;
+					if (!msg.content && !hasPreConfirmation) return null;
 					return (
 						<div
 							key={msg.id}
@@ -88,6 +117,26 @@ const ChatMessageSection = () => {
 											</button>
 										))}
 									</div>
+								)}
+
+								{/* Widget Section */}
+								{msg.widgets && msg.widgets.length > 0 && (
+									<div className="flex flex-col gap-3 mt-3">
+										{msg.widgets.map((widget, index) => (
+											<div key={`${msg.id}-widget-${index}`}>
+												{renderWidget(widget, msg.id)}
+											</div>
+										))}
+									</div>
+								)}
+
+								{/* Pre Confirm Section */}
+								{msg.eventType && msg.form && msg.payload && (
+									<PreConfirmationCard
+										messageId={msg.id}
+										eventType={msg.eventType}
+										form={msg.form}
+									/>
 								)}
 
 								<div

@@ -6,7 +6,6 @@ const WebsocketLogs = () => {
 	const logsEndRef = useRef<HTMLDivElement>(null);
 
 	const { logs, clearLogs } = useWebSocketContext();
-
 	const getLogColor = (type: LogEntry["type"]) => {
 		switch (type) {
 			case "error":
@@ -15,6 +14,8 @@ const WebsocketLogs = () => {
 				return "text-blue-400";
 			case "receive":
 				return "text-green-400";
+			case "info":
+				return "text-amber-400";
 			default:
 				return "text-gray-400";
 		}

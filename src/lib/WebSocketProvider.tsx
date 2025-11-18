@@ -1,5 +1,10 @@
 import { createContext, type ReactNode, useContext } from "react";
-import type { ChatMessage, LogEntry, MessageAction } from "./useWebSocket";
+import type {
+	ChatMessage,
+	LogEntry,
+	MessageAction,
+	PostConfirmation,
+} from "./useWebSocket";
 import { useWebSocket } from "./useWebSocket";
 
 type WebSocketConfig = {
@@ -19,6 +24,7 @@ type WebSocketContextType = {
 	disconnect: () => void;
 	sendMessage: (payload: string, displayMessage?: string) => boolean;
 	sendAction: (action: MessageAction, messageId?: string) => boolean;
+	sendPostConfirmation: (payload: PostConfirmation, event: string) => boolean;
 	clearLogs: () => void;
 	clearMessages: () => void;
 	clearTranscribing: () => void;
