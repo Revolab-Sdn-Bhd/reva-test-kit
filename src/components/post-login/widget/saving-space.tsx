@@ -62,40 +62,15 @@ const SavingSpaceWidgetComponent = ({
 								<div className="flex items-start justify-between gap-2">
 									<div>
 										<h4 className="font-medium text-white">{item.title}</h4>
-										<p className="text-xs text-gray-400">{item.type}</p>
+										<p className="text-xs text-gray-400">Type: {item.type}</p>
 									</div>
 									<div className="text-right">
 										<div className="font-semibold text-white">
 											{item.availableBalance.currency}{" "}
 											{item.availableBalance.amount.toFixed(2)}
 										</div>
-										{item.savingSpaceTargetBalance && (
-											<div className="text-xs text-gray-400">
-												Target: {item.savingSpaceTargetBalance.currency}{" "}
-												{item.savingSpaceTargetBalance.amount.toFixed(2)}
-											</div>
-										)}
 									</div>
 								</div>
-
-								{/* Progress bar if target exists */}
-								{item.savingSpaceTargetBalance && (
-									<div className="mt-2">
-										<div className="w-full h-2 overflow-hidden bg-gray-700 rounded-full">
-											<div
-												className="h-full transition-all bg-blue-500"
-												style={{
-													width: `${Math.min(
-														(item.availableBalance.amount /
-															item.savingSpaceTargetBalance.amount) *
-															100,
-														100,
-													)}%`,
-												}}
-											/>
-										</div>
-									</div>
-								)}
 
 								{/* Buttons */}
 								{item.buttons && item.buttons.length > 0 && (

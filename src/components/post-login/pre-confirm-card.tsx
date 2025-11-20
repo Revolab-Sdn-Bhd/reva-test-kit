@@ -38,7 +38,7 @@ const PreConfirmationCard = ({
 				{form.fields.map((field) => (
 					<div
 						key={`${messageId}-${field.label}`}
-						className="flex justify-between items-center p-3 bg-gray-900 rounded-lg"
+						className="flex justify-between items-center p-3 bg-gray-900 rounded-lg gap-1"
 					>
 						<span className="text-sm text-gray-400">{field.label}</span>
 						<span className="text-sm font-medium text-white">
@@ -46,13 +46,6 @@ const PreConfirmationCard = ({
 						</span>
 					</div>
 				))}
-			</div>
-
-			{/* Event Type Badge */}
-			<div className="mb-4">
-				<span className="inline-block px-2 py-1 text-xs font-medium text-blue-400 bg-blue-900/30 rounded">
-					{eventType}
-				</span>
 			</div>
 
 			{/* Action Buttons */}
