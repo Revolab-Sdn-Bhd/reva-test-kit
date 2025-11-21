@@ -350,14 +350,15 @@ export const useWebSocket = () => {
 			// Store config for reconnection
 			configRef.current = config;
 
-			let wsUrl = `${config.url}?token=${encodeURIComponent(
-				config.token,
-			)}&language=${config.language}&platform=${config.platform}`;
-
-			// Add sessionId if provided
+			const params = new URLSearchParams();
+			if (config.token) params.append("token", config.token);
+			if (config.language) params.append("language", config.language);
+			if (config.platform) params.append("platform", config.platform);
 			if (config.sessionId) {
-				wsUrl += `&sessionId=${encodeURIComponent(config.sessionId)}`;
+				params.append("sessionId", config.sessionId);
 			}
+
+			const wsUrl = `${config.url}?${params.toString()}`;
 
 			addLog("info", `Connecting to ${wsUrl}`);
 

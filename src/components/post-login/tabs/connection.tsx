@@ -178,8 +178,14 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 				const wsHost = isDevelopment
 					? "localhost:3000"
 					: envConfig?.CHAT_SERVICE_URL;
-				const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
-				return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
+				const params = new URLSearchParams();
+				if (token) params.append("token", token);
+				if (language) params.append("language", language);
+				if (platform) params.append("platform", platform);
+				if (sessionId) {
+					params.append("sessionId", sessionId);
+				}
+				return `${wsProtocol}${wsHost}${wsPath}?${params.toString()}`;
 			})()}
 		</div>
 		</div>
