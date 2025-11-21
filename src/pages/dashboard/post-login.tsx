@@ -24,6 +24,7 @@ function PostLoginContent() {
 	const [language, setLanguage] = useState<"en" | "ar">("en");
 	const [token, setToken] = useState("reflect123");
 	const [sessionId, setSessionId] = useState("");
+	const [wsPath, setWsPath] = useState("/ws/chat");
 
 	const { envConfig } = useEnvConfig();
 
@@ -38,7 +39,7 @@ function PostLoginContent() {
 		const wsHost = isDevelopment
 			? "localhost:3000"
 			: envConfig?.CHAT_SERVICE_URL;
-		const wsUrl = `${wsProtocol}${wsHost}/ws/chat`;
+		const wsUrl = `${wsProtocol}${wsHost}${wsPath}`;
 
 		connect({
 			url: wsUrl,
@@ -112,23 +113,23 @@ function PostLoginContent() {
 								</button>
 							</div>
 
-							{activeTab === "connection" && (
-								<ConnectionTab
-									platform={platform}
-									setPlatform={(platform) => setPlatform(platform)}
-									language={language}
-									setLanguage={(language) => setLanguage(language)}
-									isConnected={isConnected}
-									token={token}
-									setToken={setToken}
-									sessionId={sessionId}
-									setSessionId={setSessionId}
-									handleConnect={handleConnect}
-									handleDisconnect={handleDisconnect}
-								/>
-							)}
-
-							{/* Custom JSON Tab */}
+						{activeTab === "connection" && (
+							<ConnectionTab
+								platform={platform}
+								setPlatform={(platform) => setPlatform(platform)}
+								language={language}
+								setLanguage={(language) => setLanguage(language)}
+								isConnected={isConnected}
+								token={token}
+								setToken={setToken}
+								sessionId={sessionId}
+								setSessionId={setSessionId}
+								wsPath={wsPath}
+								setWsPath={setWsPath}
+								handleConnect={handleConnect}
+								handleDisconnect={handleDisconnect}
+							/>
+						)}							{/* Custom JSON Tab */}
 							{activeTab === "custom-json" && (
 								<CustomPayloadTab isConnected={isConnected} />
 							)}
