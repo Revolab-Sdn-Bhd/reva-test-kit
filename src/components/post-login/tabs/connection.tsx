@@ -12,6 +12,8 @@ interface ConnectionTabProps {
 	setToken: React.Dispatch<SetStateAction<string>>;
 	sessionId?: string;
 	setSessionId: React.Dispatch<SetStateAction<string>>;
+	wsPath: string;
+	setWsPath: React.Dispatch<SetStateAction<string>>;
 	handleConnect: () => void;
 	handleDisconnect: () => void;
 }
@@ -26,6 +28,8 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 	setToken,
 	sessionId,
 	setSessionId,
+	wsPath,
+	setWsPath,
 	handleConnect,
 	handleDisconnect,
 }) => {
@@ -135,6 +139,24 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 				/>
 			</div>
 
+			<div>
+				<label
+					htmlFor="ws-path-input"
+					className="block mb-2 text-sm font-medium text-gray-300"
+				>
+					WebSocket Path
+				</label>
+				<input
+					id="ws-path-input"
+					type="text"
+					value={wsPath}
+					onChange={(e) => setWsPath(e.target.value)}
+					disabled={isConnected}
+					className="w-full px-3 py-2 text-white placeholder-gray-400 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-900"
+					placeholder="/ws/chat"
+				/>
+			</div>
+
 			<div className="flex gap-2">
 				<button
 					type="button"
@@ -149,17 +171,17 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 				</button>
 			</div>
 
-			<div className="font-mono text-sm text-gray-400 break-all">
-				{(() => {
-					const isDevelopment = process.env.NODE_ENV === "development";
-					const wsProtocol = isDevelopment ? "ws://" : "wss://";
-					const wsHost = isDevelopment
-						? "localhost:3000"
-						: envConfig?.CHAT_SERVICE_URL;
-					const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
-					return `${wsProtocol}${wsHost}/ws/chat?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
-				})()}
-			</div>
+		<div className="font-mono text-sm text-gray-400 break-all">
+			{(() => {
+				const isDevelopment = process.env.NODE_ENV === "development";
+				const wsProtocol = isDevelopment ? "ws://" : "wss://";
+				const wsHost = isDevelopment
+					? "localhost:3000"
+					: envConfig?.CHAT_SERVICE_URL;
+				const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
+				return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
+			})()}
+		</div>
 		</div>
 	);
 };
