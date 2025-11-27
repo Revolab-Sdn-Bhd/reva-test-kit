@@ -7,6 +7,7 @@ import {
 	getChatHistory,
 	getPaginatedChatSessions,
 } from "@/lib/api/post-login";
+import { getChatUrl } from "@/lib/util";
 
 interface ChatHistoryProps {
 	token: string;
@@ -15,10 +16,7 @@ interface ChatHistoryProps {
 const ChatHistoryTab = ({ token }: ChatHistoryProps) => {
 	const { envConfig } = useEnvConfig();
 
-	const isDevelopment = process.env.NODE_ENV === "development";
-	const protocol = isDevelopment ? "http://" : "https://";
-	const host = isDevelopment ? "localhost:3000" : envConfig?.CHAT_SERVICE_URL;
-	const chatUrl = `${protocol}${host}`;
+	const chatUrl = getChatUrl(envConfig);
 
 	const [introspectToken, setIntrospectToken] = useState<string | null>(null);
 	const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);

@@ -112,24 +112,24 @@ function PostLoginContent() {
 									Custom JSON
 								</button>
 							</div>
-
-						{activeTab === "connection" && (
-							<ConnectionTab
-								platform={platform}
-								setPlatform={(platform) => setPlatform(platform)}
-								language={language}
-								setLanguage={(language) => setLanguage(language)}
-								isConnected={isConnected}
-								token={token}
-								setToken={setToken}
-								sessionId={sessionId}
-								setSessionId={setSessionId}
-								wsPath={wsPath}
-								setWsPath={setWsPath}
-								handleConnect={handleConnect}
-								handleDisconnect={handleDisconnect}
-							/>
-						)}							{/* Custom JSON Tab */}
+							{activeTab === "connection" && (
+								<ConnectionTab
+									platform={platform}
+									setPlatform={(platform) => setPlatform(platform)}
+									language={language}
+									setLanguage={(language) => setLanguage(language)}
+									isConnected={isConnected}
+									token={token}
+									setToken={setToken}
+									sessionId={sessionId}
+									setSessionId={setSessionId}
+									wsPath={wsPath}
+									setWsPath={setWsPath}
+									handleConnect={handleConnect}
+									handleDisconnect={handleDisconnect}
+								/>
+							)}{" "}
+							{/* Custom JSON Tab */}
 							{activeTab === "custom-json" && (
 								<CustomPayloadTab isConnected={isConnected} />
 							)}

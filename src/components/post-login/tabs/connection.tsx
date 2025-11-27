@@ -103,40 +103,42 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 				</div>
 			</div>
 
-			<div>
-				<label
-					htmlFor="token-input"
-					className="block mb-2 text-sm font-medium text-gray-300"
-				>
-					Token
-				</label>
-				<input
-					id="token-input"
-					type="text"
-					value={token}
-					onChange={(e) => setToken(e.target.value)}
-					disabled={isConnected}
-					className="w-full px-3 py-2 text-white placeholder-gray-400 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-900"
-					placeholder="Enter token"
-				/>
-			</div>
+			<div className="flex flex-row items-center w-full gap-2">
+				<div className="flex-1">
+					<label
+						htmlFor="token-input"
+						className="block mb-2 text-sm font-medium text-gray-300"
+					>
+						Token
+					</label>
+					<input
+						id="token-input"
+						type="text"
+						value={token}
+						onChange={(e) => setToken(e.target.value)}
+						disabled={isConnected}
+						className="w-full px-3 py-2 text-white placeholder-gray-400 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-900"
+						placeholder="Enter token"
+					/>
+				</div>
 
-			<div>
-				<label
-					htmlFor="session-id-input"
-					className="block mb-2 text-sm font-medium text-gray-300"
-				>
-					Session ID <span className="text-xs text-gray-500">(Optional)</span>
-				</label>
-				<input
-					id="session-id-input"
-					type="text"
-					value={sessionId}
-					onChange={(e) => setSessionId(e.target.value)}
-					disabled={isConnected}
-					className="w-full px-3 py-2 text-white placeholder-gray-400 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-900"
-					placeholder="Enter session ID"
-				/>
+				<div className="flex-1">
+					<label
+						htmlFor="session-id-input"
+						className="block mb-2 text-sm font-medium text-gray-300"
+					>
+						Session ID <span className="text-xs text-gray-500">(Optional)</span>
+					</label>
+					<input
+						id="session-id-input"
+						type="text"
+						value={sessionId}
+						onChange={(e) => setSessionId(e.target.value)}
+						disabled={isConnected}
+						className="w-full px-3 py-2 text-white placeholder-gray-400 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-900"
+						placeholder="Enter session ID"
+					/>
+				</div>
 			</div>
 
 			<div>
@@ -171,17 +173,17 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 				</button>
 			</div>
 
-		<div className="font-mono text-sm text-gray-400 break-all">
-			{(() => {
-				const isDevelopment = process.env.NODE_ENV === "development";
-				const wsProtocol = isDevelopment ? "ws://" : "wss://";
-				const wsHost = isDevelopment
-					? "localhost:3000"
-					: envConfig?.CHAT_SERVICE_URL;
-				const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
-				return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
-			})()}
-		</div>
+			<div className="font-mono text-sm text-gray-400 break-all">
+				{(() => {
+					const isDevelopment = process.env.NODE_ENV === "development";
+					const wsProtocol = isDevelopment ? "ws://" : "wss://";
+					const wsHost = isDevelopment
+						? "localhost:3000"
+						: envConfig?.CHAT_SERVICE_URL;
+					const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
+					return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
+				})()}
+			</div>
 		</div>
 	);
 };
