@@ -1,12 +1,16 @@
+import DOMPurify from "dompurify";
+import { marked } from "marked";
 import { useEffect, useRef } from "react";
 import { FaMicrophone } from "react-icons/fa";
 import type {
+	ButtonWidget,
 	MessageWidget,
 	MultiCurrencyWidget,
 	SavingSpaceWidget,
 } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 import PreConfirmationCard from "../pre-confirm-card";
+import ButtonWidgetComponent from "../widget/button";
 import MultiCurrencyWidgetComponent from "../widget/multi-currency";
 import SavingSpaceWidgetComponent from "../widget/saving-space";
 
@@ -35,6 +39,9 @@ const ChatMessageSection = () => {
 					messageId={messageId}
 				/>
 			);
+		}
+		if (widget.type === "BUTTON") {
+			return <ButtonWidgetComponent widget={widget as ButtonWidget} />;
 		}
 		return null;
 	};
@@ -92,7 +99,24 @@ const ChatMessageSection = () => {
 										)}
 									</div>
 								) : (
-									<div>{msg.content}</div>
+									<div
+										className="message-content"
+										// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
+										dangerouslySetInnerHTML={{
+											__html: DOMPurify.sanitize(marked(msg.content) as string),
+										}}
+									></div>
+								)}
+
+								{/* Widget Section */}
+								{msg.widgets && msg.widgets.length > 0 && (
+									<div className="flex flex-wrap gap-2 mt-3">
+										{msg.widgets.map((widget, index) => (
+											<div key={`${msg.id}-widget-${index}`}>
+												{renderWidget(widget, msg.id)}
+											</div>
+										))}
+									</div>
 								)}
 
 								{/* Extra message */}
@@ -115,17 +139,6 @@ const ChatMessageSection = () => {
 											>
 												{action.name}
 											</button>
-										))}
-									</div>
-								)}
-
-								{/* Widget Section */}
-								{msg.widgets && msg.widgets.length > 0 && (
-									<div className="flex flex-col gap-3 mt-3">
-										{msg.widgets.map((widget, index) => (
-											<div key={`${msg.id}-widget-${index}`}>
-												{renderWidget(widget, msg.id)}
-											</div>
 										))}
 									</div>
 								)}

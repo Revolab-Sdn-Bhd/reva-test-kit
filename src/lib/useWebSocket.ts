@@ -79,7 +79,38 @@ type WidgetButton = {
 	};
 };
 
-export type MessageWidget = SavingSpaceWidget | MultiCurrencyWidget;
+export interface ButtonWidget extends BaseWidget {
+	type: WidgetType.BUTTON;
+	buttons: Array<
+		| {
+				type: "URL";
+				label: string;
+				link: string;
+		  }
+		| {
+				type: "NAVIGATE";
+				label: string;
+				navigationId: string;
+		  }
+	>;
+}
+
+interface BaseWidget {
+	type: WidgetType;
+	response: string;
+}
+
+export enum WidgetType {
+	CAROUSEL = "CAROUSEL",
+	BUTTON = "BUTTON",
+	VIDEO = "VIDEO",
+	CALLENDED = "CALLENDED",
+}
+
+export type MessageWidget =
+	| ButtonWidget
+	| SavingSpaceWidget
+	| MultiCurrencyWidget;
 
 export type PreConfirmPayload = SavingSpacePayload | MultiCurrencyPayload;
 

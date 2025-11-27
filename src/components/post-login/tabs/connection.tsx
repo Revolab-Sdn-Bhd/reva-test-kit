@@ -171,17 +171,17 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 				</button>
 			</div>
 
-		<div className="font-mono text-sm text-gray-400 break-all">
-			{(() => {
-				const isDevelopment = process.env.NODE_ENV === "development";
-				const wsProtocol = isDevelopment ? "ws://" : "wss://";
-				const wsHost = isDevelopment
-					? "localhost:3000"
-					: envConfig?.CHAT_SERVICE_URL;
-				const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
-				return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
-			})()}
-		</div>
+			<div className="font-mono text-sm text-gray-400 break-all">
+				{(() => {
+					const isDevelopment = process.env.NODE_ENV === "development";
+					const wsProtocol = isDevelopment ? "ws://" : "wss://";
+					const wsHost = isDevelopment
+						? "localhost:3000"
+						: envConfig?.CHAT_SERVICE_URL;
+					const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
+					return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
+				})()}
+			</div>
 		</div>
 	);
 };
