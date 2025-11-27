@@ -1,4 +1,7 @@
 import React, { createContext, useCallback, useState } from "react";
+import { toast } from "sonner";
+import { generateIntrospectToken } from "@/lib/api/post-login";
+import { generateRandomAlphanumeric, getChatUrl } from "@/lib/util";
 import { useEnvConfig } from "./useEnvConfig";
 
 export type ConnectionMode = "cloud" | "manual" | "env";
@@ -39,23 +42,55 @@ export const ConnectionProvider = ({
 
 			const aiHandlerUrl = envConfig.AI_HANDLER_URL;
 
-			try {
-				const { token } = await fetch(`${aiHandlerUrl}/api/v1/livekit/tokens`, {
-					method: "POST",
-					headers: {
-						"X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
-						"X-Reflect-Token": "REFLECT_TOKEN",
-					},
-					body: JSON.stringify({
-						identity: "test_identity",
-						name: "test_name",
-						language: language,
-					}),
-				}).then((res) => res.json());
+			const rotatingId = generateRandomAlphanumeric(16);
 
-				setConnectionDetails({ wsUrl: url, token, shouldConnect: true });
+			const chatUrl = getChatUrl(envConfig);
+
+			const reflectIntrospectToken = await generateIntrospectToken(
+				chatUrl,
+				generateRandomAlphanumeric(16),
+			);
+
+			try {
+				const tokenResponse = await fetch(
+					`${aiHandlerUrl}/api/v1/livekit/tokens`,
+					{
+						method: "POST",
+						headers: {
+							"X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
+							"X-Rotating-ID": rotatingId,
+							"X-Reflect-Token": reflectIntrospectToken,
+						},
+						body: JSON.stringify({
+							identity: generateRandomAlphanumeric(16),
+							name: "test_name",
+							language: language,
+						}),
+					},
+				);
+				const { token, nonce } = await tokenResponse.json();
+
+				const decryptRes = await fetch("/api/decrypt", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						rotatingId: rotatingId,
+						salt: envConfig.LIVEKIT_TOKEN_ENCRYPTION_KEY ?? "",
+						nonceB64: nonce,
+						encryptedTokenB64: token,
+					}),
+				});
+
+				const data = await decryptRes.json();
+
+				setConnectionDetails({
+					wsUrl: url,
+					token: data.decrypted,
+					shouldConnect: true,
+				});
 			} catch (err) {
 				console.error("Error fetching access token:", err);
+				toast.error("Failed to fetch access token");
 			}
 		},
 		[envConfig],
