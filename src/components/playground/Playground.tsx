@@ -42,6 +42,7 @@ import { TranscriptionTile } from "@/components/transcriptions/TranscriptionTile
 import { useConfig } from "@/hooks/useConfig";
 import { useLivekitData } from "@/hooks/useLivekitData";
 import tailwindTheme from "../../lib/tailwindTheme.preval";
+import SessionExpiringDialog from "../dialog/SessionExpiringDialog";
 
 export interface PlaygroundMeta {
 	name: string;
@@ -84,15 +85,12 @@ export default function Playground({
 		}
 	}, [config, localParticipant, roomState]);
 
-	const { escalationData, clearEscalation } = useLivekitData(room);
-	const [showEscalatedDialog, setShowEscalatedDialog] = useState(false);
-
-	// Show dialog when escalation data is received
-	useEffect(() => {
-		if (escalationData) {
-			setShowEscalatedDialog(true);
-		}
-	}, [escalationData]);
+	const {
+		escalationData,
+		clearEscalation,
+		sessionExpiring,
+		clearSessionExpiring,
+	} = useLivekitData(room);
 
 	const agentVideoTrack = tracks.find(
 		(trackRef) =>
@@ -639,13 +637,18 @@ export default function Playground({
 				</PlaygroundTile>
 			</div>
 
-			{/* Escalated Dialog */}
 			<EscalatedDialog
-				isOpen={showEscalatedDialog}
+				isOpen={!!escalationData}
 				waLink={escalationData?.waLink || ""}
 				onClose={() => {
-					setShowEscalatedDialog(false);
 					clearEscalation();
+				}}
+			/>
+
+			<SessionExpiringDialog
+				isOpen={sessionExpiring}
+				onClose={() => {
+					clearSessionExpiring();
 				}}
 			/>
 		</>
