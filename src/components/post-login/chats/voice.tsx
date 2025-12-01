@@ -2,6 +2,7 @@ import {
 	BarVisualizer,
 	useConnectionState,
 	useLocalParticipant,
+	useRoomContext,
 	useRoomInfo,
 	useTrackTranscription,
 	useVoiceAssistant,
@@ -12,7 +13,10 @@ import { BiSolidMicrophoneOff } from "react-icons/bi";
 import { HiMicrophone } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
 import { LoadingSVG } from "@/components/button/LoadingSVG";
+import EscalatedDialog from "@/components/dialog/EscalatedDialog";
+import SessionExpiringDialog from "@/components/dialog/SessionExpiringDialog";
 import { useConnection } from "@/hooks/useConnection";
+import { useLivekitData } from "@/hooks/useLivekitData";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
 interface VoiceChatSectionProps {
@@ -26,6 +30,8 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 	const { name: roomName } = useRoomInfo();
 	const { sendMessage } = useWebSocketContext();
 
+	const room = useRoomContext();
+
 	const { disconnect } = useConnection();
 
 	const [isMuted, setIsMuted] = useState(false);
@@ -36,6 +42,13 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 	// Track agent transcriptions
 	const agentTranscription = useTrackTranscription(voiceAssistant.audioTrack);
 	const [currentTranscript, setCurrentTranscript] = useState<string>("");
+
+	const {
+		escalationData,
+		clearEscalation,
+		sessionExpiring,
+		clearSessionExpiring,
+	} = useLivekitData(room);
 
 	// Update current transcript from agent
 	useEffect(() => {
@@ -90,38 +103,41 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 		}
 	}, [localParticipant, isMuted]);
 
-	const handleEndCall = useCallback(() => {
-		// Calculate final duration
-		const durationSeconds = callStartTimeRef.current
-			? Math.floor((Date.now() - callStartTimeRef.current) / 1000)
-			: 0;
+	const handleEndCall = useCallback(
+		(fixedDuration: number = 0) => {
+			// Calculate final duration
+			const durationSeconds = callStartTimeRef.current
+				? Math.floor((Date.now() - callStartTimeRef.current) / 1000)
+				: fixedDuration;
 
-		// Send CALL_STATUS event
-		const payload = {
-			event: "CALL_STATUS",
-			data: {
-				status: "ENDCALL",
-				durationSeconds,
-				roomName: roomName || undefined,
-			},
-		};
+			// Send CALL_STATUS event
+			const payload = {
+				event: "CALL_STATUS",
+				data: {
+					status: "ENDCALL",
+					durationSeconds,
+					roomName: roomName || undefined,
+				},
+			};
 
-		sendMessage(JSON.stringify(payload));
+			sendMessage(JSON.stringify(payload));
 
-		// Clean up timer
-		if (timerIntervalRef.current) {
-			clearInterval(timerIntervalRef.current);
-			timerIntervalRef.current = null;
-		}
+			// Clean up timer
+			if (timerIntervalRef.current) {
+				clearInterval(timerIntervalRef.current);
+				timerIntervalRef.current = null;
+			}
 
-		// Reset state
-		callStartTimeRef.current = null;
-		setCallDuration(0);
-		disconnect();
-		setIsMuted(false);
+			// Reset state
+			callStartTimeRef.current = null;
+			setCallDuration(0);
+			disconnect();
+			setIsMuted(false);
 
-		onFinishCall();
-	}, [disconnect, onFinishCall, roomName, sendMessage]);
+			onFinishCall();
+		},
+		[disconnect, onFinishCall, roomName, sendMessage],
+	);
 
 	const audioTileContent = useMemo(() => {
 		console.log("Voice Debug:", {
@@ -168,69 +184,89 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 	}, [voiceAssistant.audioTrack, roomState, voiceAssistant.state]);
 
 	return (
-		<div className="flex flex-col items-center justify-between h-full p-8 bg-gradient-to-b from-gray-900 via-[#800080]/20 to-gray-900">
-			{/* Center - Audio Visualizer */}
-			<div className="flex items-center justify-center flex-1">
-				<div className="relative">
-					{/* Circular background */}
-					<div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#800080]/30 to-blue-600/30 blur-3xl" />
+		<div className="relative h-full">
+			<div className="relative flex flex-col items-center justify-between h-full p-8 bg-gradient-to-b from-gray-900 via-[#800080]/20 to-gray-900">
+				{/* Center - Audio Visualizer */}
+				<div className="flex items-center justify-center flex-1">
+					<div className="relative">
+						{/* Circular background */}
+						<div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#800080]/30 to-blue-600/30 blur-3xl" />
 
-					{/* Visualizer container */}
-					<div className="relative flex items-center justify-center border rounded-full w-96 h-96 bg-gradient-to-br from-[#800080]/50 to-blue-900/50 backdrop-blur-lg border-[#800080]/30">
-						{audioTileContent}
+						{/* Visualizer container */}
+						<div className="relative flex items-center justify-center border rounded-full w-96 h-96 bg-gradient-to-br from-[#800080]/50 to-blue-900/50 backdrop-blur-lg border-[#800080]/30">
+							{audioTileContent}
+						</div>
 					</div>
 				</div>
-			</div>
 
-			{/* Bottom - Status and Controls */}
-			<div className="flex flex-col items-center space-y-6">
-				{/* Agent Transcript */}
-				{currentTranscript && (
-					<div className="max-w-2xl px-6 py-3 text-center border rounded-lg bg-white/10 backdrop-blur-lg border-white/20">
-						<p className="text-white">{currentTranscript}</p>
-					</div>
-				)}
-
-				<div className="flex flex-col items-center space-y-2">
-					{callDuration > 0 && (
-						<p className="text-sm text-white/50">
-							{Math.floor(callDuration / 60)}:
-							{(callDuration % 60).toString().padStart(2, "0")}
-						</p>
+				{/* Bottom - Status and Controls */}
+				<div className="flex flex-col items-center space-y-6">
+					{/* Agent Transcript */}
+					{currentTranscript && (
+						<div className="max-w-2xl px-6 py-3 text-center border rounded-lg bg-white/10 backdrop-blur-lg border-white/20">
+							<p className="text-white">{currentTranscript}</p>
+						</div>
 					)}
-				</div>
 
-				{/* Control Buttons */}
-				<div className="flex items-center gap-6">
-					{/* Mute/Unmute Button */}
-					<button
-						type="button"
-						onClick={handleToggleMute}
-						className={`flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${
-							isMuted
-								? "bg-red-600 hover:bg-red-700"
-								: "bg-[#800080]/80 hover:bg-[#800080]"
-						} backdrop-blur-lg border-2 border-white/20`}
-						title={isMuted ? "Unmute" : "Mute"}
-					>
-						{isMuted ? (
-							<BiSolidMicrophoneOff className="w-8 h-8 text-white" />
-						) : (
-							<HiMicrophone className="w-8 h-8 text-white" />
+					<div className="flex flex-col items-center space-y-2">
+						{callDuration > 0 && (
+							<p className="text-sm text-white/50">
+								{Math.floor(callDuration / 60)}:
+								{(callDuration % 60).toString().padStart(2, "0")}
+							</p>
 						)}
-					</button>
+					</div>
 
-					{/* Close Button */}
-					<button
-						type="button"
-						onClick={handleEndCall}
-						className="flex items-center justify-center w-16 h-16 text-white transition-all duration-300 border-2 rounded-full bg-gray-700/80 hover:bg-gray-600 backdrop-blur-lg border-white/20"
-						title="End call"
-					>
-						<IoClose className="w-8 h-8" />
-					</button>
+					{/* Control Buttons */}
+					<div className="flex items-center gap-6">
+						{/* Mute/Unmute Button */}
+						<button
+							type="button"
+							onClick={handleToggleMute}
+							className={`flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${
+								isMuted
+									? "bg-red-600 hover:bg-red-700"
+									: "bg-[#800080]/80 hover:bg-[#800080]"
+							} backdrop-blur-lg border-2 border-white/20`}
+							title={isMuted ? "Unmute" : "Mute"}
+						>
+							{isMuted ? (
+								<BiSolidMicrophoneOff className="w-8 h-8 text-white" />
+							) : (
+								<HiMicrophone className="w-8 h-8 text-white" />
+							)}
+						</button>
+
+						{/* Close Button */}
+						<button
+							type="button"
+							onClick={() => handleEndCall()}
+							className="flex items-center justify-center w-16 h-16 text-white transition-all duration-300 border-2 rounded-full bg-gray-700/80 hover:bg-gray-600 backdrop-blur-lg border-white/20"
+							title="End call"
+						>
+							<IoClose className="w-8 h-8" />
+						</button>
+					</div>
 				</div>
 			</div>
+
+			<EscalatedDialog
+				isOpen={!!escalationData}
+				waLink={escalationData?.waLink || ""}
+				onClose={() => {
+					clearEscalation();
+				}}
+				mode="inline"
+			/>
+
+			<SessionExpiringDialog
+				isOpen={true}
+				onClose={() => {
+					clearSessionExpiring();
+					handleEndCall(15 * 60); // End call with fixed duration of 15 minutes
+				}}
+				mode="inline"
+			/>
 		</div>
 	);
 };

@@ -6,23 +6,35 @@ interface EscalatedDialogProps {
 	isOpen: boolean;
 	onClose: () => void;
 	waLink?: string;
+	mode?: "fullscreen" | "inline";
 }
 
 const EscalatedDialog: React.FC<EscalatedDialogProps> = ({
 	isOpen,
 	onClose,
 	waLink,
+	mode = "fullscreen",
 }) => {
 	if (!waLink) {
 		return null;
 	}
+
+	const containerClass =
+		mode === "inline"
+			? "absolute inset-0 z-40 bg-black bg-opacity-50"
+			: "fixed inset-0 z-40 bg-black bg-opacity-50";
+
+	const contentClass =
+		mode === "inline"
+			? "absolute inset-0 z-50 flex items-center justify-center p-4"
+			: "fixed inset-0 z-50 flex items-center justify-center p-4";
 
 	return (
 		<AnimatePresence>
 			{isOpen && (
 				<>
 					<motion.div
-						className="fixed inset-0 z-40 bg-black bg-opacity-50"
+						className={containerClass}
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -30,7 +42,7 @@ const EscalatedDialog: React.FC<EscalatedDialogProps> = ({
 					/>
 
 					<motion.div
-						className="fixed inset-0 z-50 flex items-center justify-center p-4"
+						className={contentClass}
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9 }}

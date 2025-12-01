@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 enum LivekitDataTopic {
 	ESCALATED = "escalated",
 	NAVIGATION_CONTEXT = "navigationContext",
+	SESSION_EXPIRING = "session_expiring",
 }
 
 interface EscalationData {
@@ -15,17 +16,17 @@ export function useLivekitData(room: Room | null) {
 	const [escalationData, setEscalationData] = useState<EscalationData | null>(
 		null,
 	);
+	const [sessionExpiring, setSessionExpiring] = useState(false);
 
 	useEffect(() => {
 		if (!room) return;
 
-		/**
-
-  "message": "{\"escalated_voice\": {\"escalated\": true, \"wa_link\": \"https://wa.me/962792777027\", \"chat_id\": \"06912df4-eaa8-75fe-8000-d2fab871ad6c\"}}",
-  "topic": "escalated",
-  "from": "agent-AJ_5sLTHMRiwWbD"
-}
-		 */
+		// Example message format:
+		// 	{
+		// 	"message": "{\"escalated_voice\": {\"escalated\": true, \"wa_link\": \"https://wa.me/962792777027\", \"chat_id\": \"06912df4-eaa8-75fe-8000-d2fab871ad6c\"}}",
+		// 	"topic": "escalated",
+		// 	"from": "agent-AJ_5sLTHMRiwWbD"
+		// }
 
 		const onDataReceived = (
 			payload: any,
@@ -57,6 +58,10 @@ export function useLivekitData(room: Room | null) {
 					console.error("Failed to parse escalation data:", error);
 				}
 			}
+
+			if (topic === LivekitDataTopic.SESSION_EXPIRING) {
+				setSessionExpiring(true);
+			}
 		};
 
 		room.on(RoomEvent.DataReceived, onDataReceived);
@@ -69,5 +74,8 @@ export function useLivekitData(room: Room | null) {
 	return {
 		escalationData,
 		clearEscalation: () => setEscalationData(null),
+
+		sessionExpiring,
+		clearSessionExpiring: () => setSessionExpiring(false),
 	};
 }
