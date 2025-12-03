@@ -10,15 +10,16 @@ type TokenGeneratorData = {
 	shouldConnect: boolean;
 	wsUrl: string;
 	token: string;
+	tokenExpiresAt: number | null;
 	disconnect: () => Promise<void>;
 	connect: (language: "en" | "ar") => Promise<void>;
 };
 
-const ConnectionContext = createContext<TokenGeneratorData | undefined>(
+const LivekitConnectionContext = createContext<TokenGeneratorData | undefined>(
 	undefined,
 );
 
-export const ConnectionProvider = ({
+export const LivekitConnectionProvider = ({
 	children,
 }: {
 	children: React.ReactNode;
@@ -27,7 +28,8 @@ export const ConnectionProvider = ({
 		wsUrl: string;
 		token: string;
 		shouldConnect: boolean;
-	}>({ wsUrl: "", token: "", shouldConnect: false });
+		tokenExpiresAt: number | null;
+	}>({ wsUrl: "", token: "", shouldConnect: false, tokenExpiresAt: null });
 
 	const { envConfig } = useEnvConfig();
 
@@ -40,12 +42,19 @@ export const ConnectionProvider = ({
 
 			url = envConfig.LIVEKIT_URL;
 
+			// If token is still valid, reuse it to reconnect back to same LiveKit session
+			if (
+				connectionDetails.token &&
+				connectionDetails.tokenExpiresAt &&
+				connectionDetails.tokenExpiresAt > Date.now()
+			) {
+				setConnectionDetails((prev) => ({ ...prev, shouldConnect: true }));
+				return;
+			}
+
 			const aiHandlerUrl = envConfig.AI_HANDLER_URL;
-
 			const rotatingId = generateRandomAlphanumeric(16);
-
 			const chatUrl = getChatUrl(envConfig);
-
 			const reflectIntrospectToken = await generateIntrospectToken(
 				chatUrl,
 				generateRandomAlphanumeric(16),
@@ -83,40 +92,50 @@ export const ConnectionProvider = ({
 
 				const data = await decryptRes.json();
 
+				// Set token expiry to 15 minutes from now
+				const tokenExpiresAt = Date.now() + 15 * 60 * 1000;
+
 				setConnectionDetails({
 					wsUrl: url,
 					token: data.decrypted,
 					shouldConnect: true,
+					tokenExpiresAt,
 				});
 			} catch (err) {
 				console.error("Error fetching access token:", err);
 				toast.error("Failed to fetch access token");
 			}
 		},
-		[envConfig],
+		[envConfig, connectionDetails.token, connectionDetails.tokenExpiresAt],
 	);
 
 	const disconnect = useCallback(async () => {
-		setConnectionDetails((prev) => ({ ...prev, shouldConnect: false }));
+		setConnectionDetails({
+			wsUrl: "",
+			token: "",
+			shouldConnect: false,
+			tokenExpiresAt: null,
+		});
 	}, []);
 
 	return (
-		<ConnectionContext.Provider
+		<LivekitConnectionContext.Provider
 			value={{
 				wsUrl: connectionDetails.wsUrl,
 				token: connectionDetails.token,
 				shouldConnect: connectionDetails.shouldConnect,
+				tokenExpiresAt: connectionDetails.tokenExpiresAt,
 				connect,
 				disconnect,
 			}}
 		>
 			{children}
-		</ConnectionContext.Provider>
+		</LivekitConnectionContext.Provider>
 	);
 };
 
-export const useConnection = () => {
-	const context = React.useContext(ConnectionContext);
+export const useLivekitConnection = () => {
+	const context = React.useContext(LivekitConnectionContext);
 	if (context === undefined) {
 		throw new Error("useConnection must be used within a ConnectionProvider");
 	}

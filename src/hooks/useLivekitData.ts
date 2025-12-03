@@ -71,11 +71,29 @@ export function useLivekitData(room: Room | null) {
 		};
 	}, [room]);
 
+	const sendSessionEnd = () => {
+		if (!room) {
+			console.warn("Cannot send session_end: room is null");
+			return;
+		}
+
+		try {
+			const message = JSON.stringify({ session_end: true });
+			const data = new TextEncoder().encode(message);
+			room.localParticipant.publishData(data, { topic: "session_end" });
+			console.log("✅ Sent session_end event to LiveKit");
+		} catch (error) {
+			console.error("Failed to send session_end event:", error);
+		}
+	};
+
 	return {
 		escalationData,
 		clearEscalation: () => setEscalationData(null),
 
 		sessionExpiring,
 		clearSessionExpiring: () => setSessionExpiring(false),
+
+		sendSessionEnd,
 	};
 }
