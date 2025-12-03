@@ -9,7 +9,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { LanguageSelectionDialog } from "@/components/dialog/LanguageSelectionDialog";
 import Playground from "@/components/playground/Playground";
 import { useConfig } from "@/hooks/useConfig";
-import { useConnection } from "@/hooks/useConnection";
+import { useLivekitConnection } from "@/hooks/useLivekitConnection";
 
 const themeColors = [
 	"cyan",
@@ -23,7 +23,8 @@ const themeColors = [
 ];
 
 const LiveKitPage = () => {
-	const { shouldConnect, wsUrl, token, connect, disconnect } = useConnection();
+	const { shouldConnect, wsUrl, token, connect, disconnect } =
+		useLivekitConnection();
 	const [showLanguageDialog, setShowLanguageDialog] = useState(false);
 
 	const { config } = useConfig();

@@ -10,8 +10,11 @@ import ChatScreen from "@/components/post-login/chat-screen";
 import ConnectionTab from "@/components/post-login/tabs/connection";
 import CustomPayloadTab from "@/components/post-login/tabs/custom-payload";
 import WebsocketLogs from "@/components/post-login/websocket-logs";
-import { ConnectionProvider, useConnection } from "@/hooks/useConnection";
 import { useEnvConfig } from "@/hooks/useEnvConfig";
+import {
+	LivekitConnectionProvider,
+	useLivekitConnection,
+} from "@/hooks/useLivekitConnection";
 import {
 	useWebSocketContext,
 	WebSocketProvider,
@@ -32,6 +35,7 @@ function PostLoginContent() {
 	const [activeTab, setActiveTab] = useState<ConfigTab>("connection");
 
 	const { isConnected, connect, disconnect } = useWebSocketContext();
+	const { disconnect: livekitDisconnect } = useLivekitConnection();
 
 	const handleConnect = () => {
 		const isDevelopment = process.env.NODE_ENV === "development";
@@ -52,6 +56,7 @@ function PostLoginContent() {
 
 	const handleDisconnect = () => {
 		disconnect();
+		livekitDisconnect();
 	};
 
 	return (
@@ -146,7 +151,7 @@ function PostLoginContent() {
 }
 
 function PostLoginWithLiveKit() {
-	const { shouldConnect, wsUrl, token: lkToken } = useConnection();
+	const { shouldConnect, wsUrl, token: lkToken } = useLivekitConnection();
 
 	return (
 		<LiveKitRoom
@@ -168,11 +173,11 @@ function PostLoginWithLiveKit() {
 
 export default function PostLoginPage() {
 	return (
-		<ConnectionProvider>
+		<LivekitConnectionProvider>
 			<WebSocketProvider>
 				<PostLoginWithLiveKit />
 			</WebSocketProvider>
-		</ConnectionProvider>
+		</LivekitConnectionProvider>
 	);
 }
 

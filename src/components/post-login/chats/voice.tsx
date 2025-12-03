@@ -12,10 +12,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidMicrophoneOff } from "react-icons/bi";
 import { HiMicrophone } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
+import { VscDebugDisconnect } from "react-icons/vsc";
 import { LoadingSVG } from "@/components/button/LoadingSVG";
 import EscalatedDialog from "@/components/dialog/EscalatedDialog";
 import SessionExpiringDialog from "@/components/dialog/SessionExpiringDialog";
-import { useConnection } from "@/hooks/useConnection";
+import { useLivekitConnection } from "@/hooks/useLivekitConnection";
 import { useLivekitData } from "@/hooks/useLivekitData";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
@@ -32,7 +33,7 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 
 	const room = useRoomContext();
 
-	const { disconnect } = useConnection();
+	const { disconnect } = useLivekitConnection();
 
 	const [isMuted, setIsMuted] = useState(false);
 	const [callDuration, setCallDuration] = useState(0);
@@ -48,6 +49,7 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 		clearEscalation,
 		sessionExpiring,
 		clearSessionExpiring,
+		sendSessionEnd,
 	} = useLivekitData(room);
 
 	// Update current transcript from agent
@@ -134,10 +136,18 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 			disconnect();
 			setIsMuted(false);
 
+			// Send session end to LiveKit and clear token
+			sendSessionEnd();
+
 			onFinishCall();
 		},
-		[disconnect, onFinishCall, roomName, sendMessage],
+		[disconnect, onFinishCall, roomName, sendMessage, sendSessionEnd],
 	);
+
+	const handleDisconnect = useCallback(() => {
+		disconnect();
+		onFinishCall();
+	}, [disconnect, onFinishCall]);
 
 	const audioTileContent = useMemo(() => {
 		console.log("Voice Debug:", {
@@ -246,6 +256,15 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 						>
 							<IoClose className="w-8 h-8" />
 						</button>
+
+						<button
+							type="button"
+							onClick={() => handleDisconnect()}
+							className="flex items-center justify-center w-16 h-16 text-white transition-all duration-300 border-2 rounded-full bg-gray-700/80 hover:bg-gray-600 backdrop-blur-lg border-white/20"
+							title="Disconnect"
+						>
+							<VscDebugDisconnect className="w-8 h-8" />
+						</button>
 					</div>
 				</div>
 			</div>
@@ -260,7 +279,7 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 			/>
 
 			<SessionExpiringDialog
-				isOpen={true}
+				isOpen={sessionExpiring}
 				onClose={() => {
 					clearSessionExpiring();
 					handleEndCall(15 * 60); // End call with fixed duration of 15 minutes

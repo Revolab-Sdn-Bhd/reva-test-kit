@@ -1,28 +1,28 @@
 import type { AppProps } from "next/app";
 import { Toaster } from "sonner";
 import { ConfigProvider } from "@/hooks/useConfig";
-import { ConnectionProvider } from "@/hooks/useConnection";
 import { EnvConfigProvider } from "@/hooks/useEnvConfig";
+import { LivekitConnectionProvider } from "@/hooks/useLivekitConnection";
 
 import "@livekit/components-styles/components/participant";
 import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }: AppProps) {
-	const getLayout =
-		(
-			Component as typeof Component & {
-				getLayout?: (page: React.ReactElement) => React.ReactNode;
-			}
-		).getLayout ?? ((page) => page);
+  const getLayout =
+    (
+      Component as typeof Component & {
+        getLayout?: (page: React.ReactElement) => React.ReactNode;
+      }
+    ).getLayout ?? ((page) => page);
 
-	return (
-		<EnvConfigProvider>
-			<ConfigProvider>
-				<ConnectionProvider>
-					<Toaster position="top-right" />
-					{getLayout(<Component {...pageProps} />)}
-				</ConnectionProvider>
-			</ConfigProvider>
-		</EnvConfigProvider>
-	);
+  return (
+    <EnvConfigProvider>
+      <ConfigProvider>
+        <LivekitConnectionProvider>
+          <Toaster position="top-right" />
+          {getLayout(<Component {...pageProps} />)}
+        </LivekitConnectionProvider>
+      </ConfigProvider>
+    </EnvConfigProvider>
+  );
 }

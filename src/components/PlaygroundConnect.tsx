@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useConfig } from "@/hooks/useConfig";
-import type { ConnectionMode } from "@/hooks/useConnection";
+import type { ConnectionMode } from "@/hooks/useLivekitConnection";
 import { Button } from "./button/Button";
 
 type PlaygroundConnectProps = {

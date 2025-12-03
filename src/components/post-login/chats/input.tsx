@@ -3,7 +3,7 @@ import { FaMicrophone } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { LuAudioLines } from "react-icons/lu";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
-import { useConnection } from "@/hooks/useConnection";
+import { useLivekitConnection } from "@/hooks/useLivekitConnection";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
 const ChatInputSection = ({
@@ -26,7 +26,7 @@ const ChatInputSection = ({
 
 	const [inputMessage, setInputMessage] = useState("");
 
-	const { connect } = useConnection();
+	const { connect } = useLivekitConnection();
 
 	const handleSendMessage = () => {
 		if (!inputMessage.trim()) return;
