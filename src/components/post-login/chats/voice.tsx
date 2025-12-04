@@ -144,8 +144,9 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
   );
 
   const handleDisconnect = useCallback(() => {
+    room.disconnect();
     onFinishCall();
-  }, [onFinishCall]);
+  }, [onFinishCall, room]);
 
   const audioTileContent = useMemo(() => {
     console.log("Voice Debug:", {
