@@ -8,21 +8,21 @@ import "@livekit/components-styles/components/participant";
 import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const getLayout =
-    (
-      Component as typeof Component & {
-        getLayout?: (page: React.ReactElement) => React.ReactNode;
-      }
-    ).getLayout ?? ((page) => page);
+	const getLayout =
+		(
+			Component as typeof Component & {
+				getLayout?: (page: React.ReactElement) => React.ReactNode;
+			}
+		).getLayout ?? ((page) => page);
 
-  return (
-    <EnvConfigProvider>
-      <ConfigProvider>
-        <LivekitConnectionProvider>
-          <Toaster position="top-right" />
-          {getLayout(<Component {...pageProps} />)}
-        </LivekitConnectionProvider>
-      </ConfigProvider>
-    </EnvConfigProvider>
-  );
+	return (
+		<EnvConfigProvider>
+			<ConfigProvider>
+				<LivekitConnectionProvider>
+					<Toaster position="top-right" />
+					{getLayout(<Component {...pageProps} />)}
+				</LivekitConnectionProvider>
+			</ConfigProvider>
+		</EnvConfigProvider>
+	);
 }
