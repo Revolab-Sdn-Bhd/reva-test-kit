@@ -7,6 +7,9 @@ FROM node:22-alpine AS base
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Enable corepack (manages pnpm)
+RUN corepack enable
+
 # ------------------------
 # Dependencies (build stage)
 # ------------------------
@@ -15,16 +18,13 @@ FROM base AS deps
 # Install build tools + SQLite headers for better-sqlite3
 RUN apk add --no-cache libc6-compat python3 make g++ sqlite-dev
 
-# Copy package files
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+WORKDIR /app
 
-# Install dependencies
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Copy package files
+COPY package.json pnpm-lock.yaml .npmrc* ./
+
+# Install dependencies with pnpm
+RUN pnpm install --frozen-lockfile
 
 # ------------------------
 # Builder stage (build Next.js app)
@@ -38,13 +38,8 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
-# Build Next.js
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Build Next.js with pnpm
+RUN pnpm run build
 
 # ------------------------
 # Production Runner
