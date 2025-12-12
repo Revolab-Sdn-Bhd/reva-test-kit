@@ -35,6 +35,16 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 }) => {
 	const { envConfig } = useEnvConfig();
 
+	const renderWsUrl = () => {
+		const isDevelopment = process.env.NODE_ENV === "development";
+		const wsProtocol = isDevelopment ? "ws://" : "wss://";
+		const wsHost = isDevelopment
+			? "localhost:3000"
+			: envConfig?.CHAT_SERVICE_URL;
+		const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
+		return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
+	};
+
 	return (
 		<div className="space-y-4 text-sm">
 			<div className="grid grid-cols-2">
@@ -174,15 +184,7 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 			</div>
 
 			<div className="font-mono text-sm text-gray-400 break-all">
-				{(() => {
-					const isDevelopment = process.env.NODE_ENV === "development";
-					const wsProtocol = isDevelopment ? "ws://" : "wss://";
-					const wsHost = isDevelopment
-						? "localhost:3000"
-						: envConfig?.CHAT_SERVICE_URL;
-					const sessionIdParam = sessionId ? `&sessionId=${sessionId}` : "";
-					return `${wsProtocol}${wsHost}${wsPath}?token=${token}&language=${language}&platform=${platform}${sessionIdParam}`;
-				})()}
+				{renderWsUrl()}
 			</div>
 		</div>
 	);
