@@ -48,11 +48,6 @@ export const LivekitConnectionProvider = ({
 				connectionDetails.tokenExpiresAt &&
 				connectionDetails.tokenExpiresAt > Date.now()
 			) {
-        console.log("LiveKit token (old)", connectionDetails.token);
-        console.log(
-          "LiveKit token (old) expires at:",
-          new Date(connectionDetails.tokenExpiresAt).toISOString()
-        );
 				setConnectionDetails((prev) => ({ ...prev, shouldConnect: true }));
 				return;
 			}
@@ -100,9 +95,6 @@ export const LivekitConnectionProvider = ({
 				// Set token expiry to 15 minutes from now
 				const tokenExpiresAt = Date.now() + 15 * 60 * 1000;
 
-        console.log("LiveKit token", data.decrypted);
-        console.log("LiveKit token expires at:", new Date(tokenExpiresAt).toISOString());
-        
 				setConnectionDetails({
 					wsUrl: url,
 					token: data.decrypted,

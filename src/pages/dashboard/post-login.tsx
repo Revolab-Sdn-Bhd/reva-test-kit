@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import ChatScreen from "@/components/post-login/chat-screen";
+import AccountSection from "@/components/post-login/tabs/account";
 import ConnectionTab from "@/components/post-login/tabs/connection";
 import CustomPayloadTab from "@/components/post-login/tabs/custom-payload";
 import WebsocketLogs from "@/components/post-login/websocket-logs";
@@ -20,7 +21,13 @@ import {
 	WebSocketProvider,
 } from "@/lib/WebSocketProvider";
 
-type ConfigTab = "connection" | "custom-json";
+type ConfigTab = "connection" | "custom-json" | "user-account";
+
+const Tabs = [
+	{ label: "Connection", value: "connection" },
+	{ label: "User Account", value: "user-account" },
+	{ label: "Custom JSON", value: "custom-json" },
+];
 
 function PostLoginContent() {
 	const [platform, setPlatform] = useState<"web" | "mobile">("web");
@@ -92,30 +99,21 @@ function PostLoginContent() {
 
 					{!isConfigCollapsed && (
 						<div className="px-6 pb-6 space-y-4">
-							{/* Tabs */}
 							<div className="flex border-b border-gray-700">
-								<button
-									type="button"
-									onClick={() => setActiveTab("connection")}
-									className={`px-4 py-2 text-sm font-medium transition-colors ${
-										activeTab === "connection"
-											? "text-blue-400 border-b-2 border-blue-400"
-											: "text-gray-400 hover:text-gray-300"
-									}`}
-								>
-									Connection Config
-								</button>
-								<button
-									type="button"
-									onClick={() => setActiveTab("custom-json")}
-									className={`px-4 py-2 text-sm font-medium transition-colors ${
-										activeTab === "custom-json"
-											? "text-blue-400 border-b-2 border-blue-400"
-											: "text-gray-400 hover:text-gray-300"
-									}`}
-								>
-									Custom JSON
-								</button>
+								{Tabs.map(({ label, value }) => (
+									<button
+										key={label}
+										type="button"
+										onClick={() => setActiveTab(value as ConfigTab)}
+										className={`px-4 py-2 text-sm font-medium transition-colors ${
+											activeTab === value
+												? "text-blue-400 border-b-2 border-blue-400"
+												: "text-gray-400 hover:text-gray-300"
+										}`}
+									>
+										{label}
+									</button>
+								))}
 							</div>
 							{activeTab === "connection" && (
 								<ConnectionTab
@@ -133,10 +131,12 @@ function PostLoginContent() {
 									handleConnect={handleConnect}
 									handleDisconnect={handleDisconnect}
 								/>
-							)}{" "}
-							{/* Custom JSON Tab */}
+							)}
 							{activeTab === "custom-json" && (
 								<CustomPayloadTab isConnected={isConnected} />
+							)}
+							{activeTab === "user-account" && (
+								<AccountSection isConnected={isConnected} />
 							)}
 						</div>
 					)}
