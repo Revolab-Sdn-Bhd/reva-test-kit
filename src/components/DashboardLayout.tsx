@@ -1,14 +1,20 @@
+import {
+	ActionIcon,
+	AppShell,
+	Burger,
+	Group,
+	NavLink,
+	Stack,
+	Text,
+	Tooltip,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import type React from "react";
 import { useEffect, useState } from "react";
-import {
-	MdArrowBack,
-	MdLogin,
-	MdLogout,
-	MdMenu,
-	MdVideocam,
-} from "react-icons/md";
+import { LuMessageCircleMore } from "react-icons/lu";
+import { MdLogout, MdVideocam } from "react-icons/md";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 
 interface NavItem {
@@ -26,7 +32,7 @@ const navItems: NavItem[] = [
 	{
 		label: "Post Login",
 		href: "/dashboard/post-login",
-		icon: MdLogin,
+		icon: LuMessageCircleMore,
 	},
 ];
 
@@ -34,7 +40,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 	const router = useRouter();
 	const auth = useAuthStore((state) => state.auth);
 	const clearAuth = useAuthStore((state) => state.clearAuth);
-	const [isCollapsed, setIsCollapsed] = useState(false);
+	const [collapsed, { toggle }] = useDisclosure(true);
 	const [isHydrated, setIsHydrated] = useState(false);
 
 	useEffect(() => {
@@ -64,77 +70,89 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 	}
 
 	return (
-		<div className="flex h-screen bg-gray-900">
-			{/* Sidebar */}
-			<aside
-				className={`border-r transition-all duration-300 ${
-					isCollapsed ? "w-16" : "w-64"
-				} bg-gray-800 border-gray-700`}
-			>
-				<div className="flex flex-col h-full">
-					{/* Logo/Brand & Toggle */}
-					<div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
-						{!isCollapsed && (
-							<h1 className="text-xl font-bold text-gray-100 text-nowrap">
+		<AppShell
+			navbar={{
+				width: collapsed ? 70 : 250,
+				breakpoint: 0,
+			}}
+			padding={0}
+		>
+			<AppShell.Navbar p="md">
+				<AppShell.Section>
+					<Group justify={collapsed ? "center" : "space-between"} mb="md">
+						{!collapsed && (
+							<Text fw={700} size="lg">
 								Reva Test Kit
-							</h1>
+							</Text>
 						)}
-						<button
-							onClick={() => setIsCollapsed(!isCollapsed)}
-							className="p-2 text-gray-300 transition-colors rounded-lg hover:bg-gray-700"
-							aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-						>
-							{isCollapsed ? (
-								<MdMenu className="w-5 h-5" />
-							) : (
-								<MdArrowBack className="w-5 h-5" />
-							)}
-						</button>
-					</div>
+						<ActionIcon onClick={toggle} variant="subtle" size="lg">
+							<Burger opened={!collapsed} size="sm" />
+						</ActionIcon>
+					</Group>
+				</AppShell.Section>
 
-					{/* Navigation */}
-					<nav className="flex-1 p-4 space-y-2">
+				<AppShell.Section grow mt="md">
+					<Stack gap="xs">
 						{navItems.map((item) => {
 							const Icon = item.icon;
 							const isActive = router.pathname === item.href;
-
-							return (
-								<Link
+							const navLink = (
+								<NavLink
 									key={item.href}
 									href={item.href}
-									className={`flex items-center gap-3 rounded-lg transition-colors ${
-										isActive
-											? "bg-blue-900 text-blue-400 font-medium"
-											: "text-gray-200 hover:bg-gray-700"
-									} ${isCollapsed ? "px-2 py-3" : "px-4 py-3"}`}
-									title={isCollapsed ? item.label : undefined}
+									component={Link}
+									label={!collapsed ? item.label : undefined}
+									leftSection={<Icon className="size-5" />}
+									active={isActive}
+									variant="filled"
+									className="rounded-md"
+								/>
+							);
+
+							return collapsed ? (
+								<Tooltip
+									key={item.href}
+									label={item.label}
+									position="right"
+									withArrow
 								>
-									<Icon className="flex-shrink-0 w-5 h-5" />
-									{!isCollapsed && <span>{item.label}</span>}
-								</Link>
+									{navLink}
+								</Tooltip>
+							) : (
+								navLink
 							);
 						})}
-					</nav>
+					</Stack>
+				</AppShell.Section>
 
-					{/* Logout Button */}
-					<div className="p-4 border-t border-gray-700">
-						<button
+				<AppShell.Section>
+					<Tooltip
+						label="Logout"
+						position="right"
+						withArrow
+						disabled={!collapsed}
+					>
+						<NavLink
+							label={!collapsed ? "Logout" : undefined}
+							leftSection={<MdLogout className="w-5 h-5" />}
 							onClick={handleLogout}
-							className={`flex items-center gap-3 w-full rounded-lg transition-colors text-gray-200 hover:bg-gray-700 ${
-								isCollapsed ? "px-2 py-3" : "px-4 py-3"
-							}`}
-							title={isCollapsed ? "Logout" : undefined}
-						>
-							<MdLogout className="flex-shrink-0 w-5 h-5" />
-							{!isCollapsed && <span>Logout</span>}
-						</button>
-					</div>
-				</div>
-			</aside>
+							variant="filled"
+							className="rounded-md"
+						/>
+					</Tooltip>
+				</AppShell.Section>
+			</AppShell.Navbar>
 
-			{/* Main content */}
-			<main className="flex-1 overflow-auto">{children}</main>
-		</div>
+			<AppShell.Main
+				style={{
+					height: "100vh",
+					overflow: "auto",
+					backgroundColor: "var(--mantine-color-dark-7)",
+				}}
+			>
+				{children}
+			</AppShell.Main>
+		</AppShell>
 	);
 };
 

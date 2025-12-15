@@ -1,19 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
-import { AB_API_ENDPOINT } from "@/lib/constant";
-import {
-	createSavingSpace,
-	deleteUser,
-	getAllUsers,
-	getUserByAccount,
-	upsertUser,
-} from "../../../../../lib/cache";
+import { createSavingSpace } from "../../../../../lib/cache";
 import type {
 	Amount,
 	SavingSpace,
 	SavingsStatusLifecycle,
-	UserAccount,
-	UserSavingSpacesFormData,
 } from "../../../../../types/savingSpaces";
 
 // Helper function to generate UUID
@@ -59,102 +50,73 @@ const createLifecycleEntry = (
 	description,
 });
 
-// POST handler - Create new saving space
+// POST handler - Create new saving spaces for a sub-account
 const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
-		const formData: UserSavingSpacesFormData = req.body;
+		const { subAccountId } = req.query;
+		const { savingSpaces } = req.body;
 
-		// Validate required fields
-		if (!formData.userData.name || !formData.userData.accountNumber) {
+		// Validate sub-account ID
+		if (!subAccountId || typeof subAccountId !== "string") {
 			return res
 				.status(400)
-				.json({ error: "Missing required user data fields" });
+				.json({ error: "subAccountId query parameter is required" });
 		}
 
-		if (!formData.savingSpaces || formData.savingSpaces.length === 0) {
+		if (
+			!savingSpaces ||
+			!Array.isArray(savingSpaces) ||
+			savingSpaces.length === 0
+		) {
 			return res
 				.status(400)
 				.json({ error: "At least one saving space is required" });
 		}
 
-		// Check if user exists
-		const user = getUserByAccount(
-			formData.userData.name,
-			formData.userData.accountNumber,
-		);
-
-		let userId: string;
-
-		if (user) {
-			// Update existing user
-			userId = user.id;
-			upsertUser({
-				id: userId,
-				name: formData.userData.name,
-				accountNumber: formData.userData.accountNumber,
-				accountBalance: formData.userData.accountBalance,
-				currency: formData.userData.currency,
-			});
-		} else {
-			// Create new user
-			userId = generateUUID();
-			upsertUser({
-				id: userId,
-				name: formData.userData.name,
-				accountNumber: formData.userData.accountNumber,
-				accountBalance: formData.userData.accountBalance,
-				currency: formData.userData.currency,
-			});
-		}
-
-		// Create saving spaces
+		// Create saving spaces for the sub-account
 		const newSavingSpaces: SavingSpace[] = [];
-		for (const item of formData.savingSpaces) {
+		for (const item of savingSpaces) {
 			// Generate IDs
 			const savingSpaceId = generateUUID();
-			const apiInteractionId = generateUUID();
-			const categoryPictureId = generateUUID();
+			const apiInteractionId = item.apiInteractionId || generateUUID();
+			const categoryPictureId = item.categoryPictureId || generateUUID();
 
 			// Calculate metrics
-			const metrics = calculateMetrics(
-				item.savedAmount || 0,
-				item.targetAmount,
-			);
+			const savedAmount = item.savedAmount?.amount || 0;
+			const targetAmount = item.targetAmount.amount;
+			const metrics = calculateMetrics(savedAmount, targetAmount);
 
 			// Create saving space object
 			const newSavingSpace: SavingSpace = {
 				savingSpaceId,
 				apiInteractionId,
 				categoryPictureId,
-				name: formData.userData.name,
+				name: "", // Will be filled from sub-account/user data when retrieved
 				description: item.description || "",
-				accountNumber: formData.userData.accountNumber,
+				accountNumber: "", // Will be filled from sub-account data when retrieved
 				categoryName: item.categoryName,
 				frequency: item.frequency || "MONTHLY",
-				status: "ACTIVE",
-				categoryPictureUrl: "",
+				status: item.status || "ACTIVE",
+				categoryPictureUrl: item.categoryPictureUrl || "",
 				targetDate: item.targetDate,
-				startDate: new Date().toISOString(),
-				partyId: "PARTY123",
-				targetAmount: createAmount(
-					formData.userData.currency,
-					item.targetAmount,
-				),
-				savedAmount: createAmount(
-					formData.userData.currency,
-					item.savedAmount || 0,
-				),
+				startDate: item.startDate || new Date().toISOString().split("T")[0],
+				partyId: item.partyId || "PARTY123",
+				targetAmount: item.targetAmount,
+				savedAmount:
+					item.savedAmount || createAmount(item.targetAmount.currency, 0),
 				remainingAmount: createAmount(
-					formData.userData.currency,
+					item.targetAmount.currency,
 					metrics.remainingAmount,
 				),
 				savedPercentage: metrics.savedPercentage,
 				remainingPercentage: metrics.remainingPercentage,
-				savingsStatusLifeCycles: [createLifecycleEntry("ACTIVE", "CREATED")],
+				savingsStatusLifeCycles: [
+					createLifecycleEntry(item.status || "ACTIVE", "CREATED"),
+				],
 			};
 
 			// Save to database
-			createSavingSpace(userId, newSavingSpace);
+			createSavingSpace(subAccountId, newSavingSpace);
 			newSavingSpaces.push(newSavingSpace);
 		}
 
@@ -169,30 +131,35 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 };
 
-// GET handler - Retrieve all user accounts
+// GET handler - Retrieve all sub-accounts with saving spaces
 const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
+		const { getAllSubAccounts, getUser } = require("../../../../../lib/cache");
+		const user = getUser();
+
 		// Get query parameters
 		const page = parseInt((req.query.page as string) || "1", 10);
 		const size = parseInt((req.query.size as string) || "10", 10);
 
-		// Get all accounts from database
-		const allAccounts: UserAccount[] = getAllUsers();
+		// Get all sub-accounts from database
+		const allSubAccounts = getAllSubAccounts();
 
 		// Fill in name and accountNumber for each saving space
-		allAccounts.forEach((account) => {
-			account.savingSpaces.forEach((space) => {
-				space.name = account.name;
-				space.accountNumber = account.accountNumber;
-			});
+		allSubAccounts.forEach((subAccount: any) => {
+			if (subAccount.savingSpaces) {
+				subAccount.savingSpaces.forEach((space: any) => {
+					space.name = user?.name || "";
+					space.accountNumber = subAccount.accountNumber;
+				});
+			}
 		});
 
 		// Calculate pagination
-		const totalRecords = allAccounts.length;
+		const totalRecords = allSubAccounts.length;
 		const totalPages = Math.ceil(totalRecords / size);
 		const startIndex = (page - 1) * size;
 		const endIndex = startIndex + size;
-		const paginatedAccounts = allAccounts.slice(startIndex, endIndex);
+		const paginatedAccounts = allSubAccounts.slice(startIndex, endIndex);
 		const hasNext = page < totalPages;
 
 		// Build response with UserAccount data
@@ -214,14 +181,14 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 			links: [
 				{
 					rel: "self",
-					href: `${AB_API_ENDPOINT}/saving-spaces?page=${page}&size=${size}`,
+					href: `/api/neobanking/customer-experience/v1/saving-spaces?page=${page}&size=${size}`,
 					method: "GET",
 				},
 				...(hasNext
 					? [
 							{
 								rel: "next",
-								href: `${AB_API_ENDPOINT}/saving-spaces?page=${page + 1}&size=${size}`,
+								href: `/api/neobanking/customer-experience/v1/saving-spaces?page=${page + 1}&size=${size}`,
 								method: "GET",
 							},
 						]
@@ -230,7 +197,7 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 					? [
 							{
 								rel: "prev",
-								href: `${AB_API_ENDPOINT}/saving-spaces?page=${page - 1}&size=${size}`,
+								href: `/api/neobanking/customer-experience/v1/saving-spaces?page=${page - 1}&size=${size}`,
 								method: "GET",
 							},
 						]
@@ -245,27 +212,30 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 };
 
-// DELETE handler - Delete user account and all saving spaces
+// DELETE handler - Delete sub-account and all saving spaces
 const handleDelete = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
-		const { userId } = req.query;
+		const { subAccountId } = req.query;
+		const { deleteSubAccount } = require("../../../../../lib/cache");
 
-		if (!userId || typeof userId !== "string") {
-			return res.status(400).json({ error: "User ID is required" });
+		if (!subAccountId || typeof subAccountId !== "string") {
+			return res
+				.status(400)
+				.json({ error: "subAccountId query parameter is required" });
 		}
 
-		const deleted = deleteUser(userId);
+		const deleted = deleteSubAccount(subAccountId);
 
 		if (!deleted) {
-			return res.status(404).json({ error: "User not found" });
+			return res.status(404).json({ error: "Sub-account not found" });
 		}
 
 		return res.status(200).json({
 			success: true,
-			message: "User account and all saving spaces deleted successfully",
+			message: "Sub-account and all saving spaces deleted successfully",
 		});
 	} catch (error) {
-		console.error("Error deleting user account:", error);
+		console.error("Error deleting sub-account:", error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };

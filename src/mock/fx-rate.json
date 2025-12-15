@@ -1,0 +1,9 @@
+{
+	"base": "JOD",
+	"rates": {
+		"USD": 1.40944,
+		"EUR": 1.2973,
+		"GBP": 1.1158
+	},
+	"commissionRate": 0.003
+}

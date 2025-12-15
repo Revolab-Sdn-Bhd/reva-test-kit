@@ -60,7 +60,7 @@ export default function Home() {
 		if (auth) {
 			router.replace("/dashboard/livekit");
 		}
-	}, []);
+	}, [auth]);
 
 	return (
 		<div className="flex items-center justify-center min-h-screen px-4 bg-gray-50">

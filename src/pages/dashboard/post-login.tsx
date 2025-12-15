@@ -67,7 +67,7 @@ function PostLoginContent() {
 	};
 
 	return (
-		<div className="flex h-full gap-4 p-4 bg-gray-900">
+		<div className="flex h-full gap-4 p-3 bg-gray-900">
 			{/* Left Panel - Configuration & Logs */}
 			<div className="flex flex-col w-1/2 gap-4">
 				{/* Configuration */}

@@ -28,7 +28,8 @@
 				"useButtonType": "off",
 				"noSvgWithoutTitle": "off",
 				"useKeyWithClickEvents": "off",
-				"noStaticElementInteractions": "off"
+				"noStaticElementInteractions": "off",
+				"noLabelWithoutControl": "off"
 			},
 			"performance": {
 				"noImgElement": "off"
