@@ -1,1 +1,1 @@
-export const AB_API_ENDPOINT = "/api/neobanking";
+export const AB_API_ENDPOINT = "/api/neobanking/revolab";

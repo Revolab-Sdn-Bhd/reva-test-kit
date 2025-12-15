@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
-import { createSavingSpace } from "../../../../../lib/cache";
+import { createSavingSpace } from "../../../../../../lib/cache";
 import type {
 	Amount,
 	SavingSpace,
 	SavingsStatusLifecycle,
-} from "../../../../../types/savingSpaces";
+} from "../../../../../../types/savingSpaces";
 
 // Helper function to generate UUID
 const generateUUID = (): string => {

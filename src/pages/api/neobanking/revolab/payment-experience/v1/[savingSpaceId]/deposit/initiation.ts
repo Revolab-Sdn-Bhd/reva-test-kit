@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
 	getSavingSpaceById,
 	updateSavingSpaceAmounts,
-} from "../../../../../../../lib/cache";
+} from "../../../../../../../../lib/cache";
 
 interface InstructedAmount {
 	currency: string;
