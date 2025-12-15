@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
 	getSavingSpaceById,
 	updateSavingSpaceAmounts,
-	updateUserAccountBalance,
+	updateSubAccountBalance,
 } from "../../../../../../../../lib/cache";
 
 interface InstructedAmount {
@@ -135,9 +135,9 @@ export default async function handler(
 			return res.status(500).json({ error: "Failed to update saving space" });
 		}
 
-		// Update user account balance (add withdrawal amount back to account)
-		const balanceUpdated = updateUserAccountBalance(
-			savingSpace.userId,
+		// Update sub-account balance (add withdrawal amount back to account)
+		const balanceUpdated = updateSubAccountBalance(
+			savingSpace.subAccountId,
 			instructedAmount.amount,
 			"deposit",
 		);

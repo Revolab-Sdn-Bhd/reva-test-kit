@@ -99,16 +99,19 @@ const SavingSpaceDialog: React.FC<SavingSpaceDialogProps> = ({
 			// Remove the id field from savingSpaces before sending
 			const cleanedSpaces = savingSpaces.map(({ id, ...space }) => space);
 
-			const response = await fetch(`${AB_API_ENDPOINT}/saving-spaces`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/customer-experience/v1/saving-spaces`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						userData,
+						savingSpaces: cleanedSpaces,
+					}),
 				},
-				body: JSON.stringify({
-					userData,
-					savingSpaces: cleanedSpaces,
-				}),
-			});
+			);
 
 			if (!response.ok) {
 				const error = await response.json();
