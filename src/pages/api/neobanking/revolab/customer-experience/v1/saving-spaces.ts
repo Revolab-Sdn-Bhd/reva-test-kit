@@ -1,11 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
-import { createSavingSpace } from "../../../../../../lib/cache";
+import {
+	createSavingSpace,
+	deleteSubAccount,
+	getAllSubAccounts,
+	getUser,
+} from "@/lib/cache";
 import type {
 	Amount,
 	SavingSpace,
 	SavingsStatusLifecycle,
-} from "../../../../../../types/savingSpaces";
+} from "@/types/savingSpaces";
 
 // Helper function to generate UUID
 const generateUUID = (): string => {
@@ -134,7 +139,6 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
 // GET handler - Retrieve all saving spaces
 const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
-		const { getAllSubAccounts, getUser } = require("../../../../../lib/cache");
 		const user = getUser();
 
 		// Get query parameters
@@ -202,7 +206,6 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 const handleDelete = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
 		const { subAccountId } = req.query;
-		const { deleteSubAccount } = require("../../../../../lib/cache");
 
 		if (!subAccountId || typeof subAccountId !== "string") {
 			return res

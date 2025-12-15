@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAllSubAccounts, getUser } from "../../../../../../../lib/cache";
+import { getAllSubAccounts, getUser } from "@/lib/cache";
 import type {
 	AccountDashboardResponse,
 	PrimaryAccount,
 	SubAccountResponse,
-} from "../../../../../../../types/accounts";
+} from "@/types/accounts";
 
 export default async function handler(
 	req: NextApiRequest,

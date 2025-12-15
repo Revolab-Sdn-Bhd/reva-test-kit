@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getAllSubAccounts, getUser } from "@/lib/cache";
 
 // GET handler - Retrieve all sub-accounts with saving spaces
 const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
-		const { getAllSubAccounts, getUser } = require("../../../../../lib/cache");
 		const user = getUser();
 
 		// Get query parameters
