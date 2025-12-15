@@ -100,7 +100,7 @@ const SavingSpaceDialog: React.FC<SavingSpaceDialogProps> = ({
 			const cleanedSpaces = savingSpaces.map(({ id, ...space }) => space);
 
 			const response = await fetch(
-				`${AB_API_ENDPOINT}/customer-experience/v1/saving-spaces`,
+				`${AB_API_ENDPOINT}/customer-experience/v1/accounts`,
 				{
 					method: "POST",
 					headers: {

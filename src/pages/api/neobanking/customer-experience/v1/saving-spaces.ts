@@ -131,38 +131,42 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 };
 
-// GET handler - Retrieve all sub-accounts with saving spaces
+// GET handler - Retrieve all saving spaces
 const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
 		const { getAllSubAccounts, getUser } = require("../../../../../lib/cache");
 		const user = getUser();
 
 		// Get query parameters
-		const page = parseInt((req.query.page as string) || "1", 10);
+		const page = parseInt((req.query.page as string) || "0", 10);
 		const size = parseInt((req.query.size as string) || "10", 10);
 
-		// Get all sub-accounts from database
+		// Get all sub-accounts and extract all saving spaces
 		const allSubAccounts = getAllSubAccounts();
+		const allSavingSpaces: any[] = [];
 
-		// Fill in name and accountNumber for each saving space
+		// Flatten all saving spaces from all sub-accounts
 		allSubAccounts.forEach((subAccount: any) => {
-			if (subAccount.savingSpaces) {
+			if (subAccount.savingSpaces && subAccount.savingSpaces.length > 0) {
 				subAccount.savingSpaces.forEach((space: any) => {
-					space.name = user?.name || "";
-					space.accountNumber = subAccount.accountNumber;
+					allSavingSpaces.push({
+						...space,
+						name: user?.name || "",
+						accountNumber: subAccount.accountNumber,
+					});
 				});
 			}
 		});
 
 		// Calculate pagination
-		const totalRecords = allSubAccounts.length;
+		const totalRecords = allSavingSpaces.length;
 		const totalPages = Math.ceil(totalRecords / size);
-		const startIndex = (page - 1) * size;
+		const startIndex = page * size;
 		const endIndex = startIndex + size;
-		const paginatedAccounts = allSubAccounts.slice(startIndex, endIndex);
-		const hasNext = page < totalPages;
+		const paginatedSpaces = allSavingSpaces.slice(startIndex, endIndex);
+		const hasNext = page < totalPages - 1;
 
-		// Build response with UserAccount data
+		// Build response
 		const response = {
 			metadata: {
 				queryParameters: {
@@ -176,32 +180,14 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 				},
 			},
 			data: {
-				results: paginatedAccounts,
+				results: paginatedSpaces,
 			},
 			links: [
 				{
 					rel: "self",
-					href: `/api/neobanking/customer-experience/v1/saving-spaces?page=${page}&size=${size}`,
+					href: `/neobanking/customer-experience/v1/saving-spaces?page=${page}&size=${size}`,
 					method: "GET",
 				},
-				...(hasNext
-					? [
-							{
-								rel: "next",
-								href: `/api/neobanking/customer-experience/v1/saving-spaces?page=${page + 1}&size=${size}`,
-								method: "GET",
-							},
-						]
-					: []),
-				...(page > 1
-					? [
-							{
-								rel: "prev",
-								href: `/api/neobanking/customer-experience/v1/saving-spaces?page=${page - 1}&size=${size}`,
-								method: "GET",
-							},
-						]
-					: []),
 			],
 		};
 
