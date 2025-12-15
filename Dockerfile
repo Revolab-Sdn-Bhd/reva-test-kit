@@ -23,10 +23,8 @@ RUN apt-get update && apt-get install -y \
   libsqlite3-dev \
   && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency manifests
 COPY package.json pnpm-lock.yaml .npmrc* ./
 
-# Install ALL deps (do NOT ignore scripts)
 RUN pnpm install --frozen-lockfile
 
 # FORCE native build (guarantees .node exists)
@@ -47,14 +45,10 @@ COPY . .
 # Build Next.js (standalone)
 RUN pnpm run build
 
-# Remove dev deps AFTER build
-RUN pnpm prune --prod \
-  && pnpm store prune
-
 # ======================================================
 # runner — production image
 # ======================================================
-FROM node:22-bookworm AS runner
+FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
