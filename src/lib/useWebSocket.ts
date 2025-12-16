@@ -8,10 +8,10 @@ export type LogEntry = {
 };
 
 export type MessageAction = {
-	name: string;
 	event: string;
-	value: string;
-	description: string;
+	data?: string;
+	value?: string;
+	name?: string;
 };
 
 export type PostConfirmation = {
@@ -39,15 +39,6 @@ export type SavingSpaceItem = {
 	icon: string;
 	type: string;
 	savingSpaceId: string;
-	availableBalance: {
-		currency: string;
-		amount: number;
-	};
-	savingSpaceTargetBalance?: {
-		currency: string;
-		amount: number;
-	};
-	buttons: WidgetButton[];
 	payload: {
 		event: string;
 		data: string;
@@ -544,7 +535,7 @@ export const useWebSocket = () => {
 				const payloadStr = JSON.stringify(payload);
 				wsRef.current.send(payloadStr);
 				addLog("send", `Sent action: ${payloadStr}`);
-				addMessage("user", action.name);
+				addMessage("user", action?.name ?? "");
 				return true;
 			} catch (error) {
 				addLog("error", `Failed to send action: ${error}`);

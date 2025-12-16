@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { SavingSpaceWidget } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
@@ -14,21 +15,7 @@ const SavingSpaceWidgetComponent = ({
 		sendAction(
 			{
 				event: payload.event,
-				value: payload.data,
-				name: payload.data,
-				description: "",
-			},
-			messageId,
-		);
-	};
-
-	const handleButtonClick = (payload: { event: string; data: string }) => {
-		sendAction(
-			{
-				event: payload.event,
-				value: payload.data,
-				name: payload.data,
-				description: "",
+				data: payload.data,
 			},
 			messageId,
 		);
@@ -64,32 +51,7 @@ const SavingSpaceWidgetComponent = ({
 										<h4 className="font-medium text-white">{item.title}</h4>
 										<p className="text-xs text-gray-400">Type: {item.type}</p>
 									</div>
-									<div className="text-right">
-										<div className="font-semibold text-white">
-											{item.availableBalance.currency}{" "}
-											{item.availableBalance.amount.toFixed(2)}
-										</div>
-									</div>
 								</div>
-
-								{/* Buttons */}
-								{item.buttons && item.buttons.length > 0 && (
-									<div className="flex gap-2 mt-3">
-										{item.buttons.map((button, btnIndex) => (
-											<button
-												key={`${item.savingSpaceId}-btn-${btnIndex}`}
-												type="button"
-												onClick={(e) => {
-													e.stopPropagation();
-													handleButtonClick(button.payload);
-												}}
-												className="px-3 py-1 text-xs font-medium text-white transition-colors bg-blue-600 rounded hover:bg-blue-700"
-											>
-												{button.title}
-											</button>
-										))}
-									</div>
-								)}
 							</div>
 						</div>
 					</div>
