@@ -24,7 +24,7 @@ const ChatMessageSection = () => {
 	}, [messages]);
 
 	const renderWidget = (widget: MessageWidget, messageId: string) => {
-		if (widget.type === "savingspace") {
+		if (widget.type === "SAVINGSPACEACCOUNTLIST") {
 			return (
 				<SavingSpaceWidgetComponent
 					widget={widget as SavingSpaceWidget}

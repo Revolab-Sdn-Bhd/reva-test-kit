@@ -23,7 +23,7 @@ export type PostConfirmation = {
 };
 
 export type SavingSpaceWidget = {
-	type: string;
+	type: "SAVINGSPACEACCOUNTLIST";
 	text: string;
 	items: SavingSpaceItem[];
 };
