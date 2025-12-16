@@ -79,8 +79,8 @@ type WidgetButton = {
 	};
 };
 
-export interface ButtonWidget extends BaseWidget {
-	type: WidgetType.BUTTON;
+export interface ButtonWidget {
+	type: MessageWidgetType.BUTTON;
 	buttons: Array<
 		| {
 				type: "URL";
@@ -93,18 +93,13 @@ export interface ButtonWidget extends BaseWidget {
 				navigationId: string;
 		  }
 	>;
-}
-
-interface BaseWidget {
-	type: WidgetType;
 	response: string;
 }
 
-export enum WidgetType {
-	CAROUSEL = "CAROUSEL",
+export enum MessageWidgetType {
 	BUTTON = "BUTTON",
-	VIDEO = "VIDEO",
-	CALLENDED = "CALLENDED",
+	SAVINGSPACEACCOUNTLIST = "SAVINGSPACEACCOUNTLIST",
+	MULTICURRENCY = "MULTICURRENCYACCOUNTLIST",
 }
 
 export type MessageWidget =

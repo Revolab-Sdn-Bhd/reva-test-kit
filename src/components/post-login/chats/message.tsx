@@ -2,11 +2,12 @@ import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { useEffect, useRef } from "react";
 import { FaMicrophone } from "react-icons/fa";
-import type {
-	ButtonWidget,
-	MessageWidget,
-	MultiCurrencyWidget,
-	SavingSpaceWidget,
+import {
+	type ButtonWidget,
+	type MessageWidget,
+	MessageWidgetType,
+	type MultiCurrencyWidget,
+	type SavingSpaceWidget,
 } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 import PreConfirmationCard from "../pre-confirm-card";
@@ -24,7 +25,7 @@ const ChatMessageSection = () => {
 	}, [messages]);
 
 	const renderWidget = (widget: MessageWidget, messageId: string) => {
-		if (widget.type === "SAVINGSPACEACCOUNTLIST") {
+		if (widget.type === MessageWidgetType.SAVINGSPACEACCOUNTLIST) {
 			return (
 				<SavingSpaceWidgetComponent
 					widget={widget as SavingSpaceWidget}
@@ -32,7 +33,7 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
-		if (widget.type === "multicurrency") {
+		if (widget.type === MessageWidgetType.MULTICURRENCY) {
 			return (
 				<MultiCurrencyWidgetComponent
 					widget={widget as MultiCurrencyWidget}
@@ -40,7 +41,7 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
-		if (widget.type === "BUTTON") {
+		if (widget.type === MessageWidgetType.BUTTON) {
 			return <ButtonWidgetComponent widget={widget as ButtonWidget} />;
 		}
 		return null;
