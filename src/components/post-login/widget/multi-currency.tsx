@@ -14,9 +14,7 @@ const MultiCurrencyWidgetComponent = ({
 		sendAction(
 			{
 				event: payload.event,
-				value: payload.data,
-				name: payload.data,
-				description: "",
+				data: payload.data,
 			},
 			messageId,
 		);
@@ -26,9 +24,7 @@ const MultiCurrencyWidgetComponent = ({
 		sendAction(
 			{
 				event: payload.event,
-				value: payload.data,
-				name: payload.data,
-				description: "",
+				data: payload.data,
 			},
 			messageId,
 		);

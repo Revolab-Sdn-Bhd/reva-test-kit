@@ -136,7 +136,6 @@ const ChatMessageSection = () => {
 												type="button"
 												onClick={() => sendAction(action, msg.id)}
 												className="px-3 py-1 text-xs font-medium text-gray-900 transition-colors bg-gray-200 rounded-full hover:bg-gray-300"
-												title={action.description}
 											>
 												{action.name}
 											</button>
