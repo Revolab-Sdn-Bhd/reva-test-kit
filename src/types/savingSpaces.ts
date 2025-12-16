@@ -79,6 +79,7 @@ export interface SavingSpaceFormData {
 }
 
 export interface SavingSpaceItem {
+	name: string;
 	categoryName: string;
 	frequency: string;
 	targetAmount: number;

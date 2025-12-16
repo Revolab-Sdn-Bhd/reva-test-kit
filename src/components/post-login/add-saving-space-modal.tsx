@@ -42,6 +42,7 @@ const AddSavingSpaceModal = ({
 	const [savingSpaces, setSavingSpaces] = useState<SavingSpaceWithId[]>([
 		{
 			id: crypto.randomUUID(),
+			name: "",
 			categoryName: "",
 			frequency: "MONTHLY",
 			targetAmount: 0,
@@ -100,6 +101,7 @@ const AddSavingSpaceModal = ({
 			...savingSpaces,
 			{
 				id: crypto.randomUUID(),
+				name: "",
 				categoryName: "",
 				frequency: "MONTHLY",
 				targetAmount: 0,
@@ -190,6 +192,7 @@ const AddSavingSpaceModal = ({
 			setSavingSpaces([
 				{
 					id: crypto.randomUUID(),
+					name: "",
 					categoryName: "",
 					frequency: "MONTHLY",
 					targetAmount: 0,
@@ -291,20 +294,32 @@ const AddSavingSpaceModal = ({
 								</Group>
 
 								<Stack gap="xs">
-									<TextInput
-										label="Category Name"
-										placeholder="e.g., Vacation, Emergency Fund"
-										size="xs"
-										value={space.categoryName}
-										onChange={(e) =>
-											handleSavingSpaceChange(
-												index,
-												"categoryName",
-												e.target.value,
-											)
-										}
-										required
-									/>
+									<Group grow>
+										<TextInput
+											label="Name"
+											placeholder="e.g., Vacation, Emergency Fund"
+											size="xs"
+											value={space.name}
+											onChange={(e) =>
+												handleSavingSpaceChange(index, "name", e.target.value)
+											}
+											required
+										/>
+										<TextInput
+											label="Category Name"
+											placeholder="e.g., Vacation, Emergency Fund"
+											size="xs"
+											value={space.categoryName}
+											onChange={(e) =>
+												handleSavingSpaceChange(
+													index,
+													"categoryName",
+													e.target.value,
+												)
+											}
+											required
+										/>
+									</Group>
 
 									<Select
 										label="Frequency"

@@ -155,7 +155,6 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
 				subAccount.savingSpaces.forEach((space: any) => {
 					allSavingSpaces.push({
 						...space,
-						name: user?.name || "",
 						accountNumber: subAccount.accountNumber,
 					});
 				});
