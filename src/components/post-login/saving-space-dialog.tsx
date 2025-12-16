@@ -30,6 +30,7 @@ const SavingSpaceDialog: React.FC<SavingSpaceDialogProps> = ({
 	const [savingSpaces, setSavingSpaces] = useState<SavingSpaceWithId[]>([
 		{
 			id: crypto.randomUUID(),
+			name: "",
 			categoryName: "",
 			frequency: "MONTHLY",
 			targetAmount: 0,
@@ -72,6 +73,7 @@ const SavingSpaceDialog: React.FC<SavingSpaceDialogProps> = ({
 			...savingSpaces,
 			{
 				id: crypto.randomUUID(),
+				name: "",
 				categoryName: "",
 				frequency: "MONTHLY",
 				targetAmount: 0,
@@ -134,6 +136,7 @@ const SavingSpaceDialog: React.FC<SavingSpaceDialogProps> = ({
 			setSavingSpaces([
 				{
 					id: crypto.randomUUID(),
+					name: "",
 					categoryName: "",
 					frequency: "MONTHLY",
 					targetAmount: 0,
