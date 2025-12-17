@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useState } from "react";
 import { toast } from "sonner";
 import { generateIntrospectToken } from "@/lib/api/post-login";
-import { useAuthStore } from "@/lib/store/use-auth-store";
 import { generateRandomAlphanumeric, getChatUrl } from "@/lib/util";
 import { useEnvConfig } from "./useEnvConfig";
 
@@ -13,7 +12,9 @@ type TokenGeneratorData = {
 	token: string;
 	tokenExpiresAt: number | null;
 	disconnect: () => Promise<void>;
+	environment?: "dev" | "staging";
 	connect: (language: "en" | "ar") => Promise<void>;
+	changeEnvironment: (environment: "dev" | "staging") => void;
 };
 
 const LivekitConnectionContext = createContext<TokenGeneratorData | undefined>(
@@ -30,10 +31,16 @@ export const LivekitConnectionProvider = ({
 		token: string;
 		shouldConnect: boolean;
 		tokenExpiresAt: number | null;
-	}>({ wsUrl: "", token: "", shouldConnect: false, tokenExpiresAt: null });
+		environment?: "dev" | "staging";
+	}>({
+		wsUrl: "",
+		token: "",
+		shouldConnect: false,
+		tokenExpiresAt: null,
+		environment: "staging",
+	});
 
 	const { envConfig } = useEnvConfig();
-	const environment = useAuthStore((state) => state.environment);
 
 	const connect = useCallback(
 		async (language: "en" | "ar") => {
@@ -43,7 +50,7 @@ export const LivekitConnectionProvider = ({
 			}
 
 			url =
-				environment === "staging"
+				connectionDetails?.environment === "staging"
 					? String(envConfig.LIVEKIT_URL ?? "")
 					: String(envConfig.LIVEKIT_URL_DEV ?? "");
 
@@ -58,7 +65,7 @@ export const LivekitConnectionProvider = ({
 			}
 
 			const aiHandlerUrl =
-				environment === "staging"
+				connectionDetails?.environment === "staging"
 					? String(envConfig.AI_HANDLER_URL ?? "")
 					: String(envConfig.AI_HANDLER_URL_DEV ?? "");
 			const rotatingId = generateRandomAlphanumeric(16);
@@ -75,7 +82,7 @@ export const LivekitConnectionProvider = ({
 						method: "POST",
 						headers: {
 							"X-Livekit-Api-Key":
-								environment === "staging"
+								connectionDetails?.environment === "staging"
 									? String(envConfig.LIVEKIT_API_KEY ?? "")
 									: String(envConfig.LIVEKIT_API_KEY_DEV ?? ""),
 							"X-Rotating-ID": rotatingId,
@@ -96,7 +103,7 @@ export const LivekitConnectionProvider = ({
 					body: JSON.stringify({
 						rotatingId: rotatingId,
 						salt:
-							environment === "staging"
+							connectionDetails?.environment === "staging"
 								? envConfig.LIVEKIT_TOKEN_ENCRYPTION_KEY
 								: envConfig.LIVEKIT_TOKEN_ENCRYPTION_KEY_DEV,
 						nonceB64: nonce,
@@ -120,7 +127,12 @@ export const LivekitConnectionProvider = ({
 				toast.error("Failed to fetch access token");
 			}
 		},
-		[envConfig, connectionDetails.token, connectionDetails.tokenExpiresAt],
+		[
+			envConfig,
+			connectionDetails?.environment,
+			connectionDetails.token,
+			connectionDetails.tokenExpiresAt,
+		],
 	);
 
 	const disconnect = useCallback(async () => {
@@ -132,6 +144,13 @@ export const LivekitConnectionProvider = ({
 		});
 	}, []);
 
+	const changeEnvironment = useCallback((environment: "dev" | "staging") => {
+		setConnectionDetails((prev) => ({
+			...prev,
+			environment,
+		}));
+	}, []);
+
 	return (
 		<LivekitConnectionContext.Provider
 			value={{
@@ -141,6 +160,7 @@ export const LivekitConnectionProvider = ({
 				tokenExpiresAt: connectionDetails.tokenExpiresAt,
 				connect,
 				disconnect,
+				changeEnvironment,
 			}}
 		>
 			{children}

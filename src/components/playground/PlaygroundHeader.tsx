@@ -7,7 +7,7 @@ import { Button } from "@/components/button/Button";
 import { LoadingSVG } from "@/components/button/LoadingSVG";
 // import { SettingsDropdown } from "@/components/playground/SettingsDropdown";
 import { useConfig } from "@/hooks/useConfig";
-import { useAuthStore } from "@/lib/store/use-auth-store";
+import { useLivekitConnection } from "@/hooks/useLivekitConnection";
 
 type PlaygroundHeader = {
 	logo?: ReactNode;
@@ -30,8 +30,7 @@ export const PlaygroundHeader = ({
 }: PlaygroundHeader) => {
 	const { config } = useConfig();
 
-	const environment = useAuthStore((state) => state.environment);
-	const setEnvironment = useAuthStore((state) => state.setEnvironment);
+	const { environment, changeEnvironment } = useLivekitConnection();
 
 	return (
 		<div
@@ -52,7 +51,7 @@ export const PlaygroundHeader = ({
 				<Switch
 					checked={environment === "staging"}
 					onChange={(event) =>
-						setEnvironment?.(event.currentTarget.checked ? "staging" : "dev")
+						changeEnvironment?.(event.currentTarget.checked ? "staging" : "dev")
 					}
 					label={environment?.toUpperCase()}
 					size="sm"
