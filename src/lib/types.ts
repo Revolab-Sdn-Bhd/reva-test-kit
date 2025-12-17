@@ -27,4 +27,8 @@ export interface EnvConfig {
 	LIVEKIT_API_KEY?: string;
 	CHAT_SERVICE_URL?: string;
 	LIVEKIT_TOKEN_ENCRYPTION_KEY?: string;
+	LIVEKIT_API_KEY_DEV?: string;
+	LIVEKIT_TOKEN_ENCRYPTION_KEY_DEV?: string;
+	LIVEKIT_URL_DEV?: string;
+	AI_HANDLER_URL_DEV?: string;
 }

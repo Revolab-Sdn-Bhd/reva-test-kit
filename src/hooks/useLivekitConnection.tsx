@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useState } from "react";
 import { toast } from "sonner";
 import { generateIntrospectToken } from "@/lib/api/post-login";
+import { useAuthStore } from "@/lib/store/use-auth-store";
 import { generateRandomAlphanumeric, getChatUrl } from "@/lib/util";
 import { useEnvConfig } from "./useEnvConfig";
 
@@ -32,6 +33,7 @@ export const LivekitConnectionProvider = ({
 	}>({ wsUrl: "", token: "", shouldConnect: false, tokenExpiresAt: null });
 
 	const { envConfig } = useEnvConfig();
+	const environment = useAuthStore((state) => state.environment);
 
 	const connect = useCallback(
 		async (language: "en" | "ar") => {
@@ -40,7 +42,10 @@ export const LivekitConnectionProvider = ({
 				throw new Error("LIVEKIT_URL is not set");
 			}
 
-			url = envConfig.LIVEKIT_URL;
+			url =
+				environment === "staging"
+					? String(envConfig.LIVEKIT_URL ?? "")
+					: String(envConfig.LIVEKIT_URL_DEV ?? "");
 
 			// If token is still valid, reuse it to reconnect back to same LiveKit session
 			if (
@@ -52,7 +57,10 @@ export const LivekitConnectionProvider = ({
 				return;
 			}
 
-			const aiHandlerUrl = envConfig.AI_HANDLER_URL;
+			const aiHandlerUrl =
+				environment === "staging"
+					? String(envConfig.AI_HANDLER_URL ?? "")
+					: String(envConfig.AI_HANDLER_URL_DEV ?? "");
 			const rotatingId = generateRandomAlphanumeric(16);
 			const chatUrl = getChatUrl(envConfig);
 			const reflectIntrospectToken = await generateIntrospectToken(
@@ -66,7 +74,10 @@ export const LivekitConnectionProvider = ({
 					{
 						method: "POST",
 						headers: {
-							"X-Livekit-Api-Key": envConfig.LIVEKIT_API_KEY ?? "",
+							"X-Livekit-Api-Key":
+								environment === "staging"
+									? String(envConfig.LIVEKIT_API_KEY ?? "")
+									: String(envConfig.LIVEKIT_API_KEY_DEV ?? ""),
 							"X-Rotating-ID": rotatingId,
 							"X-Reflect-Token": reflectIntrospectToken,
 						},
@@ -84,7 +95,10 @@ export const LivekitConnectionProvider = ({
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						rotatingId: rotatingId,
-						salt: envConfig.LIVEKIT_TOKEN_ENCRYPTION_KEY ?? "",
+						salt:
+							environment === "staging"
+								? envConfig.LIVEKIT_TOKEN_ENCRYPTION_KEY
+								: envConfig.LIVEKIT_TOKEN_ENCRYPTION_KEY_DEV,
 						nonceB64: nonce,
 						encryptedTokenB64: token,
 					}),

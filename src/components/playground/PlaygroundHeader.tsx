@@ -1,11 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 
+import { Switch } from "@mantine/core";
 import { ConnectionState } from "livekit-client";
 import type { ReactNode } from "react";
 import { Button } from "@/components/button/Button";
 import { LoadingSVG } from "@/components/button/LoadingSVG";
-import { SettingsDropdown } from "@/components/playground/SettingsDropdown";
+// import { SettingsDropdown } from "@/components/playground/SettingsDropdown";
 import { useConfig } from "@/hooks/useConfig";
+import { useAuthStore } from "@/lib/store/use-auth-store";
 
 type PlaygroundHeader = {
 	logo?: ReactNode;
@@ -27,6 +29,10 @@ export const PlaygroundHeader = ({
 	connectionState,
 }: PlaygroundHeader) => {
 	const { config } = useConfig();
+
+	const environment = useAuthStore((state) => state.environment);
+	const setEnvironment = useAuthStore((state) => state.setEnvironment);
+
 	return (
 		<div
 			className={`flex gap-4 pt-4 text-${accentColor}-500 justify-between items-center shrink-0`}
@@ -43,7 +49,16 @@ export const PlaygroundHeader = ({
 				</div>
 			</div>
 			<div className="flex items-center justify-end gap-2 basis-1/3">
-				{config.settings.editable && <SettingsDropdown />}
+				<Switch
+					checked={environment === "staging"}
+					onChange={(event) =>
+						setEnvironment?.(event.currentTarget.checked ? "staging" : "dev")
+					}
+					label={environment?.toUpperCase()}
+					size="sm"
+				/>
+				{/* {config.settings.editable && <SettingsDropdown />} */}
+
 				<Button
 					accentColor={
 						connectionState === ConnectionState.Connected ? "red" : accentColor

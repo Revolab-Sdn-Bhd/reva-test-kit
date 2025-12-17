@@ -7,5 +7,11 @@ export default function handler(_: NextApiRequest, res: NextApiResponse) {
 		LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
 		LIVEKIT_TOKEN_ENCRYPTION_KEY: process.env.LIVEKIT_TOKEN_ENCRYPTION_KEY,
 		CHAT_SERVICE_URL: process.env.CHAT_SERVICE_URL,
+
+		LIVEKIT_API_KEY_DEV: process.env.LIVEKIT_API_KEY_DEV,
+		LIVEKIT_TOKEN_ENCRYPTION_KEY_DEV:
+			process.env.LIVEKIT_TOKEN_ENCRYPTION_KEY_DEV,
+		LIVEKIT_URL_DEV: process.env.LIVEKIT_URL_DEV,
+		AI_HANDLER_URL_DEV: process.env.AI_HANDLER_URL_DEV,
 	});
 }
