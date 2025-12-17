@@ -66,7 +66,7 @@ const initDB = (): Database.Database => {
       savingSpaceId TEXT PRIMARY KEY,
       subAccountId TEXT NOT NULL,
       description TEXT,
-			name TEXT NOT NULL,
+			name TEXT,
       categoryName TEXT NOT NULL,
       frequency TEXT NOT NULL,
       targetAmount REAL NOT NULL,
