@@ -10,7 +10,6 @@ const SavingSpaceWidgetComponent = ({
 	messageId: string;
 }) => {
 	const { sendAction } = useWebSocketContext();
-
 	const handleItemClick = (payload: { event: string; data: string }) => {
 		sendAction(
 			{

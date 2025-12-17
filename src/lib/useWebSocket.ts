@@ -518,7 +518,7 @@ export const useWebSocket = () => {
 				} else if (action.event === "SELECT_ACCOUNT") {
 					payload = {
 						event: action.event,
-						data: action.value,
+						data: action.data,
 					};
 					const payloadStr = JSON.stringify(payload);
 					wsRef.current.send(payloadStr);
