@@ -26,7 +26,7 @@ const WebsocketLogs = () => {
 	}, [logs]);
 
 	return (
-		<div className="flex flex-col flex-1 min-h-0 p-6 bg-gray-800 border border-gray-700 rounded-lg shadow">
+		<div className="flex flex-col flex-1 min-h-0 p-3 bg-gray-800 border border-gray-700 rounded-lg shadow">
 			<div className="flex items-center justify-between mb-4">
 				<h2 className="text-xl font-bold text-white">WebSocket Logs</h2>
 				<button
