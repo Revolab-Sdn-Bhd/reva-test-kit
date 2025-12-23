@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import ChatScreen from "@/components/post-login/chat-screen";
 import AccountSection from "@/components/post-login/tabs/account";
+import BillsSection from "@/components/post-login/tabs/bills";
 import ConnectionTab from "@/components/post-login/tabs/connection";
 import CustomPayloadTab from "@/components/post-login/tabs/custom-payload";
 import WebsocketLogs from "@/components/post-login/websocket-logs";
@@ -21,11 +22,12 @@ import {
 	WebSocketProvider,
 } from "@/lib/WebSocketProvider";
 
-type ConfigTab = "connection" | "custom-json" | "user-account";
+type ConfigTab = "connection" | "custom-json" | "user-account" | "bills";
 
 const Tabs = [
 	{ label: "Connection", value: "connection" },
 	{ label: "User Account", value: "user-account" },
+	{ label: "Bills", value: "bills" },
 	{ label: "Custom JSON", value: "custom-json" },
 ];
 
@@ -75,7 +77,7 @@ function PostLoginContent() {
 					<button
 						type="button"
 						onClick={() => setIsConfigCollapsed(!isConfigCollapsed)}
-						className="flex items-center justify-between w-full p-6 text-left"
+						className="flex items-center justify-between w-full p-3 text-left"
 					>
 						<h2 className="text-xl font-bold text-white">
 							WebSocket Configuration
@@ -132,16 +134,19 @@ function PostLoginContent() {
 									handleDisconnect={handleDisconnect}
 								/>
 							)}
-							{activeTab === "custom-json" && (
-								<CustomPayloadTab isConnected={isConnected} />
-							)}
+
 							{activeTab === "user-account" && (
 								<AccountSection isConnected={isConnected} />
+							)}
+							{activeTab === "bills" && (
+								<BillsSection isConnected={isConnected} />
+							)}
+							{activeTab === "custom-json" && (
+								<CustomPayloadTab isConnected={isConnected} />
 							)}
 						</div>
 					)}
 				</div>
-
 				<WebsocketLogs />
 			</div>
 

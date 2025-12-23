@@ -87,6 +87,16 @@ const initDB = (): Database.Database => {
     )
   `);
 
+	// Create BillProfiles table
+	db.exec(`
+    CREATE TABLE IF NOT EXISTS bill_profiles (
+      customerProviderIdentifier TEXT PRIMARY KEY,
+      billingInfo TEXT NOT NULL,
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL
+    )
+  `);
+
 	// Create indexes for better query performance
 	db.exec(`
     CREATE INDEX IF NOT EXISTS idx_sub_accounts_user ON sub_accounts(userId);
@@ -485,4 +495,106 @@ const mapDBToSavingSpace = (row: any): SavingSpace => {
 		name: "", // Will be filled from user data
 		status: row.status,
 	};
+};
+
+// ============= Bill Profiles Functions =============
+
+export interface BillingInfo {
+	status: string;
+	billerName: string;
+	paymentType: string;
+	serviceType: string;
+	iconLink: string;
+	billerCode: string;
+	customerIdentifier: string;
+	nickName: string;
+}
+
+export interface BillProfile {
+	billingInfo: BillingInfo[];
+	customerProviderIdentifier: string;
+}
+
+/**
+ * Get all bill profiles
+ */
+export const getAllBillProfiles = (): BillProfile[] => {
+	const db = getDB();
+	const rows = db
+		.prepare("SELECT * FROM bill_profiles ORDER BY createdAt DESC")
+		.all();
+
+	return rows.map((row: any) => ({
+		customerProviderIdentifier: row.customerProviderIdentifier,
+		billingInfo: JSON.parse(row.billingInfo),
+	}));
+};
+
+/**
+ * Get bill profile by customer provider identifier
+ */
+export const getBillProfileById = (
+	customerProviderIdentifier: string,
+): BillProfile | null => {
+	const db = getDB();
+	const row = db
+		.prepare("SELECT * FROM bill_profiles WHERE customerProviderIdentifier = ?")
+		.get(customerProviderIdentifier);
+
+	if (!row) return null;
+
+	return {
+		customerProviderIdentifier: (row as any).customerProviderIdentifier,
+		billingInfo: JSON.parse((row as any).billingInfo),
+	};
+};
+
+/**
+ * Create a new bill profile
+ */
+export const createBillProfile = (billProfile: BillProfile): void => {
+	const db = getDB();
+	const now = new Date().toISOString();
+
+	db.prepare(
+		`
+    INSERT INTO bill_profiles (customerProviderIdentifier, billingInfo, createdAt, updatedAt)
+    VALUES (?, ?, ?, ?)
+  `,
+	).run(
+		billProfile.customerProviderIdentifier,
+		JSON.stringify(billProfile.billingInfo),
+		now,
+		now,
+	);
+};
+
+/**
+ * Update an existing bill profile
+ */
+export const updateBillProfile = (billProfile: BillProfile): void => {
+	const db = getDB();
+	const now = new Date().toISOString();
+
+	db.prepare(
+		`
+    UPDATE bill_profiles
+    SET billingInfo = ?, updatedAt = ?
+    WHERE customerProviderIdentifier = ?
+  `,
+	).run(
+		JSON.stringify(billProfile.billingInfo),
+		now,
+		billProfile.customerProviderIdentifier,
+	);
+};
+
+/**
+ * Delete a bill profile
+ */
+export const deleteBillProfile = (customerProviderIdentifier: string): void => {
+	const db = getDB();
+	db.prepare(
+		"DELETE FROM bill_profiles WHERE customerProviderIdentifier = ?",
+	).run(customerProviderIdentifier);
 };
