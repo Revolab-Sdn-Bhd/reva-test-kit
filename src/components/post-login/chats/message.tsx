@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { FaMicrophone } from "react-icons/fa";
 import {
 	type ButtonWidget,
+	type InsufficientConfirmWidget,
 	type MessageWidget,
 	MessageWidgetType,
 	type MultiCurrencyWidget,
@@ -12,8 +13,9 @@ import {
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 import PreConfirmationCard from "../pre-confirm-card";
 import ButtonWidgetComponent from "../widget/button";
-import MultiCurrencyWidgetComponent from "../widget/multi-currency";
-import SavingSpaceWidgetComponent from "../widget/saving-space";
+import InsufficientConfirmWidgetComponent from "../widget/transact/insufficient-confirm-widget";
+import MultiCurrencyWidgetComponent from "../widget/transact/multi-currency";
+import SavingSpaceWidgetComponent from "../widget/transact/saving-space";
 
 const ChatMessageSection = () => {
 	const { messages, sendAction } = useWebSocketContext();
@@ -25,7 +27,10 @@ const ChatMessageSection = () => {
 	}, [messages]);
 
 	const renderWidget = (widget: MessageWidget, messageId: string) => {
-		if (widget.type === MessageWidgetType.SAVINGSPACEACCOUNTLIST) {
+		if (
+			widget.type === MessageWidgetType.SAVINGSPACEACCOUNTLIST ||
+			widget.type === MessageWidgetType.SAVINGSPACEACCOUNT
+		) {
 			return (
 				<SavingSpaceWidgetComponent
 					widget={widget as SavingSpaceWidget}
@@ -33,11 +38,32 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
-		if (widget.type === MessageWidgetType.MULTICURRENCY) {
+		if (
+			widget.type === MessageWidgetType.MULTICURRENCYACCOUNTLIST ||
+			widget.type === MessageWidgetType.MULTICURRENCYACCOUNT
+		) {
 			return (
 				<MultiCurrencyWidgetComponent
 					widget={widget as MultiCurrencyWidget}
 					messageId={messageId}
+				/>
+			);
+		}
+		//support confirm widget and insufficient balance widget
+		if (
+			widget.type === MessageWidgetType.SAVINGSPACENOACCOUNT ||
+			widget.type === MessageWidgetType.MULTICURRENCYNOACCOUNT ||
+			widget.type === MessageWidgetType.CURRENTACCOUNTINSUFFICIENTBALANCE ||
+			widget.type === MessageWidgetType.SAVINGSPACEACCOUNTINSUFFICIENTBALANCE ||
+			widget.type ===
+				MessageWidgetType.MULTICURRENCYACCOUNTINSUFFICIENTBALANCE ||
+			widget.type === MessageWidgetType.CURRENTACCOUNTAVAILABLEBALANCE ||
+			widget.type === MessageWidgetType.SAVINGSPACEACCOUNTAVAILABLEBALANCE ||
+			widget.type === MessageWidgetType.MULTICURRENCYACCOUNTAVAILABLEBALANCE
+		) {
+			return (
+				<InsufficientConfirmWidgetComponent
+					widget={widget as InsufficientConfirmWidget}
 				/>
 			);
 		}
@@ -56,7 +82,9 @@ const ChatMessageSection = () => {
 			) : (
 				messages.map((msg) => {
 					const hasPreConfirmation = msg.eventType && msg.form && msg.payload;
-					if (!msg.content && !hasPreConfirmation) return null;
+					const hasWidgets = msg.widgets && msg.widgets.length > 0;
+
+					if (!msg.content && !hasPreConfirmation && !hasWidgets) return null;
 					return (
 						<div
 							key={msg.id}
@@ -74,6 +102,13 @@ const ChatMessageSection = () => {
 								<div className="mb-1 text-sm font-medium">
 									{msg.sender === "user" ? "You" : "Agent"}
 								</div>
+
+								{/* info */}
+								{msg.info && (
+									<div className="mt-2 text-sm italic text-gray-300">
+										Info: {msg.info}
+									</div>
+								)}
 
 								{/* Audio message */}
 								{msg.type === "audio" ? (
@@ -111,7 +146,7 @@ const ChatMessageSection = () => {
 
 								{/* Widget Section */}
 								{msg.widgets && msg.widgets.length > 0 && (
-									<div className="flex flex-wrap gap-2 mt-3">
+									<div className="mt-3 space-y-2">
 										{msg.widgets.map((widget, index) => (
 											<div key={`${msg.id}-widget-${index}`}>
 												{renderWidget(widget, msg.id)}

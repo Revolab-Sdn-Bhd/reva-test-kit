@@ -22,16 +22,20 @@ export type PostConfirmation = {
 	transactionId: string;
 };
 
-export type SavingSpaceWidget = {
+export type SavingSpaceWidget =
+	| SavingSpaceListWidget
+	| SavingSpaceAccountWidget;
+
+export type SavingSpaceListWidget = {
 	type: "SAVINGSPACEACCOUNTLIST";
 	text: string;
 	items: SavingSpaceItem[];
 };
 
-export type MultiCurrencyWidget = {
-	type: string;
+export type SavingSpaceAccountWidget = {
+	type: "SAVINGSPACEACCOUNT";
 	text: string;
-	items: MultiCurrencyItem[];
+	items: SavingSpaceAccountItem[];
 };
 
 export type SavingSpaceItem = {
@@ -45,29 +49,144 @@ export type SavingSpaceItem = {
 	};
 };
 
-export type MultiCurrencyItem = {
+export type SavingSpaceAccountItem = {
 	title: string;
 	icon: string;
 	type: string;
-	accountNumber: string;
-	availableBalance: {
+	savingSpaceId: string;
+	savedAmount: {
+		currency: string;
+		amount: number;
+	};
+	goal: {
 		currency: string;
 		amount: number;
 	};
 	buttons: WidgetButton[];
+};
+
+export type MultiCurrencyWidget =
+	| MultiCurrencyListWidget
+	| MultiCurrencyAccountWidget;
+
+export type MultiCurrencyListWidget = {
+	type: "MULTICURRENCYACCOUNTLIST";
+	text: string;
+	items: MultiCurrencyItem[];
+};
+
+export type MultiCurrencyAccountWidget = {
+	type: "MULTICURRENCYACCOUNT";
+	text: string;
+	items: MultiCurrencyAccountItem[];
+};
+
+export type MultiCurrencyItem = {
+	title: string;
+	icon: string;
+	accountNumber: string;
 	payload: {
 		event: string;
 		data: string;
 	};
 };
 
-type WidgetButton = {
-	type: string;
+export type MultiCurrencyAccountItem = {
 	title: string;
+	icon: string;
+	accountNumber: string;
+	availableBalance: {
+		currency: string;
+		amount: number;
+	};
+	currentAccountBalance: {
+		currency: string;
+		amount: number;
+	};
+	buttons: WidgetButton[];
+};
+
+export type BillPaymentWidget =
+	| BillPaymentListWidget
+	| BillPaymentAccountWidget;
+
+export type BillPaymentListWidget = {
+	type: "BILLERACCOUNTLIST";
+	text: string;
+	items: BillPaymentItem[];
+};
+
+export type BillPaymentAccountWidget = {
+	type: "BILLERS";
+	text: string;
+	items: BillPaymentAccountItem[];
+};
+
+export type BillPaymentItem = {
+	title: string;
+	icon: string;
+	billerCode: string;
+	paymentType: string;
+	serviceType: string;
+	customerIdentifier: string;
+	nickName: string;
 	payload: {
 		event: string;
 		data: string;
 	};
+};
+
+export type BillPaymentAccountItem = {
+	text: string;
+	title: string;
+	icon: string;
+	billerCode: string;
+	paymentType: string;
+	serviceType: string;
+	customerIdentifier: string;
+	nickName: string;
+	fees: {
+		currency: string;
+		amount: string;
+	};
+	dueAmount: {
+		currency: string;
+		amount: string;
+	};
+	minimumDueAmount: {
+		currency: string;
+		amount: string;
+	};
+	currentAccountBalance: {
+		currency: string;
+		amount: string;
+	};
+};
+
+type WidgetButton = {
+	id: string;
+	type: string;
+	label: string;
+	payload: {
+		event: string;
+		data: string;
+	};
+};
+
+export type InsufficientConfirmWidget = {
+	type: string;
+	text: string;
+	buttons: Array<InsufficientConfirmButton>;
+};
+
+export type InsufficientConfirmButton = InsufficientButton | WidgetButton;
+
+export type InsufficientButton = {
+	id: string;
+	type: string;
+	label: string;
+	link?: string;
+	navigationId?: string;
 };
 
 export interface ButtonWidget {
@@ -89,14 +208,31 @@ export interface ButtonWidget {
 
 export enum MessageWidgetType {
 	BUTTON = "BUTTON",
+	SAVINGSPACENOACCOUNT = "SAVINGSPACENOACCOUNT",
+	MULTICURRENCYNOACCOUNT = "MULTICURRENCYNOACCOUNT",
+
 	SAVINGSPACEACCOUNTLIST = "SAVINGSPACEACCOUNTLIST",
-	MULTICURRENCY = "MULTICURRENCYACCOUNTLIST",
+	SAVINGSPACEACCOUNT = "SAVINGSPACEACCOUNT",
+
+	MULTICURRENCYACCOUNTLIST = "MULTICURRENCYACCOUNTLIST",
+	MULTICURRENCYACCOUNT = "MULTICURRENCYACCOUNT",
+
+	CURRENTACCOUNTINSUFFICIENTBALANCE = "CURRENTACCOUNTINSUFFICIENTBALANCE",
+	SAVINGSPACEACCOUNTINSUFFICIENTBALANCE = "SAVINGSPACEACCOUNTINSUFFICIENTBALANCE",
+	MULTICURRENCYACCOUNTINSUFFICIENTBALANCE = "MULTICURRENCYACCOUNTINSUFFICIENTBALANCE",
+
+	CURRENTACCOUNTAVAILABLEBALANCE = "CURRENTACCOUNTAVAILABLEBALANCE",
+	MULTICURRENCYACCOUNTAVAILABLEBALANCE = "MULTICURRENCYACCOUNTAVAILABLEBALANCE",
+	SAVINGSPACEACCOUNTAVAILABLEBALANCE = "SAVINGSPACEACCOUNTAVAILABLEBALANCE",
 }
 
-export type MessageWidget =
-	| ButtonWidget
+export type TransactWidget =
 	| SavingSpaceWidget
-	| MultiCurrencyWidget;
+	| MultiCurrencyWidget
+	| BillPaymentWidget
+	| InsufficientConfirmWidget;
+
+export type MessageWidget = ButtonWidget | TransactWidget;
 
 export type PreConfirmPayload = SavingSpacePayload | MultiCurrencyPayload;
 
@@ -105,6 +241,13 @@ export interface Form {
 	fields: {
 		label: string;
 		value: string;
+	}[];
+	buttons: {
+		id: string;
+		type: string;
+		label: string;
+		link?: string;
+		navigationId?: string;
 	}[];
 }
 
@@ -125,6 +268,7 @@ export type ChatMessage = {
 	id: string;
 	sender: "user" | "agent";
 	content: string;
+	info?: string;
 	timestamp: string;
 	actions?: MessageAction[];
 	widgets?: MessageWidget[];
@@ -164,6 +308,7 @@ export enum EventType {
 	CALL_STATUS = "CALL_STATUS",
 	POST_CONFIRMATION = "POST_CONFIRMATION",
 	SELECT_ACCOUNT = "SELECT_ACCOUNT",
+	SELECT_ANOTHER_ACCOUNT = "SELECT_ANOTHER_ACCOUNT",
 	PRE_CONFIRMATION = "PRE_CONFIRMATION",
 }
 
@@ -226,6 +371,7 @@ export const useWebSocket = () => {
 								id: msgData.messageId || Date.now().toString(),
 								sender: "agent",
 								content: msgData.message,
+								info: msgData.info,
 								timestamp: new Date().toLocaleTimeString(),
 								actions: msgData.actions,
 								widgets: msgData.widgets,
@@ -331,6 +477,7 @@ export const useWebSocket = () => {
 						}
 						break;
 					case EventType.SELECT_ACCOUNT:
+					case EventType.SELECT_ANOTHER_ACCOUNT:
 						break;
 					case EventType.PRE_CONFIRMATION:
 						{
@@ -515,11 +662,15 @@ export const useWebSocket = () => {
 						event: "ENDSESSION",
 						data: {},
 					};
-				} else if (action.event === "SELECT_ACCOUNT") {
+				} else if (
+					action.event === "SELECT_ACCOUNT" ||
+					action.event === "SELECT_ANOTHER_ACCOUNT"
+				) {
 					payload = {
 						event: action.event,
-						data: action.data,
+						data: action.value ?? action.data,
 					};
+
 					const payloadStr = JSON.stringify(payload);
 					wsRef.current.send(payloadStr);
 					addLog("send", `Sent action: ${payloadStr}`);
