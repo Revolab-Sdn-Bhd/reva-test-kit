@@ -50,13 +50,16 @@ const PreConfirmationCard = ({
 
 			{/* Action Buttons */}
 			<div className="flex gap-3">
-				<button
-					type="button"
-					onClick={handleConfirm}
-					className="flex-1 px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
-				>
-					Confirm
-				</button>
+				{form.buttons.map((button) => (
+					<button
+						key={button.id}
+						type="button"
+						onClick={handleConfirm}
+						className="flex-1 px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+					>
+						{button.label}
+					</button>
+				))}
 			</div>
 		</div>
 	);
