@@ -221,8 +221,16 @@ const AccountSection: React.FC<AccountSectionProps> = ({ isConnected }) => {
 											<div className="grid grid-cols-2 gap-2 text-xs">
 												<div className="col-span-2">
 													<span className="text-base font-medium text-green-400">
-														{record.categoryName}
+														Name: {record.name}
 													</span>
+													<div>
+														<span className="font-medium text-gray-400">
+															Category:
+														</span>
+														<span className="ml-2 text-white">
+															{record.categoryName}
+														</span>
+													</div>
 												</div>
 												<div>
 													<span className="font-medium text-gray-400">

@@ -96,7 +96,7 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
 				savingSpaceId,
 				apiInteractionId,
 				categoryPictureId,
-				name: "", // Will be filled from sub-account/user data when retrieved
+				name: item.name || "",
 				description: item.description || "",
 				accountNumber: "", // Will be filled from sub-account data when retrieved
 				categoryName: item.categoryName,
