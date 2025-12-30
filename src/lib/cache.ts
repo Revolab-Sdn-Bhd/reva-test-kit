@@ -353,8 +353,8 @@ export const createSavingSpace = (
       savingSpaceId, subAccountId, description, categoryName, frequency,
       targetAmount, remainingPercentage, categoryPictureUrl, targetDate,
       remainingAmount, apiInteractionId, savedPercentage, savedAmount,
-      partyId, startDate, categoryPictureId, status, currency, createdAt
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      partyId, startDate, categoryPictureId, status, currency, createdAt, name
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
 	stmt.run(
@@ -377,6 +377,7 @@ export const createSavingSpace = (
 		space.status,
 		space.targetAmount.currency,
 		now,
+		space.name,
 	);
 
 	return space;
@@ -492,7 +493,7 @@ const mapDBToSavingSpace = (row: any): SavingSpace => {
 		partyId: row.partyId || "",
 		startDate: row.startDate,
 		categoryPictureId: row.categoryPictureId,
-		name: "", // Will be filled from user data
+		name: row.name, // Will be filled from user data
 		status: row.status,
 	};
 };
