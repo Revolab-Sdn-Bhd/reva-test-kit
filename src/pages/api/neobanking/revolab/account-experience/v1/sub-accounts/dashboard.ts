@@ -91,8 +91,9 @@ export default async function handler(
 		};
 
 		// Convert sub-accounts to response format
-		const subAccountsResponse: SubAccountResponse[] = subAccounts.map(
-			(account) => {
+		const subAccountsResponse: SubAccountResponse[] = subAccounts
+			.slice(1) //need to exclude index 0 as primary account
+			.map((account) => {
 				const accountOutstanding =
 					account.savingSpaces?.reduce(
 						(sum: number, space: any) => sum + space.savedAmount.amount,
@@ -119,8 +120,7 @@ export default async function handler(
 					name: user.name,
 					virtualIban: user.virtualIban,
 				};
-			},
-		);
+			});
 
 		const response: AccountDashboardResponse = {
 			metadata: {
