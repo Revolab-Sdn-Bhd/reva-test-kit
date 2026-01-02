@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { useEffect, useRef } from "react";
 import { FaMicrophone } from "react-icons/fa";
 import {
+	type BillPaymentWidget,
 	type ButtonWidget,
 	type InsufficientConfirmWidget,
 	type MessageWidget,
@@ -13,6 +14,7 @@ import {
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 import PreConfirmationCard from "../pre-confirm-card";
 import ButtonWidgetComponent from "../widget/button";
+import BillPaymentWidgetComponent from "../widget/transact/bill-payment";
 import InsufficientConfirmWidgetComponent from "../widget/transact/insufficient-confirm-widget";
 import MultiCurrencyWidgetComponent from "../widget/transact/multi-currency";
 import SavingSpaceWidgetComponent from "../widget/transact/saving-space";
@@ -49,10 +51,22 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
+		if (
+			widget.type === MessageWidgetType.BILLERACCOUNTLIST ||
+			widget.type === MessageWidgetType.BILLERS
+		) {
+			return (
+				<BillPaymentWidgetComponent
+					widget={widget as BillPaymentWidget}
+					messageId={messageId}
+				/>
+			);
+		}
 		//support confirm widget and insufficient balance widget
 		if (
 			widget.type === MessageWidgetType.SAVINGSPACENOACCOUNT ||
 			widget.type === MessageWidgetType.MULTICURRENCYNOACCOUNT ||
+			widget.type === MessageWidgetType.BILLERNOACCOUNT ||
 			widget.type === MessageWidgetType.CURRENTACCOUNTINSUFFICIENTBALANCE ||
 			widget.type === MessageWidgetType.SAVINGSPACEACCOUNTINSUFFICIENTBALANCE ||
 			widget.type ===
@@ -105,8 +119,19 @@ const ChatMessageSection = () => {
 
 								{/* info */}
 								{msg.info && (
-									<div className="mt-2 text-sm italic text-gray-300">
-										Info: {msg.info}
+									<div className="flex items-center gap-2 text-sm italic text-gray-300">
+										<svg
+											className="w-4 h-4"
+											fill="currentColor"
+											viewBox="0 0 20 20"
+										>
+											<path
+												fillRule="evenodd"
+												d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+												clipRule="evenodd"
+											/>
+										</svg>
+										<span>{msg.info}</span>
 									</div>
 								)}
 
