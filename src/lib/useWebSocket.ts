@@ -137,7 +137,6 @@ export type BillPaymentItem = {
 };
 
 export type BillPaymentAccountItem = {
-	text: string;
 	title: string;
 	icon: string;
 	billerCode: string;
@@ -147,19 +146,19 @@ export type BillPaymentAccountItem = {
 	nickName: string;
 	fees: {
 		currency: string;
-		amount: string;
+		amount: number;
 	};
 	dueAmount: {
 		currency: string;
-		amount: string;
+		amount: number;
 	};
 	minimumDueAmount: {
 		currency: string;
-		amount: string;
+		amount: number;
 	};
 	currentAccountBalance: {
 		currency: string;
-		amount: string;
+		amount: number;
 	};
 };
 
@@ -210,12 +209,16 @@ export enum MessageWidgetType {
 	BUTTON = "BUTTON",
 	SAVINGSPACENOACCOUNT = "SAVINGSPACENOACCOUNT",
 	MULTICURRENCYNOACCOUNT = "MULTICURRENCYNOACCOUNT",
+	BILLERNOACCOUNT = "BILLERNOACCOUNT",
 
 	SAVINGSPACEACCOUNTLIST = "SAVINGSPACEACCOUNTLIST",
 	SAVINGSPACEACCOUNT = "SAVINGSPACEACCOUNT",
 
 	MULTICURRENCYACCOUNTLIST = "MULTICURRENCYACCOUNTLIST",
 	MULTICURRENCYACCOUNT = "MULTICURRENCYACCOUNT",
+
+	BILLERACCOUNTLIST = "BILLERACCOUNTLIST",
+	BILLERS = "BILLERS",
 
 	CURRENTACCOUNTINSUFFICIENTBALANCE = "CURRENTACCOUNTINSUFFICIENTBALANCE",
 	SAVINGSPACEACCOUNTINSUFFICIENTBALANCE = "SAVINGSPACEACCOUNTINSUFFICIENTBALANCE",
