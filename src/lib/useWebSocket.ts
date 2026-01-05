@@ -188,6 +188,60 @@ export type InsufficientButton = {
 	navigationId?: string;
 };
 
+export type TransactionOptionWidget = {
+	type: string;
+	text: string;
+	items: {
+		title: string;
+		type?: string;
+		icon: string;
+		payload: {
+			event: string;
+			data: string;
+		};
+	}[];
+};
+
+export type ReflectWidget = ReflectTransferWidget | ReflectRequestWidget;
+
+export type ReflectTransferWidget = {
+	type: "REFLECTTRANSFERDETAIL";
+	text: string;
+	items: {
+		title: string;
+		icon: string;
+		contactNumber: string;
+		contactName: string;
+		amount: {
+			type: string;
+			currency: string;
+			amount: number;
+		};
+		availableBalance: {
+			currency: string;
+			amount: number;
+		};
+		buttons: WidgetButton[];
+	}[];
+};
+
+export type ReflectRequestWidget = {
+	type: "REFLECTREQUESTDETAIL";
+	text: string;
+	items: {
+		title: string;
+		icon: string;
+		contactNumber: string;
+		contactName: string;
+		amount: {
+			type: string;
+			currency: string;
+			amount: number;
+		};
+		buttons: WidgetButton[];
+	}[];
+};
+
 export interface ButtonWidget {
 	type: MessageWidgetType.BUTTON;
 	buttons: Array<
@@ -220,20 +274,33 @@ export enum MessageWidgetType {
 	BILLERACCOUNTLIST = "BILLERACCOUNTLIST",
 	BILLERS = "BILLERS",
 
+	TRANSFERMONEY = "TRANSFERMONEY",
+	REFLECTTRANSFER = "REFLECTTRANSFER",
+	REFLECTTRANSFERDETAIL = "REFLECTTRANSFERDETAIL",
+
+	REQUESTMONEY = "REQUESTMONEY",
+	REFLECTREQUEST = "REFLECTREQUEST",
+	REFLECTREQUESTDETAIL = "REFLECTREQUESTDETAIL",
+
 	CURRENTACCOUNTINSUFFICIENTBALANCE = "CURRENTACCOUNTINSUFFICIENTBALANCE",
 	SAVINGSPACEACCOUNTINSUFFICIENTBALANCE = "SAVINGSPACEACCOUNTINSUFFICIENTBALANCE",
 	MULTICURRENCYACCOUNTINSUFFICIENTBALANCE = "MULTICURRENCYACCOUNTINSUFFICIENTBALANCE",
+	REFLECTTRANSFERINSUFFICIENTBALANCE = "REFLECTTRANSFERINSUFFICIENTBALANCE",
 
 	CURRENTACCOUNTAVAILABLEBALANCE = "CURRENTACCOUNTAVAILABLEBALANCE",
 	MULTICURRENCYACCOUNTAVAILABLEBALANCE = "MULTICURRENCYACCOUNTAVAILABLEBALANCE",
 	SAVINGSPACEACCOUNTAVAILABLEBALANCE = "SAVINGSPACEACCOUNTAVAILABLEBALANCE",
+	REFLECTTRANSFERAVAILABLEBALANCE = "REFLECTTRANSFERAVAILABLEBALANCE",
+	REFLECTREQUESTAVAILABLEBALANCE = "REFLECTREQUESTAVAILABLEBALANCE",
 }
 
 export type TransactWidget =
 	| SavingSpaceWidget
 	| MultiCurrencyWidget
 	| BillPaymentWidget
-	| InsufficientConfirmWidget;
+	| InsufficientConfirmWidget
+	| TransactionOptionWidget
+	| ReflectWidget;
 
 export type MessageWidget = ButtonWidget | TransactWidget;
 
@@ -667,7 +734,13 @@ export const useWebSocket = () => {
 					};
 				} else if (
 					action.event === "SELECT_ACCOUNT" ||
-					action.event === "SELECT_ANOTHER_ACCOUNT"
+					action.event === "SELECT_ANOTHER_ACCOUNT" ||
+					action.event === "SELECT_TRANSFER_OPTION" ||
+					action.event === "SELECT_ONE_TIME_TRANSFER" ||
+					action.event === "SELECT_CONTACT" ||
+					action.event === "SELECT_ANOTHER_CONTACT" ||
+					action.event === "SELECT_REQUEST_OPTION" ||
+					action.event === "SELECT_ONE_TIME_REQUEST"
 				) {
 					payload = {
 						event: action.event,
