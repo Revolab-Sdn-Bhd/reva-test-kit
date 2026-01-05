@@ -9,7 +9,9 @@ import {
 	type MessageWidget,
 	MessageWidgetType,
 	type MultiCurrencyWidget,
+	type ReflectWidget,
 	type SavingSpaceWidget,
+	type TransactionOptionWidget,
 } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 import PreConfirmationCard from "../pre-confirm-card";
@@ -17,7 +19,9 @@ import ButtonWidgetComponent from "../widget/button";
 import BillPaymentWidgetComponent from "../widget/transact/bill-payment";
 import InsufficientConfirmWidgetComponent from "../widget/transact/insufficient-confirm-widget";
 import MultiCurrencyWidgetComponent from "../widget/transact/multi-currency";
+import ReflectWidgetComponent from "../widget/transact/reflect";
 import SavingSpaceWidgetComponent from "../widget/transact/saving-space";
+import TransactionOptionWidgetComponent from "../widget/transact/transaction-option";
 
 const ChatMessageSection = () => {
 	const { messages, sendAction } = useWebSocketContext();
@@ -28,11 +32,47 @@ const ChatMessageSection = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages]);
 
+	const WIDGET_TYPE_GROUPS = {
+		savingSpace: [
+			MessageWidgetType.SAVINGSPACEACCOUNTLIST,
+			MessageWidgetType.SAVINGSPACEACCOUNT,
+		],
+		multiCurrency: [
+			MessageWidgetType.MULTICURRENCYACCOUNTLIST,
+			MessageWidgetType.MULTICURRENCYACCOUNT,
+		],
+		billPayment: [
+			MessageWidgetType.BILLERACCOUNTLIST,
+			MessageWidgetType.BILLERS,
+		],
+		reflect: [
+			MessageWidgetType.REFLECTTRANSFERDETAIL,
+			MessageWidgetType.REFLECTREQUESTDETAIL,
+		],
+		insufficientConfirm: [
+			MessageWidgetType.SAVINGSPACENOACCOUNT,
+			MessageWidgetType.MULTICURRENCYNOACCOUNT,
+			MessageWidgetType.BILLERNOACCOUNT,
+			MessageWidgetType.CURRENTACCOUNTINSUFFICIENTBALANCE,
+			MessageWidgetType.SAVINGSPACEACCOUNTINSUFFICIENTBALANCE,
+			MessageWidgetType.MULTICURRENCYACCOUNTINSUFFICIENTBALANCE,
+			MessageWidgetType.REFLECTTRANSFERINSUFFICIENTBALANCE,
+			MessageWidgetType.CURRENTACCOUNTAVAILABLEBALANCE,
+			MessageWidgetType.SAVINGSPACEACCOUNTAVAILABLEBALANCE,
+			MessageWidgetType.MULTICURRENCYACCOUNTAVAILABLEBALANCE,
+			MessageWidgetType.REFLECTTRANSFERAVAILABLEBALANCE,
+			MessageWidgetType.REFLECTREQUESTAVAILABLEBALANCE,
+		],
+		transactionOption: [
+			MessageWidgetType.TRANSFERMONEY,
+			MessageWidgetType.REQUESTMONEY,
+			MessageWidgetType.REFLECTTRANSFER,
+			MessageWidgetType.REFLECTREQUEST,
+		],
+	} as const;
+
 	const renderWidget = (widget: MessageWidget, messageId: string) => {
-		if (
-			widget.type === MessageWidgetType.SAVINGSPACEACCOUNTLIST ||
-			widget.type === MessageWidgetType.SAVINGSPACEACCOUNT
-		) {
+		if (WIDGET_TYPE_GROUPS.savingSpace.includes(widget.type as any)) {
 			return (
 				<SavingSpaceWidgetComponent
 					widget={widget as SavingSpaceWidget}
@@ -40,10 +80,7 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
-		if (
-			widget.type === MessageWidgetType.MULTICURRENCYACCOUNTLIST ||
-			widget.type === MessageWidgetType.MULTICURRENCYACCOUNT
-		) {
+		if (WIDGET_TYPE_GROUPS.multiCurrency.includes(widget.type as any)) {
 			return (
 				<MultiCurrencyWidgetComponent
 					widget={widget as MultiCurrencyWidget}
@@ -51,10 +88,7 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
-		if (
-			widget.type === MessageWidgetType.BILLERACCOUNTLIST ||
-			widget.type === MessageWidgetType.BILLERS
-		) {
+		if (WIDGET_TYPE_GROUPS.billPayment.includes(widget.type as any)) {
 			return (
 				<BillPaymentWidgetComponent
 					widget={widget as BillPaymentWidget}
@@ -62,28 +96,34 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
-		//support confirm widget and insufficient balance widget
-		if (
-			widget.type === MessageWidgetType.SAVINGSPACENOACCOUNT ||
-			widget.type === MessageWidgetType.MULTICURRENCYNOACCOUNT ||
-			widget.type === MessageWidgetType.BILLERNOACCOUNT ||
-			widget.type === MessageWidgetType.CURRENTACCOUNTINSUFFICIENTBALANCE ||
-			widget.type === MessageWidgetType.SAVINGSPACEACCOUNTINSUFFICIENTBALANCE ||
-			widget.type ===
-				MessageWidgetType.MULTICURRENCYACCOUNTINSUFFICIENTBALANCE ||
-			widget.type === MessageWidgetType.CURRENTACCOUNTAVAILABLEBALANCE ||
-			widget.type === MessageWidgetType.SAVINGSPACEACCOUNTAVAILABLEBALANCE ||
-			widget.type === MessageWidgetType.MULTICURRENCYACCOUNTAVAILABLEBALANCE
-		) {
+		if (WIDGET_TYPE_GROUPS.reflect.includes(widget.type as any)) {
+			return (
+				<ReflectWidgetComponent
+					widget={widget as ReflectWidget}
+					messageId={messageId}
+				/>
+			);
+		}
+		if (WIDGET_TYPE_GROUPS.insufficientConfirm.includes(widget.type as any)) {
 			return (
 				<InsufficientConfirmWidgetComponent
 					widget={widget as InsufficientConfirmWidget}
 				/>
 			);
 		}
+		if (WIDGET_TYPE_GROUPS.transactionOption.includes(widget.type as any)) {
+			return (
+				<TransactionOptionWidgetComponent
+					widget={widget as TransactionOptionWidget}
+					messageId={messageId}
+				/>
+			);
+		}
+
 		if (widget.type === MessageWidgetType.BUTTON) {
 			return <ButtonWidgetComponent widget={widget as ButtonWidget} />;
 		}
+
 		return null;
 	};
 
