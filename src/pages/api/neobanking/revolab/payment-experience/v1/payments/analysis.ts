@@ -2,187 +2,187 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getUser } from "@/lib/cache";
 
 interface CreditorInfo {
-  name: string;
-  mobileNumber: string;
+	name: string;
+	mobileNumber: string;
 }
 
 interface InstructedAmount {
-  amount: number;
-  currency: string;
+	amount: number;
+	currency: string;
 }
 
 interface RemittanceInfo {
-  purposeCode: string;
-  purposeDescription: string;
-  imageUrl: string;
+	purposeCode: string;
+	purposeDescription: string;
+	imageUrl: string;
 }
 
 interface PaymentAnalysisRequest {
-  creditorInfo: CreditorInfo;
-  instructedAmount: InstructedAmount;
-  remittanceInfo: RemittanceInfo;
-  flowName: string | null;
-  appVersion: string | null;
+	creditorInfo: CreditorInfo;
+	instructedAmount: InstructedAmount;
+	remittanceInfo: RemittanceInfo;
+	flowName: string | null;
+	appVersion: string | null;
 }
 
 interface PaymentAnalysisResult {
-  debitorInfo: {
-    name: string;
-    mobileNumber: string;
-  };
-  creditorInfo: {
-    name: string;
-    mobileNumber: string;
-  };
-  instructedAmount: InstructedAmount;
-  remittanceInfo: RemittanceInfo;
+	debitorInfo: {
+		name: string;
+		mobileNumber: string;
+	};
+	creditorInfo: {
+		name: string;
+		mobileNumber: string;
+	};
+	instructedAmount: InstructedAmount;
+	remittanceInfo: RemittanceInfo;
 }
 
 interface PaymentAnalysisResponse {
-  metadata: {
-    queryParameters: Record<string, any>;
-    pagination: {
-      totalPages: number;
-      totalRecords: number;
-      hasNext: boolean;
-    };
-  };
-  links: Array<{
-    href: string;
-    method: string;
-    rel: string;
-  }>;
-  data: {
-    results: PaymentAnalysisResult[];
-  };
+	metadata: {
+		queryParameters: Record<string, any>;
+		pagination: {
+			totalPages: number;
+			totalRecords: number;
+			hasNext: boolean;
+		};
+	};
+	links: Array<{
+		href: string;
+		method: string;
+		rel: string;
+	}>;
+	data: {
+		results: PaymentAnalysisResult[];
+	};
 }
 
 export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<
-    PaymentAnalysisResponse | { error: string; message?: string }
-  >
+	req: NextApiRequest,
+	res: NextApiResponse<
+		PaymentAnalysisResponse | { error: string; message?: string }
+	>,
 ) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+	if (req.method !== "POST") {
+		return res.status(405).json({ error: "Method not allowed" });
+	}
 
-  try {
-    const {
-      creditorInfo,
-      instructedAmount,
-      remittanceInfo,
-    }: PaymentAnalysisRequest = req.body;
+	try {
+		const {
+			creditorInfo,
+			instructedAmount,
+			remittanceInfo,
+		}: PaymentAnalysisRequest = req.body;
 
-    // Validate required fields
-    if (!creditorInfo?.mobileNumber) {
-      return res.status(400).json({
-        error: "creditorInfo.mobileNumber is required",
-      });
-    }
+		// Validate required fields
+		if (!creditorInfo?.mobileNumber) {
+			return res.status(400).json({
+				error: "creditorInfo.mobileNumber is required",
+			});
+		}
 
-    if (!instructedAmount?.amount || !instructedAmount?.currency) {
-      return res.status(400).json({
-        error:
-          "instructedAmount.amount and instructedAmount.currency are required",
-      });
-    }
+		if (!instructedAmount?.amount || !instructedAmount?.currency) {
+			return res.status(400).json({
+				error:
+					"instructedAmount.amount and instructedAmount.currency are required",
+			});
+		}
 
-    if (
-      !remittanceInfo?.purposeCode ||
-      remittanceInfo?.purposeDescription === undefined
-    ) {
-      return res.status(400).json({
-        error:
-          "remittanceInfo.purposeCode and remittanceInfo.purposeDescription are required",
-      });
-    }
+		if (
+			!remittanceInfo?.purposeCode ||
+			remittanceInfo?.purposeDescription === undefined
+		) {
+			return res.status(400).json({
+				error:
+					"remittanceInfo.purposeCode and remittanceInfo.purposeDescription are required",
+			});
+		}
 
-    // Get debitor info from the user (assuming single user)
-    const user = getUser();
-    if (!user) {
-      return res.status(400).json({
-        error: "User not found",
-      });
-    }
+		// Get debitor info from the user (assuming single user)
+		const user = getUser();
+		if (!user) {
+			return res.status(400).json({
+				error: "User not found",
+			});
+		}
 
-    // Mock creditor name lookup based on mobile number
-    const creditorName = generateCreditorName(creditorInfo.mobileNumber);
+		// Mock creditor name lookup based on mobile number
+		const creditorName = generateCreditorName(creditorInfo.mobileNumber);
 
-    // Format mobile numbers to international format
-    const formattedCreditorMobile = formatMobileNumber(
-      creditorInfo.mobileNumber
-    );
-    const formattedDebitorMobile = "+962775851126"; // Mock debitor mobile
+		// Format mobile numbers to international format
+		const formattedCreditorMobile = formatMobileNumber(
+			creditorInfo.mobileNumber,
+		);
+		const formattedDebitorMobile = "+962775851126"; // Mock debitor mobile
 
-    const result: PaymentAnalysisResult = {
-      debitorInfo: {
-        name: user.name,
-        mobileNumber: formattedDebitorMobile,
-      },
-      creditorInfo: {
-        name: creditorName,
-        mobileNumber: formattedCreditorMobile,
-      },
-      instructedAmount: {
-        amount: instructedAmount.amount,
-        currency: instructedAmount.currency,
-      },
-      remittanceInfo: {
-        purposeCode: remittanceInfo.purposeCode,
-        purposeDescription: remittanceInfo.purposeDescription,
-        imageUrl: remittanceInfo.imageUrl || "",
-      },
-    };
+		const result: PaymentAnalysisResult = {
+			debitorInfo: {
+				name: user.name,
+				mobileNumber: formattedDebitorMobile,
+			},
+			creditorInfo: {
+				name: creditorName,
+				mobileNumber: formattedCreditorMobile,
+			},
+			instructedAmount: {
+				amount: instructedAmount.amount,
+				currency: instructedAmount.currency,
+			},
+			remittanceInfo: {
+				purposeCode: remittanceInfo.purposeCode,
+				purposeDescription: remittanceInfo.purposeDescription,
+				imageUrl: remittanceInfo.imageUrl || "",
+			},
+		};
 
-    const response: PaymentAnalysisResponse = {
-      metadata: {
-        queryParameters: {},
-        pagination: {
-          totalPages: 1,
-          totalRecords: 1,
-          hasNext: false,
-        },
-      },
-      links: [
-        {
-          href: "/neobanking/payment-experience/v1/payments/analysis",
-          method: "POST",
-          rel: "self",
-        },
-      ],
-      data: {
-        results: [result],
-      },
-    };
+		const response: PaymentAnalysisResponse = {
+			metadata: {
+				queryParameters: {},
+				pagination: {
+					totalPages: 1,
+					totalRecords: 1,
+					hasNext: false,
+				},
+			},
+			links: [
+				{
+					href: "/neobanking/payment-experience/v1/payments/analysis",
+					method: "POST",
+					rel: "self",
+				},
+			],
+			data: {
+				results: [result],
+			},
+		};
 
-    return res.status(200).json(response);
-  } catch (error) {
-    console.error("Error analyzing payment:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+		return res.status(200).json(response);
+	} catch (error) {
+		console.error("Error analyzing payment:", error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
 }
 
 function formatMobileNumber(mobileNumber: string): string {
-  // Remove leading zeros and add +962 prefix if not present
-  let formatted = mobileNumber.replace(/^00/, "+");
-  if (!formatted.startsWith("+")) {
-    formatted = "+962" + formatted.replace(/^0+/, "");
-  }
-  return formatted;
+	// Remove leading zeros and add +962 prefix if not present
+	let formatted = mobileNumber.replace(/^00/, "+");
+	if (!formatted.startsWith("+")) {
+		formatted = `+962${formatted.replace(/^0+/, "")}`;
+	}
+	return formatted;
 }
 
 function generateCreditorName(mobileNumber: string): string {
-  // Mock name generation based on mobile number
-  const names = [
-    "Bana AlHasan",
-    "Ahmad Qadadeh",
-    "Mohammed Ali",
-    "Sara Ibrahim",
-    "Omar Khalil",
-  ];
-  const hash = mobileNumber
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return names[hash % names.length];
+	// Mock name generation based on mobile number
+	const names = [
+		"Bana AlHasan",
+		"Ahmad Qadadeh",
+		"Mohammed Ali",
+		"Sara Ibrahim",
+		"Omar Khalil",
+	];
+	const hash = mobileNumber
+		.split("")
+		.reduce((acc, char) => acc + char.charCodeAt(0), 0);
+	return names[hash % names.length];
 }
