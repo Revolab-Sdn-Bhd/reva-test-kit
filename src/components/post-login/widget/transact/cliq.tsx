@@ -1,25 +1,24 @@
 import { useState } from "react";
-import type { ReflectTransferWidget, ReflectWidget } from "@/lib/useWebSocket";
+import type { CliqTransferWidget, CliqWidget } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
-const ReflectWidgetComponent = ({
+const CliqWidgetComponent = ({
 	widget,
 	messageId,
 }: {
-	widget: ReflectWidget;
+	widget: CliqWidget;
 	messageId: string;
 }) => {
 	const { sendAction, sendMessage } = useWebSocketContext();
 
 	const [amount, setAmount] = useState<string>("0.000");
 
-	const isTransferWidget = (w: ReflectWidget): w is ReflectTransferWidget => {
-		return w.type === "REFLECTTRANSFERDETAIL";
+	const isTransferWidget = (w: CliqWidget): w is CliqTransferWidget => {
+		return w.type === "CLIQTRANSFERDETAIL";
 	};
 
 	const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
-		// Allow only numbers and decimal point
 		if (/^\d*\.?\d{0,3}$/.test(value) || value === "") {
 			setAmount(value);
 		}
@@ -38,7 +37,7 @@ const ReflectWidgetComponent = ({
 
 		if (button.id === "transfer" || button.id === "request") {
 			const amountValue = parseFloat(amount) || 0;
-			data = `Transfer ${amountValue.toFixed(3)} ${item.amount.currency}`;
+			data = `Send ${amountValue.toFixed(3)} ${item.amount.currency}`;
 
 			sendMessage(
 				JSON.stringify({
@@ -47,7 +46,7 @@ const ReflectWidgetComponent = ({
 				}),
 				data,
 			);
-		} else if (button.id === "changecontact") {
+		} else if (button.id === "changealias") {
 			if (messageId) {
 				sendAction(
 					{ event: button.payload.event, data: button.payload.data },
@@ -63,12 +62,12 @@ const ReflectWidgetComponent = ({
 			<div className="space-y-3">
 				{widget.items.map((item, index) => (
 					<div
-						key={`${item.contactNumber}-${index}`}
+						key={`${item.contactName}-${index}`}
 						className="rounded-2xl border border-gray-600 bg-gradient-to-br from-gray-700/40 to-gray-800/40 p-4"
 					>
-						{/* Contact Info Section */}
-						<div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-600">
-							<div className="flex items-center gap-3">
+						{/* contact info section */}
+						<div className="">
+							<div className="">
 								{item.icon ? (
 									<img
 										src={item.icon}
@@ -90,7 +89,8 @@ const ReflectWidgetComponent = ({
 									<p className="text-sm text-gray-300">{item.contactNumber}</p>
 								</div>
 							</div>
-							{/* Change Contact Button */}
+
+							{/* Change alias Button */}
 							{item.buttons && item.buttons.length > 1 && (
 								<button
 									onClick={() => handleButtonClick(item.buttons[1], item)}
@@ -101,7 +101,7 @@ const ReflectWidgetComponent = ({
 							)}
 						</div>
 
-						{/* Amount Section */}
+						{/* amount section */}
 						<div className="mb-4">
 							<div className="flex items-center justify-between mb-2">
 								<span className="text-sm text-gray-300">Amount</span>
@@ -172,4 +172,4 @@ const ReflectWidgetComponent = ({
 	);
 };
 
-export default ReflectWidgetComponent;
+export default CliqWidgetComponent;

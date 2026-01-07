@@ -5,6 +5,7 @@ import { FaMicrophone } from "react-icons/fa";
 import {
 	type BillPaymentWidget,
 	type ButtonWidget,
+	type CliqWidget,
 	type InsufficientConfirmWidget,
 	type MessageWidget,
 	MessageWidgetType,
@@ -17,6 +18,7 @@ import { useWebSocketContext } from "@/lib/WebSocketProvider";
 import PreConfirmationCard from "../pre-confirm-card";
 import ButtonWidgetComponent from "../widget/button";
 import BillPaymentWidgetComponent from "../widget/transact/bill-payment";
+import CliqWidgetComponent from "../widget/transact/cliq";
 import InsufficientConfirmWidgetComponent from "../widget/transact/insufficient-confirm-widget";
 import MultiCurrencyWidgetComponent from "../widget/transact/multi-currency";
 import ReflectWidgetComponent from "../widget/transact/reflect";
@@ -49,25 +51,34 @@ const ChatMessageSection = () => {
 			MessageWidgetType.REFLECTTRANSFERDETAIL,
 			MessageWidgetType.REFLECTREQUESTDETAIL,
 		],
+		cliq: [
+			MessageWidgetType.CLIQTRANSFERDETAIL,
+			MessageWidgetType.CLIQREQUESTDETAIL,
+		],
 		insufficientConfirm: [
 			MessageWidgetType.SAVINGSPACENOACCOUNT,
 			MessageWidgetType.MULTICURRENCYNOACCOUNT,
 			MessageWidgetType.BILLERNOACCOUNT,
+			MessageWidgetType.CLIQNOACCOUNT,
 			MessageWidgetType.CURRENTACCOUNTINSUFFICIENTBALANCE,
 			MessageWidgetType.SAVINGSPACEACCOUNTINSUFFICIENTBALANCE,
 			MessageWidgetType.MULTICURRENCYACCOUNTINSUFFICIENTBALANCE,
 			MessageWidgetType.REFLECTTRANSFERINSUFFICIENTBALANCE,
+			MessageWidgetType.CLIQTRANSFERINSUFFICIENTBALANCE,
 			MessageWidgetType.CURRENTACCOUNTAVAILABLEBALANCE,
 			MessageWidgetType.SAVINGSPACEACCOUNTAVAILABLEBALANCE,
 			MessageWidgetType.MULTICURRENCYACCOUNTAVAILABLEBALANCE,
 			MessageWidgetType.REFLECTTRANSFERAVAILABLEBALANCE,
 			MessageWidgetType.REFLECTREQUESTAVAILABLEBALANCE,
+			MessageWidgetType.CLIQTRANSFERAVAILABLEBALANCE,
+			MessageWidgetType.CLIQREQUESTAVAILABLEBALANCE,
 		],
 		transactionOption: [
 			MessageWidgetType.TRANSFERMONEY,
 			MessageWidgetType.REQUESTMONEY,
 			MessageWidgetType.REFLECTTRANSFER,
 			MessageWidgetType.REFLECTREQUEST,
+			MessageWidgetType.DROPDOWN,
 		],
 	} as const;
 
@@ -100,6 +111,14 @@ const ChatMessageSection = () => {
 			return (
 				<ReflectWidgetComponent
 					widget={widget as ReflectWidget}
+					messageId={messageId}
+				/>
+			);
+		}
+		if (WIDGET_TYPE_GROUPS.cliq.includes(widget.type as any)) {
+			return (
+				<CliqWidgetComponent
+					widget={widget as CliqWidget}
 					messageId={messageId}
 				/>
 			);

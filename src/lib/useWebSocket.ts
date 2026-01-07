@@ -176,6 +176,15 @@ export type InsufficientConfirmWidget = {
 	type: string;
 	text: string;
 	buttons: Array<InsufficientConfirmButton>;
+	placeholders?: {
+		id: string;
+		type: string;
+		label: string;
+		action: {
+			type: string;
+			widgetType: string;
+		};
+	}[];
 };
 
 export type InsufficientConfirmButton = InsufficientButton | WidgetButton;
@@ -242,6 +251,46 @@ export type ReflectRequestWidget = {
 	}[];
 };
 
+export type CliqWidget = CliqTransferWidget | CliqRequestWidget;
+
+export type CliqTransferWidget = {
+	type: "CLIQTRANSFERDETAIL";
+	text: string;
+	items: {
+		title: string;
+		icon: string;
+		contactNumber: string;
+		contactName: string;
+		amount: {
+			type: string;
+			currency: string;
+			amount: number;
+		};
+		availableBalance: {
+			currency: string;
+			amount: number;
+		};
+		buttons: WidgetButton[];
+	}[];
+};
+
+export type CliqRequestWidget = {
+	type: "CLIQREQUESTDETAIL";
+	text: string;
+	items: {
+		title: string;
+		icon: string;
+		contactNumber: string;
+		contactName: string;
+		amount: {
+			type: string;
+			currency: string;
+			amount: number;
+		};
+		buttons: WidgetButton[];
+	}[];
+};
+
 export interface ButtonWidget {
 	type: MessageWidgetType.BUTTON;
 	buttons: Array<
@@ -264,6 +313,7 @@ export enum MessageWidgetType {
 	SAVINGSPACENOACCOUNT = "SAVINGSPACENOACCOUNT",
 	MULTICURRENCYNOACCOUNT = "MULTICURRENCYNOACCOUNT",
 	BILLERNOACCOUNT = "BILLERNOACCOUNT",
+	CLIQNOACCOUNT = "CLIQNOACCOUNT",
 
 	SAVINGSPACEACCOUNTLIST = "SAVINGSPACEACCOUNTLIST",
 	SAVINGSPACEACCOUNT = "SAVINGSPACEACCOUNT",
@@ -282,16 +332,24 @@ export enum MessageWidgetType {
 	REFLECTREQUEST = "REFLECTREQUEST",
 	REFLECTREQUESTDETAIL = "REFLECTREQUESTDETAIL",
 
+	CLIQTRANSFERDETAIL = "CLIQTRANSFERDETAIL",
+	CLIQREQUESTDETAIL = "CLIQREQUESTDETAIL",
+
+	DROPDOWN = "DROPDOWN",
+
 	CURRENTACCOUNTINSUFFICIENTBALANCE = "CURRENTACCOUNTINSUFFICIENTBALANCE",
 	SAVINGSPACEACCOUNTINSUFFICIENTBALANCE = "SAVINGSPACEACCOUNTINSUFFICIENTBALANCE",
 	MULTICURRENCYACCOUNTINSUFFICIENTBALANCE = "MULTICURRENCYACCOUNTINSUFFICIENTBALANCE",
 	REFLECTTRANSFERINSUFFICIENTBALANCE = "REFLECTTRANSFERINSUFFICIENTBALANCE",
+	CLIQTRANSFERINSUFFICIENTBALANCE = "CLIQTRANSFERINSUFFICIENTBALANCE",
 
 	CURRENTACCOUNTAVAILABLEBALANCE = "CURRENTACCOUNTAVAILABLEBALANCE",
 	MULTICURRENCYACCOUNTAVAILABLEBALANCE = "MULTICURRENCYACCOUNTAVAILABLEBALANCE",
 	SAVINGSPACEACCOUNTAVAILABLEBALANCE = "SAVINGSPACEACCOUNTAVAILABLEBALANCE",
 	REFLECTTRANSFERAVAILABLEBALANCE = "REFLECTTRANSFERAVAILABLEBALANCE",
 	REFLECTREQUESTAVAILABLEBALANCE = "REFLECTREQUESTAVAILABLEBALANCE",
+	CLIQTRANSFERAVAILABLEBALANCE = "CLIQTRANSFERAVAILABLEBALANCE",
+	CLIQREQUESTAVAILABLEBALANCE = "CLIQREQUESTAVAILABLEBALANCE",
 }
 
 export type TransactWidget =
@@ -300,7 +358,8 @@ export type TransactWidget =
 	| BillPaymentWidget
 	| InsufficientConfirmWidget
 	| TransactionOptionWidget
-	| ReflectWidget;
+	| ReflectWidget
+	| CliqWidget;
 
 export type MessageWidget = ButtonWidget | TransactWidget;
 
@@ -377,8 +436,20 @@ export enum EventType {
 	SESSION_LANGUAGE = "SESSION_LANGUAGE",
 	CALL_STATUS = "CALL_STATUS",
 	POST_CONFIRMATION = "POST_CONFIRMATION",
+
 	SELECT_ACCOUNT = "SELECT_ACCOUNT",
 	SELECT_ANOTHER_ACCOUNT = "SELECT_ANOTHER_ACCOUNT",
+	SELECT_TRANSFER_OPTION = "SELECT_TRANSFER_OPTION",
+	SELECT_ONE_TIME_TRANSFER = "SELECT_ONE_TIME_TRANSFER",
+	SELECT_CONTACT = "SELECT_CONTACT",
+	SELECT_ANOTHER_CONTACT = "SELECT_ANOTHER_CONTACT",
+	SELECT_REQUEST_OPTION = "SELECT_REQUEST_OPTION",
+	SELECT_ONE_TIME_REQUEST = "SELECT_ONE_TIME_REQUEST",
+	SELECT_ALIAS_TYPE = "SELECT_ALIAS_TYPE",
+	SELECT_ANOTHER_ALIAS = "SELECT_ANOTHER_ALIAS",
+	SELECT_PURPOSE = "SELECT_PURPOSE",
+	SELECT_BANK = "SELECT_BANK",
+
 	PRE_CONFIRMATION = "PRE_CONFIRMATION",
 }
 
@@ -548,6 +619,16 @@ export const useWebSocket = () => {
 						break;
 					case EventType.SELECT_ACCOUNT:
 					case EventType.SELECT_ANOTHER_ACCOUNT:
+					case EventType.SELECT_TRANSFER_OPTION:
+					case EventType.SELECT_ONE_TIME_TRANSFER:
+					case EventType.SELECT_CONTACT:
+					case EventType.SELECT_ANOTHER_CONTACT:
+					case EventType.SELECT_REQUEST_OPTION:
+					case EventType.SELECT_ONE_TIME_REQUEST:
+					case EventType.SELECT_ALIAS_TYPE:
+					case EventType.SELECT_ANOTHER_ALIAS:
+					case EventType.SELECT_PURPOSE:
+					case EventType.SELECT_BANK:
 						break;
 					case EventType.PRE_CONFIRMATION:
 						{
@@ -735,12 +816,11 @@ export const useWebSocket = () => {
 				} else if (
 					action.event === "SELECT_ACCOUNT" ||
 					action.event === "SELECT_ANOTHER_ACCOUNT" ||
-					action.event === "SELECT_TRANSFER_OPTION" ||
-					action.event === "SELECT_ONE_TIME_TRANSFER" ||
 					action.event === "SELECT_CONTACT" ||
 					action.event === "SELECT_ANOTHER_CONTACT" ||
-					action.event === "SELECT_REQUEST_OPTION" ||
-					action.event === "SELECT_ONE_TIME_REQUEST"
+					action.event === "SELECT_ALIAS_TYPE" ||
+					action.event === "SELECT_ANOTHER_ALIAS" ||
+					action.event === "SELECT_PURPOSE"
 				) {
 					payload = {
 						event: action.event,
