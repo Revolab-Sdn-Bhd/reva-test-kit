@@ -1,4 +1,5 @@
 import type { TransactionOptionWidget } from "@/lib/useWebSocket";
+import { EventType } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
 const TransactionOptionWidgetComponent = ({
@@ -8,19 +9,32 @@ const TransactionOptionWidgetComponent = ({
 	widget: TransactionOptionWidget;
 	messageId: string;
 }) => {
-	const { sendAction } = useWebSocketContext();
+	const { sendAction, sendMessage } = useWebSocketContext();
 
 	const handleItemClick = (payload: { event: string; data: string }) => {
-		if (payload.event === "SELECT_CONTACT") {
+		if (payload.event === EventType.SELECT_CONTACT) {
 			sendAction(
 				{ event: payload.event, data: "AHMED ABU QUWAIS:+962 79 123 4567" },
 				messageId,
 			);
 		}
 
-		if (messageId) {
-			sendAction({ event: payload.event, data: payload.data }, messageId);
+		if (
+			payload.event === EventType.SELECT_TRANSFER_OPTION ||
+			payload.event === EventType.SELECT_ONE_TIME_TRANSFER ||
+			payload.event === EventType.SELECT_REQUEST_OPTION ||
+			payload.event === EventType.SELECT_ONE_TIME_REQUEST
+		) {
+			sendMessage(
+				JSON.stringify({
+					event: payload.event,
+					data: payload.data,
+				}),
+				payload.data,
+			);
 		}
+
+		sendAction({ event: payload.event, data: payload.data }, messageId);
 	};
 
 	return (
