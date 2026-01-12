@@ -203,6 +203,7 @@ export type TransactionOptionWidget = {
 	items: {
 		title: string;
 		type?: string;
+		iban?: string;
 		icon: string;
 		payload: {
 			event: string;
@@ -291,6 +292,26 @@ export type CliqRequestWidget = {
 	}[];
 };
 
+export type IbanTransferWidget = {
+	type: "IBANTRANSFERDETAIL";
+	text: string;
+	items: {
+		title: string;
+		icon: string;
+		iban: string;
+		amount: {
+			type: string;
+			currency: string;
+			amount: number;
+		};
+		availableBalance: {
+			currency: string;
+			amount: number;
+		};
+		buttons: WidgetButton[];
+	}[];
+};
+
 export interface ButtonWidget {
 	type: MessageWidgetType.BUTTON;
 	buttons: Array<
@@ -314,6 +335,7 @@ export enum MessageWidgetType {
 	MULTICURRENCYNOACCOUNT = "MULTICURRENCYNOACCOUNT",
 	BILLERNOACCOUNT = "BILLERNOACCOUNT",
 	CLIQNOACCOUNT = "CLIQNOACCOUNT",
+	IBANNOSAVEDCONTACT = "IBANNOSAVEDCONTACT",
 
 	SAVINGSPACEACCOUNTLIST = "SAVINGSPACEACCOUNTLIST",
 	SAVINGSPACEACCOUNT = "SAVINGSPACEACCOUNT",
@@ -337,11 +359,15 @@ export enum MessageWidgetType {
 
 	DROPDOWN = "DROPDOWN",
 
+	SAVEDIBANS = "SAVEDIBANS",
+	IBANTRANSFERDETAIL = "IBANTRANSFERDETAIL",
+
 	CURRENTACCOUNTINSUFFICIENTBALANCE = "CURRENTACCOUNTINSUFFICIENTBALANCE",
 	SAVINGSPACEACCOUNTINSUFFICIENTBALANCE = "SAVINGSPACEACCOUNTINSUFFICIENTBALANCE",
 	MULTICURRENCYACCOUNTINSUFFICIENTBALANCE = "MULTICURRENCYACCOUNTINSUFFICIENTBALANCE",
 	REFLECTTRANSFERINSUFFICIENTBALANCE = "REFLECTTRANSFERINSUFFICIENTBALANCE",
 	CLIQTRANSFERINSUFFICIENTBALANCE = "CLIQTRANSFERINSUFFICIENTBALANCE",
+	IBANTRANSFERINSUFFICIENTBALANCE = "IBANTRANSFERINSUFFICIENTBALANCE",
 
 	CURRENTACCOUNTAVAILABLEBALANCE = "CURRENTACCOUNTAVAILABLEBALANCE",
 	MULTICURRENCYACCOUNTAVAILABLEBALANCE = "MULTICURRENCYACCOUNTAVAILABLEBALANCE",
@@ -350,6 +376,9 @@ export enum MessageWidgetType {
 	REFLECTREQUESTAVAILABLEBALANCE = "REFLECTREQUESTAVAILABLEBALANCE",
 	CLIQTRANSFERAVAILABLEBALANCE = "CLIQTRANSFERAVAILABLEBALANCE",
 	CLIQREQUESTAVAILABLEBALANCE = "CLIQREQUESTAVAILABLEBALANCE",
+	IBANAVAILABLEBALANCE = "IBANAVAILABLEBALANCE",
+
+	CANCELTRANSACTION = "CANCELTRANSACTION",
 }
 
 export type TransactWidget =
@@ -359,7 +388,8 @@ export type TransactWidget =
 	| InsufficientConfirmWidget
 	| TransactionOptionWidget
 	| ReflectWidget
-	| CliqWidget;
+	| CliqWidget
+	| IbanTransferWidget;
 
 export type MessageWidget = ButtonWidget | TransactWidget;
 
@@ -451,6 +481,7 @@ export enum EventType {
 	SELECT_BANK = "SELECT_BANK",
 
 	PRE_CONFIRMATION = "PRE_CONFIRMATION",
+	CANCEL_TRANSACTION = "CANCEL_TRANSACTION",
 }
 
 export const useWebSocket = () => {
@@ -629,6 +660,7 @@ export const useWebSocket = () => {
 					case EventType.SELECT_ANOTHER_ALIAS:
 					case EventType.SELECT_PURPOSE:
 					case EventType.SELECT_BANK:
+					case EventType.CANCEL_TRANSACTION:
 						break;
 					case EventType.PRE_CONFIRMATION:
 						{
@@ -820,7 +852,9 @@ export const useWebSocket = () => {
 					action.event === "SELECT_ANOTHER_CONTACT" ||
 					action.event === "SELECT_ALIAS_TYPE" ||
 					action.event === "SELECT_ANOTHER_ALIAS" ||
-					action.event === "SELECT_PURPOSE"
+					action.event === "SELECT_PURPOSE" ||
+					action.event === "CANCEL_TRANSACTION" ||
+					action.event === "SELECT_BANK"
 				) {
 					payload = {
 						event: action.event,
