@@ -6,6 +6,7 @@ import {
 	type BillPaymentWidget,
 	type ButtonWidget,
 	type CliqWidget,
+	type IbanTransferWidget,
 	type InsufficientConfirmWidget,
 	type MessageWidget,
 	MessageWidgetType,
@@ -19,6 +20,7 @@ import PreConfirmationCard from "../pre-confirm-card";
 import ButtonWidgetComponent from "../widget/button";
 import BillPaymentWidgetComponent from "../widget/transact/bill-payment";
 import CliqWidgetComponent from "../widget/transact/cliq";
+import IbanWidgetComponent from "../widget/transact/iban";
 import InsufficientConfirmWidgetComponent from "../widget/transact/insufficient-confirm-widget";
 import MultiCurrencyWidgetComponent from "../widget/transact/multi-currency";
 import ReflectWidgetComponent from "../widget/transact/reflect";
@@ -55,6 +57,7 @@ const ChatMessageSection = () => {
 			MessageWidgetType.CLIQTRANSFERDETAIL,
 			MessageWidgetType.CLIQREQUESTDETAIL,
 		],
+		iban: [MessageWidgetType.IBANTRANSFERDETAIL],
 		insufficientConfirm: [
 			MessageWidgetType.SAVINGSPACENOACCOUNT,
 			MessageWidgetType.MULTICURRENCYNOACCOUNT,
@@ -65,6 +68,7 @@ const ChatMessageSection = () => {
 			MessageWidgetType.MULTICURRENCYACCOUNTINSUFFICIENTBALANCE,
 			MessageWidgetType.REFLECTTRANSFERINSUFFICIENTBALANCE,
 			MessageWidgetType.CLIQTRANSFERINSUFFICIENTBALANCE,
+			MessageWidgetType.IBANTRANSFERINSUFFICIENTBALANCE,
 			MessageWidgetType.CURRENTACCOUNTAVAILABLEBALANCE,
 			MessageWidgetType.SAVINGSPACEACCOUNTAVAILABLEBALANCE,
 			MessageWidgetType.MULTICURRENCYACCOUNTAVAILABLEBALANCE,
@@ -72,6 +76,9 @@ const ChatMessageSection = () => {
 			MessageWidgetType.REFLECTREQUESTAVAILABLEBALANCE,
 			MessageWidgetType.CLIQTRANSFERAVAILABLEBALANCE,
 			MessageWidgetType.CLIQREQUESTAVAILABLEBALANCE,
+			MessageWidgetType.IBANAVAILABLEBALANCE,
+			MessageWidgetType.IBANNOSAVEDCONTACT,
+			MessageWidgetType.CANCELTRANSACTION,
 		],
 		transactionOption: [
 			MessageWidgetType.TRANSFERMONEY,
@@ -79,6 +86,7 @@ const ChatMessageSection = () => {
 			MessageWidgetType.REFLECTTRANSFER,
 			MessageWidgetType.REFLECTREQUEST,
 			MessageWidgetType.DROPDOWN,
+			MessageWidgetType.SAVEDIBANS,
 		],
 	} as const;
 
@@ -123,10 +131,19 @@ const ChatMessageSection = () => {
 				/>
 			);
 		}
+		if (WIDGET_TYPE_GROUPS.iban.includes(widget.type as any)) {
+			return (
+				<IbanWidgetComponent
+					widget={widget as IbanTransferWidget}
+					messageId={messageId}
+				/>
+			);
+		}
 		if (WIDGET_TYPE_GROUPS.insufficientConfirm.includes(widget.type as any)) {
 			return (
 				<InsufficientConfirmWidgetComponent
 					widget={widget as InsufficientConfirmWidget}
+					messageId={messageId}
 				/>
 			);
 		}

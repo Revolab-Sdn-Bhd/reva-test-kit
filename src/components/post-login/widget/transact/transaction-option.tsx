@@ -66,6 +66,12 @@ const TransactionOptionWidgetComponent = ({
 							<div className="flex-1 min-w-0">
 								<h4 className="font-medium text-white">{item.title}</h4>
 							</div>
+
+							{item.iban && (
+								<div className="flex-1 min-w-0">
+									<h4 className="font-medium text-white">{item.iban}</h4>
+								</div>
+							)}
 						</div>
 					</div>
 				))}
