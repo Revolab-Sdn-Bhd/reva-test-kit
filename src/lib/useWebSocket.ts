@@ -785,7 +785,6 @@ export const useWebSocket = () => {
 						}
 						break;
 					case EventType.POST_CONFIRMATION:
-						break;
 					case EventType.SELECT_ACCOUNT:
 						break;
 					default: {
@@ -854,7 +853,8 @@ export const useWebSocket = () => {
 					action.event === "SELECT_ANOTHER_ALIAS" ||
 					action.event === "SELECT_PURPOSE" ||
 					action.event === "CANCEL_TRANSACTION" ||
-					action.event === "SELECT_BANK"
+					action.event === "SELECT_BANK" ||
+					action.event === "SELECT_SAVED_BENEFICIARY"
 				) {
 					payload = {
 						event: action.event,
