@@ -17,9 +17,7 @@ const TransactionOptionWidgetComponent = ({
 				{ event: payload.event, data: "AHMED ABU QUWAIS:+962 79 123 4567" },
 				messageId,
 			);
-		}
-
-		if (
+		} else if (
 			payload.event === EventType.SELECT_TRANSFER_OPTION ||
 			payload.event === EventType.SELECT_ONE_TIME_TRANSFER ||
 			payload.event === EventType.SELECT_REQUEST_OPTION ||
@@ -32,9 +30,9 @@ const TransactionOptionWidgetComponent = ({
 				}),
 				payload.data,
 			);
+		} else {
+			sendAction({ event: payload.event, data: payload.data }, messageId);
 		}
-
-		sendAction({ event: payload.event, data: payload.data }, messageId);
 	};
 
 	return (
@@ -58,13 +56,14 @@ const TransactionOptionWidgetComponent = ({
 									}}
 								/>
 							)}
-							{item.type === "CONTACTLIST" && (
-								<div className="text-sm bg-gray-500">
-									Contact is hardcoded: AHMED ABU QUWAIS:+962 79 123 4567
-								</div>
-							)}
 							<div className="flex-1 min-w-0">
 								<h4 className="font-medium text-white">{item.title}</h4>
+
+								{item.type === "CONTACTLIST" && (
+									<p className="text-xs text-gray-600">
+										Contact is hardcoded: AHMED ABU QUWAIS:+962 79 123 4567
+									</p>
+								)}
 							</div>
 
 							{item.iban && (
