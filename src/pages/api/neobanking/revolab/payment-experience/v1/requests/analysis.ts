@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getUser } from "@/lib/cache";
+import { getNameByNumber, getUser } from "@/lib/cache";
 
 interface ReceiverInfo {
 	name: string;
@@ -108,7 +108,12 @@ export default function handler(
 		}
 
 		// Mock receiver name lookup based on mobile number
-		const receiverName = generateReceiverName(receiverInfo.mobileNumber);
+		const receiverName = getReceiverName(receiverInfo.mobileNumber);
+		if (receiverName === null) {
+			return res.status(404).json({
+				error: "Receiver not exist",
+			});
+		}
 
 		// Format mobile numbers to international format
 		const formattedReceiverMobile = formatMobileNumber(
@@ -184,17 +189,12 @@ function formatMobileNumber(mobileNumber: string): string {
 	return formatted;
 }
 
-function generateReceiverName(mobileNumber: string): string {
-	// Mock name generation based on mobile number
-	const names = [
-		"AHMAD QADADEH",
-		"Bana AlHasan",
-		"MOHAMMED YOUSSEF",
-		"SARA KHALIL",
-		"OMAR HASSAN",
-	];
-	const hash = mobileNumber
-		.split("")
-		.reduce((acc, char) => acc + char.charCodeAt(0), 0);
-	return names[hash % names.length];
+function getReceiverName(mobileNumber: string): string | null {
+	const receiverName = getNameByNumber(mobileNumber);
+
+	if (receiverName === null) {
+		return null;
+	}
+
+	return receiverName;
 }

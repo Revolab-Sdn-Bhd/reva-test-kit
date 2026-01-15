@@ -110,7 +110,7 @@ export default function handler(
 		const creditorName = getCreditorName(creditorInfo.mobileNumber);
 		if (creditorName === null) {
 			return res.status(404).json({
-				error: "Creditor user not exist",
+				error: "Creditor not exist",
 			});
 		}
 
