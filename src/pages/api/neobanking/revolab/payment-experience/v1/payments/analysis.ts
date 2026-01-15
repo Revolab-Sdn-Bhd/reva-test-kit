@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getUser } from "@/lib/cache";
+import { getNameByNumber, getUser } from "@/lib/cache";
 
 interface CreditorInfo {
 	name: string;
@@ -106,8 +106,13 @@ export default function handler(
 			});
 		}
 
-		// Mock creditor name lookup based on mobile number
-		const creditorName = generateCreditorName(creditorInfo.mobileNumber);
+		// searching name by number
+		const creditorName = getCreditorName(creditorInfo.mobileNumber);
+		if (creditorName === null) {
+			return res.status(404).json({
+				error: "Creditor user not exist",
+			});
+		}
 
 		// Format mobile numbers to international format
 		const formattedCreditorMobile = formatMobileNumber(
@@ -172,17 +177,12 @@ function formatMobileNumber(mobileNumber: string): string {
 	return formatted;
 }
 
-function generateCreditorName(mobileNumber: string): string {
-	// Mock name generation based on mobile number
-	const names = [
-		"Bana AlHasan",
-		"Ahmad Qadadeh",
-		"Mohammed Ali",
-		"Sara Ibrahim",
-		"Omar Khalil",
-	];
-	const hash = mobileNumber
-		.split("")
-		.reduce((acc, char) => acc + char.charCodeAt(0), 0);
-	return names[hash % names.length];
+function getCreditorName(mobileNumber: string): string | null {
+	const creditorName = getNameByNumber(mobileNumber);
+
+	if (creditorName === null) {
+		return null;
+	}
+
+	return creditorName;
 }

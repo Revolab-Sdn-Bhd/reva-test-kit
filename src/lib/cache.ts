@@ -97,6 +97,16 @@ const initDB = (): Database.Database => {
     )
   `);
 
+	db.exec(`
+	CREATE TABLE IF NOT EXISTS reflect_account (
+	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+	  name TEXT NOT NULL,
+	  mobileNumber TEXT NOT NULL,
+	  createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL
+	)
+  `);
+
 	// Create indexes for better query performance
 	db.exec(`
     CREATE INDEX IF NOT EXISTS idx_sub_accounts_user ON sub_accounts(userId);
@@ -598,4 +608,94 @@ export const deleteBillProfile = (customerProviderIdentifier: string): void => {
 	db.prepare(
 		"DELETE FROM bill_profiles WHERE customerProviderIdentifier = ?",
 	).run(customerProviderIdentifier);
+};
+
+// ============= Reflect Account Functions =============
+
+export interface ReflectAccount {
+	id: number;
+	name: string;
+	mobileNumber: string;
+}
+
+/**
+ * get all reflect account
+ */
+export const getAllReflectAccount = (): ReflectAccount[] => {
+	const db = getDB();
+	const rows = db
+		.prepare("SELECT * FROM reflect_account ORDER BY createdAt DESC")
+		.all();
+
+	return rows.map((row: any) => ({
+		id: row.id,
+		name: row.name,
+		mobileNumber: row.mobileNumber,
+	}));
+};
+
+/**
+ * get name by number
+ */
+export const getNameByNumber = (number: string): string | null => {
+	const db = getDB();
+	const row = db
+		.prepare("SELECT name FROM reflect_account WHERE mobileNumber = ?")
+		.get(number);
+
+	if (!row) return null;
+
+	return (row as any).name;
+};
+
+/**
+ * get name by id
+ */
+export const getAccountByID = (id: number): string | null => {
+	const db = getDB();
+	const row = db
+		.prepare("SELECT name FROM reflect_account WHERE id = ?")
+		.get(id);
+
+	if (!row) return null;
+
+	return (row as any).name;
+};
+
+/**
+ * Create a new reflect account
+ */
+export const createReflectAccount = ({
+	name,
+	mobileNumber,
+}: {
+	name: string;
+	mobileNumber: string;
+}): { id: number; name: string; mobileNumber: string } => {
+	const db = getDB();
+	const now = new Date().toISOString();
+
+	const result = db
+		.prepare(
+			`
+	INSERT INTO reflect_account (name, mobileNumber, createdAt, updatedAt)
+	VALUES (?, ?, ?, ?)
+	RETURNING id, name, mobileNumber
+	`,
+		)
+		.get(name, mobileNumber, now, now) as {
+		id: number;
+		name: string;
+		mobileNumber: string;
+	};
+
+	return result;
+};
+
+/**
+ * Delete reflect account by id
+ */
+export const deleteReflectAccountById = (id: number): void => {
+	const db = getDB();
+	db.prepare("DELETE FROM reflect_account WHERE id = ?").run(id);
 };
