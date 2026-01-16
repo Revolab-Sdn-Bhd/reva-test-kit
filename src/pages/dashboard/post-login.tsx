@@ -11,6 +11,7 @@ import AccountSection from "@/components/post-login/tabs/account";
 import BillsSection from "@/components/post-login/tabs/bills";
 import ConnectionTab from "@/components/post-login/tabs/connection";
 import CustomPayloadTab from "@/components/post-login/tabs/custom-payload";
+import TransferAccountSection from "@/components/post-login/tabs/transfer-account";
 import WebsocketLogs from "@/components/post-login/websocket-logs";
 import { useEnvConfig } from "@/hooks/useEnvConfig";
 import {
@@ -22,12 +23,18 @@ import {
 	WebSocketProvider,
 } from "@/lib/WebSocketProvider";
 
-type ConfigTab = "connection" | "custom-json" | "user-account" | "bills";
+type ConfigTab =
+	| "connection"
+	| "custom-json"
+	| "user-account"
+	| "bills"
+	| "transfer-account";
 
 const Tabs = [
 	{ label: "Connection", value: "connection" },
 	{ label: "User Account", value: "user-account" },
 	{ label: "Bills", value: "bills" },
+	{ label: "Transfer Account", value: "transfer-account" },
 	{ label: "Custom JSON", value: "custom-json" },
 ];
 
@@ -140,6 +147,9 @@ function PostLoginContent() {
 							)}
 							{activeTab === "bills" && (
 								<BillsSection isConnected={isConnected} />
+							)}
+							{activeTab === "transfer-account" && (
+								<TransferAccountSection isConnected={isConnected} />
 							)}
 							{activeTab === "custom-json" && (
 								<CustomPayloadTab isConnected={isConnected} />
