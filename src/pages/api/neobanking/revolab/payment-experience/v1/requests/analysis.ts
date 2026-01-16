@@ -115,10 +115,6 @@ export default function handler(
 			});
 		}
 
-		// Format mobile numbers to international format
-		const formattedReceiverMobile = formatMobileNumber(
-			receiverInfo.mobileNumber,
-		);
 		const formattedSenderMobile = "+962775851126"; // Mock sender mobile
 
 		// Calculate charge and total amount (no charge for request)
@@ -128,7 +124,7 @@ export default function handler(
 		const result: RequestAnalysisResult = {
 			receiverInfo: {
 				name: receiverName,
-				mobileNumber: formattedReceiverMobile,
+				mobileNumber: receiverInfo.mobileNumber,
 			},
 			senderInfo: {
 				name: user.name,
@@ -178,15 +174,6 @@ export default function handler(
 		console.error("Error analyzing request:", error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
-}
-
-function formatMobileNumber(mobileNumber: string): string {
-	// Remove leading zeros and add +962 prefix if not present
-	let formatted = mobileNumber.replace(/^00/, "+");
-	if (!formatted.startsWith("+")) {
-		formatted = `+962${formatted.replace(/^0+/, "")}`;
-	}
-	return formatted;
 }
 
 function getReceiverName(mobileNumber: string): string | null {

@@ -47,6 +47,13 @@ export default function handler(
 				});
 			}
 
+			const validateJODNumber = validateJodNumber(mobileNumber);
+			if (!validateJODNumber) {
+				return res.status(400).json({
+					error: "Must put correct JOD Number Format",
+				});
+			}
+
 			const existingReflectUser = getNameByNumber(mobileNumber);
 			if (existingReflectUser != null) {
 				return res.status(400).json({
@@ -104,4 +111,24 @@ export default function handler(
 	}
 
 	return res.status(405).json({ error: "Method not allowed" });
+}
+
+function validateJodNumber(mobileNumber: string): boolean {
+	/**
+	 * Validate Jordanian mobile numbers.
+	 *
+	 * Acceptable formats:
+	 * - Local: 07XXXXXXXX
+	 * - International: +9627XXXXXXX
+	 * - Spaces allowed between digits for display (will be ignored)
+	 */
+
+	// Remove spaces and dashes
+	const cleaned = mobileNumber.replace(/[\s-]/g, "");
+
+	// Regex: local or international format
+	// Matches: +9627[7895]XXXXXXX or 07[7895]XXXXXXX
+	const pattern = /^(?:\+9627[7895]\d{7}|07[7895]\d{7})$/;
+
+	return pattern.test(cleaned);
 }
