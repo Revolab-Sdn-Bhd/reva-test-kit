@@ -197,8 +197,8 @@ const TransferAccountSection = ({
 								size="xs"
 							/>
 							<TextInput
-								label="Mobile Number"
-								placeholder="e.g., 03001234567"
+								label="Mobile Number (With Country Code)"
+								placeholder="e.g., +962 79 1234567"
 								value={reflectMobileNumber}
 								onChange={(e) => setReflectMobileNumber(e.target.value)}
 								required

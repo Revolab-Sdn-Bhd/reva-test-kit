@@ -114,10 +114,6 @@ export default function handler(
 			});
 		}
 
-		// Format mobile numbers to international format
-		const formattedCreditorMobile = formatMobileNumber(
-			creditorInfo.mobileNumber,
-		);
 		const formattedDebitorMobile = "+962775851126"; // Mock debitor mobile
 
 		const result: PaymentAnalysisResult = {
@@ -127,7 +123,7 @@ export default function handler(
 			},
 			creditorInfo: {
 				name: creditorName,
-				mobileNumber: formattedCreditorMobile,
+				mobileNumber: creditorInfo.mobileNumber,
 			},
 			instructedAmount: {
 				amount: instructedAmount.amount,
@@ -166,15 +162,6 @@ export default function handler(
 		console.error("Error analyzing payment:", error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
-}
-
-function formatMobileNumber(mobileNumber: string): string {
-	// Remove leading zeros and add +962 prefix if not present
-	let formatted = mobileNumber.replace(/^00/, "+");
-	if (!formatted.startsWith("+")) {
-		formatted = `+962${formatted.replace(/^0+/, "")}`;
-	}
-	return formatted;
 }
 
 function getCreditorName(mobileNumber: string): string | null {
