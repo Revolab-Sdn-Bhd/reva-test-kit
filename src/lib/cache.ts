@@ -97,6 +97,7 @@ const initDB = (): Database.Database => {
     )
   `);
 
+	// create reflect account table
 	db.exec(`
 	CREATE TABLE IF NOT EXISTS reflect_account (
 	  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,6 +107,18 @@ const initDB = (): Database.Database => {
       updatedAt TEXT NOT NULL
 	)
   `);
+
+	// create iban table
+	db.exec(`
+	CREATE TABLE IF NOT EXISTS iban (
+	 beneficiaryId TEXT PRIMARY KEY,
+	 accountNumber TEXT NOT NULL,
+	 fullName TEXT NOT NULL,
+	 nickName TEXT NOT NULL,
+	 createdAt TEXT NOT NULL,
+	 updatedAt TEXT NOT NULL
+	)
+	`);
 
 	// Create indexes for better query performance
 	db.exec(`
@@ -698,4 +711,101 @@ export const createReflectAccount = ({
 export const deleteReflectAccountById = (id: number): void => {
 	const db = getDB();
 	db.prepare("DELETE FROM reflect_account WHERE id = ?").run(id);
+};
+
+// ============= IBAN Functions =============
+
+export interface Iban {
+	beneficiaryId: string;
+	accountNumber: string;
+	fullName: string;
+	nickName: string;
+}
+
+/**
+ * get all IBAN
+ */
+export const getAllIBAN = (): Iban[] => {
+	const db = getDB();
+	const rows = db.prepare("SELECT * FROM iban ORDER BY createdAt DESC").all();
+
+	return rows.map((row: any) => ({
+		beneficiaryId: row.beneficiaryId,
+		accountNumber: row.accountNumber,
+		fullName: row.fullName,
+		nickName: row.nickName,
+	}));
+};
+
+/**
+ * get name by iban account number
+ */
+export const getNameByIbanAccountNumber = (
+	accountNumber: string,
+): string | null => {
+	const db = getDB();
+	const row = db
+		.prepare("SELECT fullName FROM iban WHERE accountNumber = ?")
+		.get(accountNumber);
+
+	if (!row) return null;
+
+	return (row as any).fullName;
+};
+
+/**
+ * get name by iban beneficiaryId
+ */
+export const getNameByBeneficiaryId = (
+	beneficiaryId: string,
+): string | null => {
+	const db = getDB();
+	const row = db
+		.prepare("SELECT fullName FROM iban WHERE beneficiaryId = ?")
+		.get(beneficiaryId);
+
+	if (!row) return null;
+
+	return (row as any).fullName;
+};
+
+/**
+ * Create a new IBAN
+ */
+export const createIbanAccount = ({
+	beneficiaryId,
+	accountNumber,
+	fullName,
+	nickName,
+}: {
+	beneficiaryId: string;
+	accountNumber: string;
+	fullName: string;
+	nickName: string;
+}): Iban => {
+	const db = getDB();
+	const now = new Date().toISOString();
+
+	const result = db
+		.prepare(
+			`INSERT INTO iban (beneficiaryId, accountNumber, fullName, nickName, createdAt, updatedAt)
+			VALUES (?, ?, ?, ?, ?, ?)
+			RETURNING beneficiaryId, accountNumber, fullName, nickName`,
+		)
+		.get(beneficiaryId, accountNumber, fullName, nickName, now, now) as {
+		beneficiaryId: string;
+		accountNumber: string;
+		fullName: string;
+		nickName: string;
+	};
+
+	return result;
+};
+
+/**
+ * delete iban by beneficiary id
+ */
+export const deleteIbanByBeneficiaryId = (beneficiaryId: string): void => {
+	const db = getDB();
+	db.prepare("DELETE FROM iban WHERE beneficiaryId = ?").run(beneficiaryId);
 };
