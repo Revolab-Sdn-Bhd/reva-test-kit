@@ -5,6 +5,7 @@ import {
 	getAccountByID,
 	getAllReflectAccount,
 	getNameByNumber,
+	getUser,
 	type ReflectAccount,
 } from "@/lib/cache";
 
@@ -58,6 +59,13 @@ export default function handler(
 			if (existingReflectUser != null) {
 				return res.status(400).json({
 					error: "Reflect user with mobile number already exists",
+				});
+			}
+
+			const user = getUser();
+			if (!user) {
+				return res.status(400).json({
+					error: "User account not found",
 				});
 			}
 

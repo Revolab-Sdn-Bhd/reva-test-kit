@@ -22,22 +22,35 @@ interface ReflectAccount {
 	mobileNumber: string;
 }
 
+interface IbanSavedBeneficiary {
+	beneficiaryId: string;
+	accountNumber: string;
+	fullName: string;
+	nickName: string;
+}
+
 const TransferAccountSection = ({
 	isConnected,
 }: TransferAccountSectionProps) => {
 	const [reflectAccounts, setReflectAccounts] = useState<ReflectAccount[]>([]);
+	const [ibanAccounts, setIbanAccounts] = useState<IbanSavedBeneficiary[]>([]);
 
 	const [showReflectForm, setShowReflectForm] = useState(false);
 	const [showCliQForm, setShowCliQForm] = useState(false);
+
 	const [showIbanForm, setShowIbanForm] = useState(false);
+	const [ibanFullName, setIbanFullName] = useState("");
+	const [ibanNickName, setIbanNickName] = useState("");
 
 	const [isLoading, setIsLoading] = useState(false);
+	const [ibanIsLoading, setIbanIsLoading] = useState(false);
 
 	const [reflectName, setReflectName] = useState("");
 	const [reflectMobileNumber, setReflectMobileNumber] = useState("");
 
 	useEffect(() => {
 		fetchReflectAccounts();
+		fetchIBANAccounts();
 	}, []);
 
 	const fetchReflectAccounts = async () => {
@@ -59,6 +72,28 @@ const TransferAccountSection = ({
 			});
 		} finally {
 			setIsLoading(false);
+		}
+	};
+
+	const fetchIBANAccounts = async () => {
+		setIbanIsLoading(true);
+		try {
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/beneficiary/account`,
+			);
+			if (response.ok) {
+				const data = await response.json();
+				setIbanAccounts(data.data.results || []);
+			}
+		} catch (error) {
+			console.error("Error fetching IBAN accounts:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to fetch IBAN accounts. Please try again.",
+				color: "red",
+			});
+		} finally {
+			setIbanIsLoading(false);
 		}
 	};
 
@@ -118,6 +153,62 @@ const TransferAccountSection = ({
 		}
 	};
 
+	const handleAddIBAN = async () => {
+		if (!ibanFullName || !ibanNickName) {
+			notifications.show({
+				title: "Validation Error",
+				message: "Please fill in all required fields.",
+				color: "orange",
+			});
+			return;
+		}
+
+		try {
+			const newIban = {
+				fullName: ibanFullName,
+				nickName: ibanNickName,
+			};
+
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/beneficiary/account`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(newIban),
+				},
+			);
+			if (response.ok) {
+				notifications.show({
+					title: "Success",
+					message: "IBAN added successfully.",
+					color: "green",
+				});
+
+				setIbanFullName("");
+				setIbanNickName("");
+				setShowIbanForm(false);
+
+				fetchIBANAccounts();
+			} else {
+				const error = await response.json();
+				notifications.show({
+					title: "Error",
+					message: error.error || "Failed to add IBAN.",
+					color: "red",
+				});
+			}
+		} catch (error) {
+			console.error("Error adding IBAN:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to add IBAN. Please try again.",
+				color: "red",
+			});
+		}
+	};
+
 	const handelDeleteReflect = async (id: number) => {
 		try {
 			const response = await fetch(
@@ -147,6 +238,40 @@ const TransferAccountSection = ({
 			notifications.show({
 				title: "Error",
 				message: "Failed to delete reflect account",
+				color: "red",
+			});
+		}
+	};
+
+	const handelDeleteIban = async (beneficiaryId: string) => {
+		try {
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/beneficiary/account?beneficiaryId=${beneficiaryId}`,
+				{
+					method: "DELETE",
+				},
+			);
+
+			if (response.ok) {
+				notifications.show({
+					title: "Success",
+					message: "IBAN deleted successfully",
+					color: "green",
+				});
+				fetchIBANAccounts();
+			} else {
+				const error = await response.json();
+				notifications.show({
+					title: "Error",
+					message: error.error || "Failed to delete IBAN",
+					color: "red",
+				});
+			}
+		} catch (error) {
+			console.error("Error deleting IBAN:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to delete IBAN",
 				color: "red",
 			});
 		}
@@ -283,14 +408,14 @@ const TransferAccountSection = ({
 				{/* header */}
 				<Group justify="space-between">
 					<Text size="lg" fw={600} c="white">
-						IBAN Account
+						IBAN (Saved Beneficiary)
 					</Text>
 					<Group gap="xs">
 						<ActionIcon
 							variant="light"
 							color="blue"
-							// onClick={fetchBillProfiles}
-							// disabled={isLoading}
+							onClick={fetchIBANAccounts}
+							disabled={ibanIsLoading}
 						>
 							<IoRefresh size={18} />
 						</ActionIcon>
@@ -300,10 +425,82 @@ const TransferAccountSection = ({
 							onClick={() => setShowIbanForm(!showIbanForm)}
 							disabled={isConnected}
 						>
-							{showIbanForm ? "Cancel" : "Add IBAN Account"}
+							{showIbanForm ? "Cancel" : "Add IBAN"}
 						</Button>
 					</Group>
 				</Group>
+
+				{/* add iban form */}
+				{showIbanForm && (
+					<Paper p="md" withBorder>
+						<Stack gap="md">
+							<Text size="sm" fw={600}>
+								Add IBAN (Saved Beneficiary)
+							</Text>
+							{/* IBAN form fields go here */}
+							<TextInput
+								label="Full Name"
+								placeholder="e.g., Ahmed Quwais"
+								value={ibanFullName}
+								onChange={(e) => setIbanFullName(e.target.value)}
+								required
+								size="xs"
+							/>
+							<TextInput
+								label="Nick Name"
+								placeholder="e.g., Ahmed"
+								value={ibanNickName}
+								onChange={(e) => setIbanNickName(e.target.value)}
+								required
+								size="xs"
+							/>
+							<Group justify="flex-end" mt="xs">
+								<Button size="xs" onClick={handleAddIBAN}>
+									Add IBAN
+								</Button>
+							</Group>
+						</Stack>
+					</Paper>
+				)}
+
+				{/* iban account list */}
+				{ibanIsLoading ? (
+					<Text c="dimmed" size="sm">
+						Loading IBAN accounts...
+					</Text>
+				) : ibanAccounts.length === 0 ? (
+					<Text c="dimmed" size="sm">
+						{`No IBAN account yet. Click "Add IBAN" to create one.`}
+					</Text>
+				) : (
+					<Stack gap="sm">
+						{ibanAccounts.map((account) => (
+							<Paper key={account.beneficiaryId} p="md" withBorder>
+								<Group justify="space-between" align="center">
+									<Stack gap={4} style={{ flex: 1 }}>
+										<Text size="sm" fw={500} c="white">
+											{account.fullName}
+										</Text>
+										<Text size="xs" c="dimmed">
+											Nick Name: {account.nickName}
+										</Text>
+										<Text size="xs" c="dimmed">
+											IBAN: {account.accountNumber}
+										</Text>
+									</Stack>
+									<ActionIcon
+										color="red"
+										variant="subtle"
+										onClick={() => handelDeleteIban(account.beneficiaryId)}
+										disabled={isConnected}
+									>
+										<IoTrash size={16} />
+									</ActionIcon>
+								</Group>
+							</Paper>
+						))}
+					</Stack>
+				)}
 			</div>
 		</div>
 	);
