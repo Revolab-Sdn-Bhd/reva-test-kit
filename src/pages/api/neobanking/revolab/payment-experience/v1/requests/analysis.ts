@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getNameByNumber, getUser } from "@/lib/cache";
+import { normalizeMobileNumber } from "@/lib/util";
 
 interface ReceiverInfo {
 	name: string;
@@ -107,8 +108,9 @@ export default function handler(
 			});
 		}
 
+		const normalizedMobile = normalizeMobileNumber(receiverInfo.mobileNumber);
 		// Mock receiver name lookup based on mobile number
-		const receiverName = getReceiverName(receiverInfo.mobileNumber);
+		const receiverName = getReceiverName(normalizedMobile);
 		if (receiverName === null) {
 			return res.status(404).json({
 				error: "Receiver not exist",

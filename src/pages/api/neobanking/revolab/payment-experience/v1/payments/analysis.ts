@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getNameByNumber, getUser } from "@/lib/cache";
+import { normalizeMobileNumber } from "@/lib/util";
 
 interface CreditorInfo {
 	name: string;
@@ -106,8 +107,9 @@ export default function handler(
 			});
 		}
 
+		const normalizedMobile = normalizeMobileNumber(creditorInfo.mobileNumber);
 		// searching name by number
-		const creditorName = getCreditorName(creditorInfo.mobileNumber);
+		const creditorName = getCreditorName(normalizedMobile);
 		if (creditorName === null) {
 			return res.status(404).json({
 				error: "Creditor not exist",
@@ -123,7 +125,7 @@ export default function handler(
 			},
 			creditorInfo: {
 				name: creditorName,
-				mobileNumber: creditorInfo.mobileNumber,
+				mobileNumber: normalizedMobile,
 			},
 			instructedAmount: {
 				amount: instructedAmount.amount,
