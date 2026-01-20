@@ -33,6 +33,7 @@
 		"marked": "^17.0.1",
 		"next": "15.5.0",
 		"next-plugin-preval": "^1.2.6",
+		"nuqs": "^2.8.6",
 		"qrcode.react": "^4.1.0",
 		"react": "^19.2.0",
 		"react-ace": "^14.0.1",

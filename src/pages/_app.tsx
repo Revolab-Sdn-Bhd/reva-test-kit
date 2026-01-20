@@ -3,6 +3,7 @@ import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import type { AppProps } from "next/app";
 import { Toaster } from "sonner";
+import { NuqsAdapter } from 'nuqs/adapters/next/pages';
 import { ConfigProvider } from "@/hooks/useConfig";
 import { EnvConfigProvider } from "@/hooks/useEnvConfig";
 import { LivekitConnectionProvider } from "@/hooks/useLivekitConnection";
@@ -31,10 +32,12 @@ export default function App({ Component, pageProps }: AppProps) {
 				<Notifications position="top-right" />
 				<EnvConfigProvider>
 					<ConfigProvider>
-						<LivekitConnectionProvider>
-							<Toaster position="top-right" />
-							{getLayout(<Component {...pageProps} />)}
-						</LivekitConnectionProvider>
+						<NuqsAdapter>
+							<LivekitConnectionProvider>
+								<Toaster position="top-right" />
+								{getLayout(<Component {...pageProps} />)}
+							</LivekitConnectionProvider>
+						</NuqsAdapter>
 					</ConfigProvider>
 				</EnvConfigProvider>
 			</ModalsProvider>

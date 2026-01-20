@@ -3,8 +3,9 @@ import {
 	RoomAudioRenderer,
 	StartAudio,
 } from "@livekit/components-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useQueryState, parseAsStringEnum } from "nuqs"
 import DashboardLayout from "@/components/DashboardLayout";
 import ChatScreen from "@/components/post-login/chat-screen";
 import AccountSection from "@/components/post-login/tabs/account";
@@ -22,33 +23,59 @@ import {
 	useWebSocketContext,
 	WebSocketProvider,
 } from "@/lib/WebSocketProvider";
+import { Mode } from "@/types/connection";
 
-type ConfigTab =
-	| "connection"
-	| "custom-json"
-	| "user-account"
-	| "bills"
-	| "transfer-account";
+enum ConfigTab {
+	Connection = "connection",
+	CustomJson = "custom-json",
+	UserAccount = "user-account",
+	Bills = "bills",
+	TransferAccount = "transfer-account",
+}
 
 const Tabs = [
-	{ label: "Connection", value: "connection" },
-	{ label: "User Account", value: "user-account" },
-	{ label: "Bills", value: "bills" },
-	{ label: "Transfer Account", value: "transfer-account" },
-	{ label: "Custom JSON", value: "custom-json" },
+	{ label: "Connection", value: ConfigTab.Connection },
+	{ label: "User Account", value: ConfigTab.UserAccount },
+	{ label: "Bills", value: ConfigTab.Bills },
+	{ label: "Transfer Account", value: ConfigTab.TransferAccount },
+	{ label: "Custom JSON", value: ConfigTab.CustomJson },
 ];
 
 function PostLoginContent() {
-	const [platform, setPlatform] = useState<"web" | "mobile">("web");
-	const [language, setLanguage] = useState<"en" | "ar">("en");
-	const [token, setToken] = useState("reflect123");
-	const [sessionId, setSessionId] = useState("");
-	const [wsPath, setWsPath] = useState("/ws/chat");
+	const [platform, setPlatform] = useQueryState<"web" | "mobile">("platform", { defaultValue: "web", type: "single", parse: (val) => (val === "mobile" ? "mobile" : "web") });
+	const [language, setLanguage] = useQueryState<"en" | "ar">("language", { defaultValue: "en", type: "single", parse: (val) => (val === "ar" ? "ar" : "en") });
+	const [token, setToken] = useQueryState("token", { defaultValue: "reflect123" });
+	const [sessionId, setSessionId] = useQueryState("sessionId", { defaultValue: "" });
+	const [wsPath, setWsPath] = useQueryState("wsPath", { defaultValue: "/ws/v2/chat" });
+	const [mode, setMode] = useQueryState<Mode>("mode", parseAsStringEnum<Mode>(Object.values(Mode)).withDefault(Mode.POST_LOGIN_V2));
+
+	useEffect(() => {
+		switch (mode) {
+			case Mode.PRE_LOGIN_V1: {
+				setWsPath("/ws/chat");
+				break;
+			}
+			case Mode.POST_LOGIN_V1: {
+				setWsPath("/ws/chat");
+				break;
+			}
+			case Mode.POST_LOGIN_V2: {
+				setWsPath("/ws/v2/chat");
+				break;
+			}
+			default: {
+				toast.error("Unknown mode, defaulting to postlogin-v2");
+				setMode(Mode.POST_LOGIN_V2);
+				setWsPath("/ws/v2/chat");
+				break;
+			}
+		}
+	}, [mode])
 
 	const { envConfig } = useEnvConfig();
 
 	const [isConfigCollapsed, setIsConfigCollapsed] = useState(false);
-	const [activeTab, setActiveTab] = useState<ConfigTab>("connection");
+	const [activeTab, setActiveTab] = useQueryState<ConfigTab>("tab", parseAsStringEnum<ConfigTab>(Object.values(ConfigTab)).withDefault(ConfigTab.Connection));
 
 	const { isConnected, connect, disconnect } = useWebSocketContext();
 	const { disconnect: livekitDisconnect } = useLivekitConnection();
@@ -90,9 +117,8 @@ function PostLoginContent() {
 							WebSocket Configuration
 						</h2>
 						<svg
-							className={`w-5 h-5 text-gray-400 transition-transform ${
-								isConfigCollapsed ? "" : "rotate-180"
-							}`}
+							className={`w-5 h-5 text-gray-400 transition-transform ${isConfigCollapsed ? "" : "rotate-180"
+								}`}
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -113,18 +139,17 @@ function PostLoginContent() {
 									<button
 										key={label}
 										type="button"
-										onClick={() => setActiveTab(value as ConfigTab)}
-										className={`px-4 py-2 text-sm font-medium transition-colors ${
-											activeTab === value
-												? "text-blue-400 border-b-2 border-blue-400"
-												: "text-gray-400 hover:text-gray-300"
-										}`}
+										onClick={() => setActiveTab(value)}
+										className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === value
+											? "text-blue-400 border-b-2 border-blue-400"
+											: "text-gray-400 hover:text-gray-300"
+											}`}
 									>
 										{label}
 									</button>
 								))}
 							</div>
-							{activeTab === "connection" && (
+							{activeTab === ConfigTab.Connection && (
 								<ConnectionTab
 									platform={platform}
 									setPlatform={(platform) => setPlatform(platform)}
@@ -142,16 +167,16 @@ function PostLoginContent() {
 								/>
 							)}
 
-							{activeTab === "user-account" && (
+							{activeTab === ConfigTab.UserAccount && (
 								<AccountSection isConnected={isConnected} />
 							)}
-							{activeTab === "bills" && (
+							{activeTab === ConfigTab.Bills && (
 								<BillsSection isConnected={isConnected} />
 							)}
-							{activeTab === "transfer-account" && (
+							{activeTab === ConfigTab.TransferAccount && (
 								<TransferAccountSection isConnected={isConnected} />
 							)}
-							{activeTab === "custom-json" && (
+							{activeTab === ConfigTab.CustomJson && (
 								<CustomPayloadTab isConnected={isConnected} />
 							)}
 						</div>
