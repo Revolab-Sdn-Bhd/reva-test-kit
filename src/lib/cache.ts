@@ -181,6 +181,25 @@ export const upsertUser = (user: {
 };
 
 /**
+ * update main user cliqEnable status
+ */
+export const enableCliQ = (value: number): number => {
+	const id = "main-user";
+	const result = db
+		.prepare(`
+	INSERT INTO users (id, cliqEnable)
+	VALUES (?, ?)
+	ON CONFLICT(id)
+	DO UPDATE SET
+		cliqEnable = excluded.cliqEnable,
+		updatedAt = datetime('now')
+	`)
+		.run(id, value);
+
+	return result.changes;
+};
+
+/**
  * Get the main user
  */
 export const getUser = (): User | null => {

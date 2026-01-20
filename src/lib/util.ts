@@ -21,3 +21,25 @@ export const getChatUrl = (envConfig: EnvConfig | null) => {
 
 	return chatUrl;
 };
+
+/**
+ * Normalizes JOD mobile numbers to a consistent format for database lookup
+ * Converts: "00962791234567", "+962791234567", "962791234567", "+962 79 123 4567"
+ * To: "+962791234567" (remove spaces, standardize prefix)
+ */
+export function normalizeMobileNumber(mobile: string): string {
+	// Remove all spaces and non-digit characters except +
+	let normalized = mobile.replace(/[\s-]/g, "");
+
+	// Convert "00962" prefix to "+962"
+	if (normalized.startsWith("00")) {
+		normalized = `+${normalized.substring(2)}`;
+	}
+
+	// Add "+" prefix if missing and starts with country code
+	if (!normalized.startsWith("+") && normalized.startsWith("962")) {
+		normalized = `+${normalized}`;
+	}
+
+	return normalized;
+}
