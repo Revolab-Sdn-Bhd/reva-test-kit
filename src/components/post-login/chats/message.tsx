@@ -28,7 +28,7 @@ import SavingSpaceWidgetComponent from "../widget/transact/saving-space";
 import TransactionOptionWidgetComponent from "../widget/transact/transaction-option";
 
 const ChatMessageSection = () => {
-	const { messages, sendAction } = useWebSocketContext();
+	const { messages, sendAction, chatInfo } = useWebSocketContext();
 
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -282,6 +282,7 @@ const ChatMessageSection = () => {
 								{/* Pre Confirm Section */}
 								{msg.eventType && msg.form && msg.payload && (
 									<PreConfirmationCard
+										chatId={chatInfo?.chatId || ""}
 										messageId={msg.id}
 										eventType={msg.eventType}
 										form={msg.form}

@@ -35,6 +35,7 @@ const initDB = (): Database.Database => {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       virtualIban TEXT NOT NULL,
+	  cliqEnable INTEGER NOT NULL DEFAULT 0,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     )

@@ -3,12 +3,14 @@ import type { Form } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
 
 type PreConfirmationProps = {
+	chatId: string;
 	messageId: string;
 	eventType: string;
 	form: Form;
 };
 
 const PreConfirmationCard = ({
+	chatId,
 	messageId,
 	eventType,
 	form,
@@ -20,10 +22,10 @@ const PreConfirmationCard = ({
 			// Handle confirm/transfer button
 			sendPostConfirmation(
 				{
-					partyId: "XXXXX",
-					chatId: "XXXX",
+					partyId: "222222",
+					chatId: chatId,
 					eventType,
-					transactionId: "XXXX",
+					transactionId: "11111",
 					transactionStatus: "SUCCESS",
 				},
 				"POST_CONFIRMATION",
