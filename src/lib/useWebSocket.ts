@@ -628,6 +628,29 @@ export const useWebSocket = () => {
 							setMessages((prev) => [...prev, message]);
 						}
 						break;
+					case EventType.LANGUAGE:
+						{
+							if (parsed.data.type === "to") {
+								const chatId = parsed.data.chatId;
+								const sessionId = parsed.data.id;
+
+								setChatInfo({ chatId, sessionId });
+								return;
+							}
+							const msgData = parsed.data;
+							const message: ChatMessage = {
+								id: msgData.messageId || Date.now().toString(),
+								sender: "agent",
+								content: msgData.message,
+								info: msgData.info,
+								timestamp: new Date().toLocaleTimeString(),
+								actions: msgData.actions,
+								widgets: msgData.widgets,
+								extraMsg: msgData.extra_msg,
+							};
+							setMessages((prev) => [...prev, message]);
+						}
+						break;
 					case EventType.ASSISTANCE:
 						{
 							if (parsed.data.type === "to") {
