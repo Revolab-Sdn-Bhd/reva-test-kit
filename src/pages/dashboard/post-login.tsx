@@ -14,10 +14,7 @@ import CustomPayloadTab from "@/components/post-login/tabs/custom-payload";
 import TransferAccountSection from "@/components/post-login/tabs/transfer-account";
 import WebsocketLogs from "@/components/post-login/websocket-logs";
 import { useEnvConfig } from "@/hooks/useEnvConfig";
-import {
-	LivekitConnectionProvider,
-	useLivekitConnection,
-} from "@/hooks/useLivekitConnection";
+import { useLivekitConnection } from "@/hooks/useLivekitConnection";
 import {
 	useWebSocketContext,
 	WebSocketProvider,
@@ -188,11 +185,9 @@ function PostLoginWithLiveKit() {
 
 export default function PostLoginPage() {
 	return (
-		<LivekitConnectionProvider>
-			<WebSocketProvider>
-				<PostLoginWithLiveKit />
-			</WebSocketProvider>
-		</LivekitConnectionProvider>
+		<WebSocketProvider>
+			<PostLoginWithLiveKit />
+		</WebSocketProvider>
 	);
 }
 
