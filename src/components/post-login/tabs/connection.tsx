@@ -57,11 +57,10 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 							type="button"
 							onClick={() => setPlatform("web")}
 							disabled={isConnected}
-							className={`px-4 py-2 rounded ${
-								platform === "web"
-									? "bg-blue-600 text-white"
-									: "bg-gray-700 text-gray-300 hover:bg-gray-600"
-							} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+							className={`px-4 py-2 rounded ${platform === "web"
+								? "bg-blue-600 text-white"
+								: "bg-gray-700 text-gray-300 hover:bg-gray-600"
+								} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
 						>
 							Web
 						</button>
@@ -69,11 +68,10 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 							type="button"
 							onClick={() => setPlatform("mobile")}
 							disabled={isConnected}
-							className={`px-4 py-2 rounded ${
-								platform === "mobile"
-									? "bg-blue-600 text-white"
-									: "bg-gray-700 text-gray-300 hover:bg-gray-600"
-							} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+							className={`px-4 py-2 rounded ${platform === "mobile"
+								? "bg-blue-600 text-white"
+								: "bg-gray-700 text-gray-300 hover:bg-gray-600"
+								} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
 						>
 							Mobile
 						</button>
@@ -89,11 +87,10 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 							type="button"
 							onClick={() => setLanguage("en")}
 							disabled={isConnected}
-							className={`px-4 py-2 rounded ${
-								language === "en"
-									? "bg-blue-600 text-white"
-									: "bg-gray-700 text-gray-300 hover:bg-gray-600"
-							} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+							className={`px-4 py-2 rounded ${language === "en"
+								? "bg-blue-600 text-white"
+								: "bg-gray-700 text-gray-300 hover:bg-gray-600"
+								} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
 						>
 							English
 						</button>
@@ -101,11 +98,10 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 							type="button"
 							onClick={() => setLanguage("ar")}
 							disabled={isConnected}
-							className={`px-4 py-2 rounded ${
-								language === "ar"
-									? "bg-blue-600 text-white"
-									: "bg-gray-700 text-gray-300 hover:bg-gray-600"
-							} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+							className={`px-4 py-2 rounded ${language === "ar"
+								? "bg-blue-600 text-white"
+								: "bg-gray-700 text-gray-300 hover:bg-gray-600"
+								} ${isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
 						>
 							Arabic
 						</button>
@@ -158,26 +154,27 @@ const ConnectionTab: React.FC<ConnectionTabProps> = ({
 				>
 					WebSocket Path
 				</label>
-				<input
+				<select
 					id="ws-path-input"
-					type="text"
 					value={wsPath}
 					onChange={(e) => setWsPath(e.target.value)}
 					disabled={isConnected}
-					className="w-full px-3 py-2 text-white placeholder-gray-400 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-900"
-					placeholder="/ws/chat"
-				/>
+					className="w-full px-3 py-2 text-white bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-900"
+				>
+					<option value="/ws/v2/chat">Post-login v2</option>
+					<option value="/ws/chat">Pre-login v1</option>
+					<option value="/ws/c">Post-login v1</option>
+				</select>
 			</div>
 
 			<div className="flex gap-2">
 				<button
 					type="button"
 					onClick={isConnected ? handleDisconnect : handleConnect}
-					className={`flex-1 px-4 py-2 rounded font-medium ${
-						isConnected
-							? "bg-red-600 hover:bg-red-700 text-white"
-							: "bg-green-600 hover:bg-green-700 text-white"
-					}`}
+					className={`flex-1 px-4 py-2 rounded font-medium ${isConnected
+						? "bg-red-600 hover:bg-red-700 text-white"
+						: "bg-green-600 hover:bg-green-700 text-white"
+						}`}
 				>
 					{isConnected ? "Disconnect" : "Start Connection"}
 				</button>

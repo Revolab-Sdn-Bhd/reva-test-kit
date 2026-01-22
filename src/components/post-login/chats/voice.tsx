@@ -45,8 +45,6 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 	const [currentTranscript, setCurrentTranscript] = useState<string>("");
 
 	const {
-		escalationData,
-		clearEscalation,
 		sessionExpiring,
 		clearSessionExpiring,
 		sendSessionEnd,
@@ -227,11 +225,10 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 						<button
 							type="button"
 							onClick={handleToggleMute}
-							className={`flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${
-								isMuted
-									? "bg-red-600 hover:bg-red-700"
-									: "bg-[#800080]/80 hover:bg-[#800080]"
-							} backdrop-blur-lg border-2 border-white/20`}
+							className={`flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${isMuted
+								? "bg-red-600 hover:bg-red-700"
+								: "bg-[#800080]/80 hover:bg-[#800080]"
+								} backdrop-blur-lg border-2 border-white/20`}
 							title={isMuted ? "Unmute" : "Mute"}
 						>
 							{isMuted ? (
@@ -262,15 +259,6 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 					</div>
 				</div>
 			</div>
-
-			<EscalatedDialog
-				isOpen={!!escalationData}
-				waLink={escalationData?.waLink || ""}
-				onClose={() => {
-					clearEscalation();
-				}}
-				mode="inline"
-			/>
 
 			<SessionExpiringDialog
 				isOpen={sessionExpiring}

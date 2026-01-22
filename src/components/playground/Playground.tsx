@@ -41,8 +41,10 @@ import {
 import { TranscriptionTile } from "@/components/transcriptions/TranscriptionTile";
 import { useConfig } from "@/hooks/useConfig";
 import { useLivekitData } from "@/hooks/useLivekitData";
+import { useEscalatedChannel } from "@/hooks/useEscalatedChannel";
 import tailwindTheme from "../../lib/tailwindTheme.preval";
 import SessionExpiringDialog from "../dialog/SessionExpiringDialog";
+import LiveAgentEscalationDialog from "../dialog/LiveAgentEscalationDialog";
 
 export interface PlaygroundMeta {
 	name: string;
@@ -74,6 +76,7 @@ export default function Playground({
 	const tracks = useTracks();
 	const room = useRoomContext();
 
+
 	const [rpcMethod, setRpcMethod] = useState("");
 	const [rpcPayload, setRpcPayload] = useState("");
 	const [showRpc, setShowRpc] = useState(false);
@@ -86,11 +89,21 @@ export default function Playground({
 	}, [config, localParticipant, roomState]);
 
 	const {
-		escalationData,
-		clearEscalation,
 		sessionExpiring,
 		clearSessionExpiring,
 	} = useLivekitData(room);
+
+	const [isOldEscalatedDialogOpen, setIsOldEscalatedDialogOpen] = useState(false);
+	const [isEscalatedDialogOpen, setIsEscalatedDialogOpen] = useState(false);
+	const escalationChannelData = useEscalatedChannel({
+		onEscalated: (d) => {
+			if (d.wsLink) {
+				setIsOldEscalatedDialogOpen(true);
+			} else {
+				setIsEscalatedDialogOpen(true);
+			}
+		},
+	})
 
 	const agentVideoTrack = tracks.find(
 		(trackRef) =>
@@ -354,7 +367,7 @@ export default function Playground({
 										key,
 										value: String(value),
 									}))}
-									onAttributesChange={() => {}}
+									onAttributesChange={() => { }}
 									themeColor={config.settings.theme_color}
 									disabled={true}
 								/>
@@ -593,11 +606,10 @@ export default function Playground({
 					/>
 				</div>
 				<div
-					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${
-						!config.settings.outputs.audio && !config.settings.outputs.video
-							? "hidden"
-							: "flex"
-					}`}
+					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${!config.settings.outputs.audio && !config.settings.outputs.video
+						? "hidden"
+						: "flex"
+						}`}
 				>
 					{/* {config.settings.outputs.video && (
 						<PlaygroundTile
@@ -638,11 +650,17 @@ export default function Playground({
 			</div>
 
 			<EscalatedDialog
-				isOpen={!!escalationData}
-				waLink={escalationData?.waLink || ""}
+				isOpen={isOldEscalatedDialogOpen}
+				waLink={escalationChannelData.wsLink ?? undefined}
 				onClose={() => {
-					clearEscalation();
+					setIsOldEscalatedDialogOpen(false);
 				}}
+			/>
+
+			<LiveAgentEscalationDialog
+				isOpen={isEscalatedDialogOpen}
+				sessionId={escalationChannelData.sessionId}
+				onClose={() => setIsEscalatedDialogOpen(false)}
 			/>
 
 			<SessionExpiringDialog
@@ -651,6 +669,7 @@ export default function Playground({
 					clearSessionExpiring();
 				}}
 			/>
+			<button onClick={() => setIsEscalatedDialogOpen(true)}>test</button>
 		</>
 	);
 }
