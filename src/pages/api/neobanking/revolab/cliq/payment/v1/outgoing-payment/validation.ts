@@ -1,5 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getNameByIbanAccountNumber, getUser } from "@/lib/cache";
+import {
+	getCliQNameByNumber,
+	getNameByAlias,
+	getNameByIbanAccountNumber,
+	getUser,
+} from "@/lib/cache";
+import { normalizeJordanMobile } from "@/lib/util";
 
 interface Creditor {
 	identification: {
@@ -133,13 +139,37 @@ export default function handler(
 				});
 			}
 
-			const creditorName = getNameByIbanAccountNumber(
-				creditorInfo.identification.value,
-			);
-			if (creditorName === null) {
-				return res.status(404).json({
-					error: "Creditor not exist",
-				});
+			let creditorName: any;
+			if (creditorInfo.identification.type === "IBAN") {
+				creditorName = getNameByIbanAccountNumber(
+					creditorInfo.identification.value,
+				);
+				if (creditorName === null) {
+					return res.status(404).json({
+						error: "Creditor not exist",
+					});
+				}
+			}
+
+			if (creditorInfo.identification.type === "ALIAS") {
+				creditorName = getNameByAlias(creditorInfo.identification.value);
+				if (creditorName === null) {
+					return res.status(404).json({
+						error: "Creditor not exist",
+					});
+				}
+			}
+
+			if (creditorInfo.identification.type === "MOBL") {
+				const normalizedMobile = normalizeJordanMobile(
+					creditorInfo.identification.value,
+				);
+				creditorName = getCliQNameByNumber(normalizedMobile);
+				if (creditorName === null) {
+					return res.status(404).json({
+						error: "Creditor not exist",
+					});
+				}
 			}
 
 			const result: IbanAnalysisResult = {
@@ -153,7 +183,7 @@ export default function handler(
 					country: creditorInfo.country,
 					iban: creditorInfo.identification.value,
 					bankSwiftBic: creditorInfo.bankSwiftBic,
-					name: creditorName,
+					name: creditorName || "",
 				},
 				debitorInfo: {
 					casRecordId: "122",

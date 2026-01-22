@@ -121,6 +121,19 @@ const initDB = (): Database.Database => {
 	)
 	`);
 
+	// create cliq table
+	db.exec(`
+	CREATE TABLE IF NOT EXISTS cliq (
+	 id INTEGER PRIMARY KEY AUTOINCREMENT,
+	 name TEXT NOT NULL,
+	 nickName TEXT NOT NULL,
+	 mobileNumber TEXT NOT NULL,
+	 alias TEXT NOT NULL, 
+	 createdAt TEXT NOT NULL,
+	 updatedAt TEXT NOT NULL
+	)
+	`);
+
 	// Create indexes for better query performance
 	db.exec(`
     CREATE INDEX IF NOT EXISTS idx_sub_accounts_user ON sub_accounts(userId);
@@ -149,6 +162,13 @@ const getDB = (): Database.Database => {
 export const db = getDB();
 
 // Database operations
+
+interface UserWithCliQ {
+	id: string;
+	name: string;
+	virtualIban: string;
+	cliqEnable: number;
+}
 
 /**
  * Create or get the main user (only one user in test kit)
@@ -184,19 +204,30 @@ export const upsertUser = (user: {
  * update main user cliqEnable status
  */
 export const enableCliQ = (value: number): number => {
-	const id = "main-user";
 	const result = db
 		.prepare(`
-	INSERT INTO users (id, cliqEnable)
-	VALUES (?, ?)
-	ON CONFLICT(id)
-	DO UPDATE SET
-		cliqEnable = excluded.cliqEnable,
-		updatedAt = datetime('now')
-	`)
-		.run(id, value);
+			UPDATE users 
+			SET cliqEnable = ?, 
+			    updatedAt = datetime('now')
+			WHERE id = 'main-user'
+		`)
+		.run(value);
 
 	return result.changes;
+};
+
+/**
+ * get user enable cliq status
+ */
+export const getCliqEnableStatus = (): { cliqEnable: number } | null => {
+	const stmt = db.prepare(`SELECT * FROM users WHERE id = 'main-user'`);
+	const user = stmt.get() as any;
+
+	if (!user) return null;
+
+	return {
+		cliqEnable: user.cliqEnable,
+	};
 };
 
 /**
@@ -212,6 +243,25 @@ export const getUser = (): User | null => {
 		id: user.id,
 		name: user.name,
 		virtualIban: user.virtualIban,
+	};
+};
+
+/**
+ * Get the main user with cliQ status
+ */
+export const getUserWithCliq = (): UserWithCliQ | null => {
+	const stmt = db.prepare(
+		`SELECT * FROM users WHERE id = 'main-user' AND cliqEnable = 1`,
+	);
+	const user = stmt.get() as any;
+
+	if (!user) return null;
+
+	return {
+		id: user.id,
+		name: user.name,
+		virtualIban: user.virtualIban,
+		cliqEnable: user.cliqEnable,
 	};
 };
 
@@ -828,4 +878,86 @@ export const createIbanAccount = ({
 export const deleteIbanByBeneficiaryId = (beneficiaryId: string): void => {
 	const db = getDB();
 	db.prepare("DELETE FROM iban WHERE beneficiaryId = ?").run(beneficiaryId);
+};
+
+// ============= cliq Account Functions =============
+
+export interface CLiQAccount {
+	id: number;
+	name: string;
+	nickName: string;
+	mobileNumber: string;
+	alias: string;
+}
+
+export const getAllCliQAccount = (): CLiQAccount[] => {
+	const db = getDB();
+	const row = db.prepare("SELECT * FROM cliq ORDER BY createdAt DESC").all();
+
+	return row.map((row: any) => ({
+		id: row.id,
+		name: row.name,
+		nickName: row.nickName,
+		mobileNumber: row.mobileNumber,
+		alias: row.alias,
+	}));
+};
+
+export const getNameByAlias = (alias: string): string | null => {
+	const db = getDB();
+	const row = db.prepare("SELECT name FROM cliq WHERE alias = ?").get(alias);
+
+	if (!row) return null;
+
+	return (row as any).name;
+};
+
+export const getCliQNameByNumber = (number: string): string | null => {
+	const db = getDB();
+	const row = db
+		.prepare("SELECT name FROM cliq WHERE mobileNumber = ?")
+		.get(number);
+
+	if (!row) return null;
+
+	return (row as any).name;
+};
+
+export const getNameById = (id: number): string | null => {
+	const db = getDB();
+	const row = db.prepare("SELECT name FROM cliq WHERE id = ?").get(id);
+
+	if (!row) return null;
+
+	return (row as any).name;
+};
+
+export const deleteCliQById = (id: number): void => {
+	const db = getDB();
+	db.prepare("DELETE FROM cliq WHERE id = ?").run(id);
+};
+
+export const createCliQAccount = ({
+	name,
+	nickName,
+	mobileNumber,
+	alias,
+}: {
+	name: string;
+	nickName: string;
+	mobileNumber: string;
+	alias: string;
+}): CLiQAccount => {
+	const db = getDB();
+	const now = new Date().toISOString();
+
+	const result = db
+		.prepare(
+			`INSERT INTO cliq (name, nickName, mobileNumber, alias, createdAt, updatedAt)
+			VALUES (?, ?, ?, ?, ?, ?)
+			RETURNING id, name, nickName, mobileNumber, alias`,
+		)
+		.get(name, nickName, mobileNumber, alias, now, now) as CLiQAccount;
+
+	return result;
 };
