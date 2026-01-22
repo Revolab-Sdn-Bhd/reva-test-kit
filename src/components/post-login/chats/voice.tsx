@@ -14,7 +14,6 @@ import { HiMicrophone } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import { LoadingSVG } from "@/components/button/LoadingSVG";
-import EscalatedDialog from "@/components/dialog/EscalatedDialog";
 import SessionExpiringDialog from "@/components/dialog/SessionExpiringDialog";
 import { useLivekitConnection } from "@/hooks/useLivekitConnection";
 import { useLivekitData } from "@/hooks/useLivekitData";
@@ -44,11 +43,8 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 	const agentTranscription = useTrackTranscription(voiceAssistant.audioTrack);
 	const [currentTranscript, setCurrentTranscript] = useState<string>("");
 
-	const {
-		sessionExpiring,
-		clearSessionExpiring,
-		sendSessionEnd,
-	} = useLivekitData(room);
+	const { sessionExpiring, clearSessionExpiring, sendSessionEnd } =
+		useLivekitData(room);
 
 	// Update current transcript from agent
 	useEffect(() => {
@@ -225,10 +221,11 @@ const VoiceChatSection = ({ onFinishCall }: VoiceChatSectionProps) => {
 						<button
 							type="button"
 							onClick={handleToggleMute}
-							className={`flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${isMuted
-								? "bg-red-600 hover:bg-red-700"
-								: "bg-[#800080]/80 hover:bg-[#800080]"
-								} backdrop-blur-lg border-2 border-white/20`}
+							className={`flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${
+								isMuted
+									? "bg-red-600 hover:bg-red-700"
+									: "bg-[#800080]/80 hover:bg-[#800080]"
+							} backdrop-blur-lg border-2 border-white/20`}
 							title={isMuted ? "Unmute" : "Mute"}
 						>
 							{isMuted ? (

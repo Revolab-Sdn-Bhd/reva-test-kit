@@ -105,17 +105,17 @@ export default function handler(
 
 			const purpose = [
 				{
-					descriptionAr: "",
+					descriptionAr: "تحويل إلى صديق / عائلة",
 					descriptionEn: "Transfer to friend / Family",
 					code: "1111XYZ10",
 				},
 				{
-					descriptionAr: "",
+					descriptionAr: "تحويل إلى الحساب الخاص",
 					descriptionEn: "Transfer to Own Account",
 					code: "1111XYZ20",
 				},
 				{
-					descriptionAr: "",
+					descriptionAr: "دفع ثمن السلع / الخدمات",
 					descriptionEn: "Goods / Services payment",
 					code: "2111XYZ30",
 				},
