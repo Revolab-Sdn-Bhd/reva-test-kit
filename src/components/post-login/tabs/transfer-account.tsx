@@ -4,6 +4,7 @@ import {
 	Group,
 	Paper,
 	Stack,
+	Switch,
 	Text,
 	TextInput,
 } from "@mantine/core";
@@ -29,29 +30,113 @@ interface IbanSavedBeneficiary {
 	nickName: string;
 }
 
+interface CLiQAccount {
+	id: number;
+	name: string;
+	nickName: string;
+	mobileNumber: string;
+	alias: string;
+}
+
 const TransferAccountSection = ({
 	isConnected,
 }: TransferAccountSectionProps) => {
 	const [reflectAccounts, setReflectAccounts] = useState<ReflectAccount[]>([]);
 	const [ibanAccounts, setIbanAccounts] = useState<IbanSavedBeneficiary[]>([]);
+	const [cliqAccounts, setCliqAccounts] = useState<CLiQAccount[]>([]);
 
 	const [showReflectForm, setShowReflectForm] = useState(false);
 	const [showCliQForm, setShowCliQForm] = useState(false);
-
 	const [showIbanForm, setShowIbanForm] = useState(false);
+
 	const [ibanFullName, setIbanFullName] = useState("");
 	const [ibanNickName, setIbanNickName] = useState("");
 
+	const [cliqFullName, setCliqFullName] = useState("");
+	const [cliqNickName, setCliqNickName] = useState("");
+	const [cliqMobileNumber, setCliqMobileNumber] = useState("");
+	const [cliqAlias, setCliqAlias] = useState("");
+
 	const [isLoading, setIsLoading] = useState(false);
 	const [ibanIsLoading, setIbanIsLoading] = useState(false);
+	const [cliqLoading, setCliqLoading] = useState(false);
+	const [cliqIsLoading, setCliqIsLoading] = useState(false);
 
 	const [reflectName, setReflectName] = useState("");
 	const [reflectMobileNumber, setReflectMobileNumber] = useState("");
 
+	const [cliqEnabled, setCliqEnabled] = useState(false);
+
 	useEffect(() => {
 		fetchReflectAccounts();
 		fetchIBANAccounts();
+		fetchCliqStatus();
+		fetchCliQAccounts();
 	}, []);
+
+	const fetchCliqStatus = async () => {
+		setCliqLoading(true);
+		try {
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/enable-cliq`,
+			);
+			if (response.ok) {
+				const data = await response.json();
+				setCliqEnabled(data.data.results === 1);
+			}
+		} catch (error) {
+			console.error("Error fetching CliQ status:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to fetch CliQ status.",
+				color: "red",
+			});
+		} finally {
+			setCliqLoading(false);
+		}
+	};
+
+	const handleToggleCliq = async (checked: boolean) => {
+		setCliqLoading(true);
+		try {
+			const enableValue = checked ? 1 : 0;
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/enable-cliq?enable=${enableValue}`,
+				{
+					method: "POST",
+				},
+			);
+
+			if (response.ok) {
+				setCliqEnabled(checked);
+				notifications.show({
+					title: "Success",
+					message: `CliQ (main user) ${checked ? "enabled" : "disabled"}`,
+					color: "green",
+				});
+			} else {
+				const error = await response.json();
+				notifications.show({
+					title: "Error",
+					message: error.error || "Failed to update CliQ status",
+					color: "red",
+				});
+				// Revert the toggle on error
+				setCliqEnabled(!checked);
+			}
+		} catch (error) {
+			console.error("Error updating CliQ status:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to update CliQ status",
+				color: "red",
+			});
+			// Revert the toggle on error
+			setCliqEnabled(!checked);
+		} finally {
+			setCliqLoading(false);
+		}
+	};
 
 	const fetchReflectAccounts = async () => {
 		setIsLoading(true);
@@ -277,6 +362,121 @@ const TransferAccountSection = ({
 		}
 	};
 
+	const fetchCliQAccounts = async () => {
+		setCliqIsLoading(true);
+		try {
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/cliq-account`,
+			);
+			if (response.ok) {
+				const data = await response.json();
+				setCliqAccounts(data.data.results || []);
+			}
+		} catch (error) {
+			console.error("Error fetching CliQ accounts:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to fetch CliQ accounts. Please try again.",
+				color: "red",
+			});
+		} finally {
+			setCliqIsLoading(false);
+		}
+	};
+
+	const handleAddCliQ = async () => {
+		if (!cliqFullName || !cliqNickName || !cliqMobileNumber || !cliqAlias) {
+			notifications.show({
+				title: "Validation Error",
+				message: "Please fill in all required fields.",
+				color: "orange",
+			});
+			return;
+		}
+
+		try {
+			const newCliQ = {
+				fullName: cliqFullName,
+				nickName: cliqNickName,
+				mobileNumber: cliqMobileNumber,
+				alias: cliqAlias,
+			};
+
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/cliq-account`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(newCliQ),
+				},
+			);
+			if (response.ok) {
+				notifications.show({
+					title: "Success",
+					message: "CliQ account added successfully.",
+					color: "green",
+				});
+
+				setCliqFullName("");
+				setCliqNickName("");
+				setCliqMobileNumber("");
+				setCliqAlias("");
+				setShowCliQForm(false);
+				fetchCliQAccounts();
+			} else {
+				const error = await response.json();
+				notifications.show({
+					title: "Error",
+					message: error.error || "Failed to add CliQ account.",
+					color: "red",
+				});
+			}
+		} catch (error) {
+			console.error("Error adding CliQ account:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to add CliQ account. Please try again.",
+				color: "red",
+			});
+		}
+	};
+
+	const handelDeleteCliq = async (id: number) => {
+		try {
+			const response = await fetch(
+				`${AB_API_ENDPOINT}/cliq/payment/v1/cliq-account?id=${id}`,
+				{
+					method: "DELETE",
+				},
+			);
+
+			if (response.ok) {
+				notifications.show({
+					title: "Success",
+					message: "CliQ account deleted successfully",
+					color: "green",
+				});
+				fetchCliQAccounts();
+			} else {
+				const error = await response.json();
+				notifications.show({
+					title: "Error",
+					message: error.error || "Failed to delete CliQ account",
+					color: "red",
+				});
+			}
+		} catch (error) {
+			console.error("Error deleting CliQ account:", error);
+			notifications.show({
+				title: "Error",
+				message: "Failed to delete CliQ account",
+				color: "red",
+			});
+		}
+	};
+
 	return (
 		<div className="space-y-4">
 			{/* reflect account section */}
@@ -383,11 +583,21 @@ const TransferAccountSection = ({
 						CliQ Account
 					</Text>
 					<Group gap="xs">
+						<Switch
+							checked={cliqEnabled}
+							onChange={(event) =>
+								handleToggleCliq(event.currentTarget.checked)
+							}
+							disabled={isConnected || cliqLoading}
+							label={cliqEnabled ? "Enabled" : "Disabled"}
+							size="sm"
+							color="green"
+						/>
 						<ActionIcon
 							variant="light"
 							color="blue"
-							// onClick={fetchBillProfiles}
-							// disabled={isLoading}
+							onClick={fetchCliQAccounts}
+							disabled={cliqIsLoading}
 						>
 							<IoRefresh size={18} />
 						</ActionIcon>
@@ -402,6 +612,100 @@ const TransferAccountSection = ({
 					</Group>
 				</Group>
 			</div>
+
+			{/* add cliq form */}
+			{showCliQForm && (
+				<Paper p="md" withBorder>
+					<Stack gap="md">
+						<Text size="sm" fw={600}>
+							Add CliQ Account
+						</Text>
+
+						<div className="grid grid-cols-2 gap-4">
+							<TextInput
+								label="Name"
+								placeholder="e.g., Ahmed Quwais"
+								value={cliqFullName}
+								onChange={(e) => setCliqFullName(e.target.value)}
+								required
+								size="xs"
+							/>
+							<TextInput
+								label="Nick Name"
+								placeholder="e.g., Ahmed"
+								value={cliqNickName}
+								onChange={(e) => setCliqNickName(e.target.value)}
+								required
+								size="xs"
+							/>
+							<TextInput
+								label="Mobile Number"
+								placeholder="e.g., +962 79 1234567"
+								value={cliqMobileNumber}
+								onChange={(e) => setCliqMobileNumber(e.target.value)}
+								required
+								size="xs"
+							/>
+							<TextInput
+								label="Alias"
+								placeholder="e.g., RANEEM99"
+								value={cliqAlias}
+								onChange={(e) => setCliqAlias(e.target.value)}
+								required
+								size="xs"
+							/>
+						</div>
+
+						<Group justify="flex-end" mt="xs">
+							<Button size="xs" onClick={handleAddCliQ}>
+								Add CliQ Account
+							</Button>
+						</Group>
+					</Stack>
+				</Paper>
+			)}
+
+			{/* cliq account list */}
+			{cliqIsLoading ? (
+				<Text c="dimmed" size="sm">
+					Loading CliQ accounts...
+				</Text>
+			) : cliqAccounts.length === 0 ? (
+				<Text c="dimmed" size="sm">
+					{`No CliQ account yet. Click "Add CliQ Account" to create one.`}
+				</Text>
+			) : (
+				<Stack gap="sm">
+					{cliqAccounts.map((account) => (
+						<Paper key={account.id} p="md" withBorder>
+							<Group justify="space-between" align="center">
+								<Stack gap={4} style={{ flex: 1 }}>
+									<Text size="sm" fw={500} c="white">
+										{account.name}
+									</Text>
+									<Text size="xs" c="dimmed">
+										Nick Name: {account.nickName}
+									</Text>
+									<Text size="xs" c="dimmed">
+										Mobile Number: {account.mobileNumber}
+									</Text>
+									<Text size="xs" c="dimmed">
+										Alias: {account.alias}
+									</Text>
+								</Stack>
+								<ActionIcon
+									color="red"
+									variant="subtle"
+									onClick={() => handelDeleteCliq(account.id)}
+									disabled={isConnected}
+								>
+									<IoTrash size={16} />
+								</ActionIcon>
+							</Group>
+						</Paper>
+					))}
+				</Stack>
+			)}
 
 			{/* iban account section */}
 			<div className="space-y-4">
