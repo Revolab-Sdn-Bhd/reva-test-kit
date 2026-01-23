@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
 	createSubAccount,
+	deleteSavingSpace,
 	deleteSubAccount,
 	getAllSubAccounts,
 	getUser,
@@ -90,20 +91,52 @@ export default async function handler(
 		}
 	} else if (req.method === "DELETE") {
 		try {
-			const { subAccountId } = req.query;
+			const { subAccountId, savingSpaceId } = req.query;
 
-			if (!subAccountId || typeof subAccountId !== "string") {
-				return res.status(400).json({ error: "subAccountId is required" });
+			if (!subAccountId && !savingSpaceId) {
+				return res.status(400).json({
+					error: "Either subAccountId or savingSpaceId is required",
+				});
 			}
 
-			const deleted = deleteSubAccount(subAccountId);
-
-			if (!deleted) {
-				return res.status(404).json({ error: "Sub-account not found" });
+			if (subAccountId && typeof subAccountId !== "string") {
+				return res.status(400).json({ error: "subAccountId must be a string" });
 			}
+
+			if (savingSpaceId && typeof savingSpaceId !== "string") {
+				return res
+					.status(400)
+					.json({ error: "savingSpaceId must be a string" });
+			}
+
+			let deletedSavingSpace = false;
+			let deletedSubAccount = false;
+
+			if (savingSpaceId) {
+				console.log("Deleting saving space:", savingSpaceId);
+				deletedSavingSpace = deleteSavingSpace(savingSpaceId);
+
+				if (!deletedSavingSpace) {
+					return res.status(404).json({ error: "Saving space not found" });
+				}
+			}
+
+			if (subAccountId) {
+				console.log("Deleting sub-account:", subAccountId);
+				deletedSubAccount = deleteSubAccount(subAccountId);
+
+				if (!deletedSubAccount) {
+					return res.status(404).json({ error: "Sub-account not found" });
+				}
+			}
+
+			const messages = [];
+			if (deletedSavingSpace)
+				messages.push("Saving space deleted successfully");
+			if (deletedSubAccount) messages.push("Sub-account deleted successfully");
 
 			res.status(200).json({
-				message: "Sub-account deleted successfully",
+				message: messages.join(" and "),
 			});
 		} catch (error: any) {
 			console.error("Error deleting sub-account:", error);

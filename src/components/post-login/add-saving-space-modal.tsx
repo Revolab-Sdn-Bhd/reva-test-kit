@@ -247,10 +247,12 @@ const AddSavingSpaceModal = ({
 					) : (
 						<Select
 							placeholder="-- Select Sub-Account --"
-							data={subAccounts.map((acc) => ({
-								value: acc.id,
-								label: `${acc.accountNumber} - ${acc.currency} ${acc.accountBalance.toFixed(2)}`,
-							}))}
+							data={subAccounts
+								.filter((acc) => acc.orderIndex === 0)
+								.map((acc) => ({
+									value: acc.id,
+									label: `${acc.accountNumber} - ${acc.currency} ${acc.accountBalance.toFixed(2)}`,
+								}))}
 							value={selectedSubAccountId}
 							onChange={(value) => setSelectedSubAccountId(value || "")}
 							required
