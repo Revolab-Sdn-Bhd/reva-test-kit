@@ -92,6 +92,51 @@ const AccountSection: React.FC<AccountSectionProps> = ({ isConnected }) => {
 		});
 	};
 
+	const handleDeleteAccountSavingSpace = async (
+		savingSpaceId: string,
+		savingSpaceName: string,
+	) => {
+		modals.openConfirmModal({
+			title: "Delete Saving Space",
+			children: `Are you sure you want to delete saving spaces: "${savingSpaceName}"?`,
+			labels: { confirm: "Delete", cancel: "Cancel" },
+			confirmProps: { color: "red" },
+			onConfirm: async () => {
+				try {
+					const response = await fetch(
+						`${AB_API_ENDPOINT}/account-experience/v1/sub-accounts?savingSpaceId=${savingSpaceId}`,
+						{
+							method: "DELETE",
+						},
+					);
+
+					if (response.ok) {
+						notifications.show({
+							title: "Success",
+							message: `Saving spaces ${savingSpaceName} deleted successfully!`,
+							color: "green",
+						});
+						fetchSavedRecords();
+					} else {
+						const error = await response.json();
+						notifications.show({
+							title: "Error",
+							message: `Failed to delete saving spaces: ${error.error || "Unknown error"}`,
+							color: "red",
+						});
+					}
+				} catch (error) {
+					console.error("Error deleting saving spaces:", error);
+					notifications.show({
+						title: "Error",
+						message: "Failed to delete saving spaces. Please try again.",
+						color: "red",
+					});
+				}
+			},
+		});
+	};
+
 	const openCreateUserModal = () => {
 		openContextModal({
 			modal: "createUserAccount",
@@ -219,18 +264,38 @@ const AccountSection: React.FC<AccountSectionProps> = ({ isConnected }) => {
 											className="p-3 border border-green-500 rounded bg-gray-900/50"
 										>
 											<div className="grid grid-cols-2 gap-2 text-xs">
-												<div className="col-span-2">
-													<span className="text-base font-medium text-green-400">
-														Name: {record.name}
-													</span>
+												<div className="col-span-2 flex items-start justify-between">
 													<div>
-														<span className="font-medium text-gray-400">
-															Category:
+														<span className="text-base font-medium text-green-400">
+															Name: {record.name}
 														</span>
-														<span className="ml-2 text-white">
-															{record.categoryName}
-														</span>
+														<div>
+															<span className="font-medium text-gray-400">
+																Category:
+															</span>
+															<span className="ml-2 text-white">
+																{record.categoryName}
+															</span>
+														</div>
 													</div>
+													<button
+														type="button"
+														onClick={() =>
+															handleDeleteAccountSavingSpace(
+																record.savingSpaceId,
+																record.name,
+															)
+														}
+														disabled={isConnected}
+														className="px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed"
+														title={
+															account.orderIndex === 0
+																? "Delete user and all accounts"
+																: "Delete account and all saving spaces"
+														}
+													>
+														Delete
+													</button>
 												</div>
 												<div>
 													<span className="font-medium text-gray-400">

@@ -433,6 +433,17 @@ export const deleteSubAccount = (subAccountId: string): boolean => {
 };
 
 /**
+ * Delete saving space by id
+ */
+export const deleteSavingSpace = (savingSpaceId: string): boolean => {
+	const checkStmt = db
+		.prepare(`DELETE FROM saving_spaces WHERE savingSpaceId = ?`)
+		.run(savingSpaceId);
+
+	return checkStmt.changes > 0;
+};
+
+/**
  * Create saving space for a sub-account
  */
 export const createSavingSpace = (
