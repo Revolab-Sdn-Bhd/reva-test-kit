@@ -3,9 +3,9 @@ import {
 	RoomAudioRenderer,
 	StartAudio,
 } from "@livekit/components-react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useQueryState, parseAsStringEnum } from "nuqs"
 import DashboardLayout from "@/components/DashboardLayout";
 import ChatScreen from "@/components/post-login/chat-screen";
 import AccountSection from "@/components/post-login/tabs/account";
@@ -42,12 +42,31 @@ const Tabs = [
 ];
 
 function PostLoginContent() {
-	const [platform, setPlatform] = useQueryState<"web" | "mobile">("platform", { defaultValue: "web", type: "single", parse: (val) => (val === "mobile" ? "mobile" : "web") });
-	const [language, setLanguage] = useQueryState<"en" | "ar">("language", { defaultValue: "en", type: "single", parse: (val) => (val === "ar" ? "ar" : "en") });
-	const [token, setToken] = useQueryState("token", { defaultValue: "reflect123" });
-	const [sessionId, setSessionId] = useQueryState("sessionId", { defaultValue: "" });
-	const [wsPath, setWsPath] = useQueryState("wsPath", { defaultValue: "/ws/v2/chat" });
-	const [mode, setMode] = useQueryState<Mode>("mode", parseAsStringEnum<Mode>(Object.values(Mode)).withDefault(Mode.POST_LOGIN_V2));
+	const [platform, setPlatform] = useQueryState<"web" | "mobile">("platform", {
+		defaultValue: "web",
+		type: "single",
+		parse: (val) => (val === "mobile" ? "mobile" : "web"),
+	});
+	const [language, setLanguage] = useQueryState<"en" | "ar">("language", {
+		defaultValue: "en",
+		type: "single",
+		parse: (val) => (val === "ar" ? "ar" : "en"),
+	});
+	const [token, setToken] = useQueryState("token", {
+		defaultValue: "reflect123",
+	});
+	const [sessionId, setSessionId] = useQueryState("sessionId", {
+		defaultValue: "",
+	});
+	const [wsPath, setWsPath] = useQueryState("wsPath", {
+		defaultValue: "/ws/v2/chat",
+	});
+	const [mode, setMode] = useQueryState<Mode>(
+		"mode",
+		parseAsStringEnum<Mode>(Object.values(Mode)).withDefault(
+			Mode.POST_LOGIN_V2,
+		),
+	);
 
 	useEffect(() => {
 		switch (mode) {
@@ -70,12 +89,17 @@ function PostLoginContent() {
 				break;
 			}
 		}
-	}, [mode])
+	}, [mode]);
 
 	const { envConfig } = useEnvConfig();
 
 	const [isConfigCollapsed, setIsConfigCollapsed] = useState(false);
-	const [activeTab, setActiveTab] = useQueryState<ConfigTab>("tab", parseAsStringEnum<ConfigTab>(Object.values(ConfigTab)).withDefault(ConfigTab.Connection));
+	const [activeTab, setActiveTab] = useQueryState<ConfigTab>(
+		"tab",
+		parseAsStringEnum<ConfigTab>(Object.values(ConfigTab)).withDefault(
+			ConfigTab.Connection,
+		),
+	);
 
 	const { isConnected, connect, disconnect } = useWebSocketContext();
 	const { disconnect: livekitDisconnect } = useLivekitConnection();
@@ -117,8 +141,9 @@ function PostLoginContent() {
 							WebSocket Configuration
 						</h2>
 						<svg
-							className={`w-5 h-5 text-gray-400 transition-transform ${isConfigCollapsed ? "" : "rotate-180"
-								}`}
+							className={`w-5 h-5 text-gray-400 transition-transform ${
+								isConfigCollapsed ? "" : "rotate-180"
+							}`}
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -140,10 +165,11 @@ function PostLoginContent() {
 										key={label}
 										type="button"
 										onClick={() => setActiveTab(value)}
-										className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === value
-											? "text-blue-400 border-b-2 border-blue-400"
-											: "text-gray-400 hover:text-gray-300"
-											}`}
+										className={`px-4 py-2 text-sm font-medium transition-colors ${
+											activeTab === value
+												? "text-blue-400 border-b-2 border-blue-400"
+												: "text-gray-400 hover:text-gray-300"
+										}`}
 									>
 										{label}
 									</button>

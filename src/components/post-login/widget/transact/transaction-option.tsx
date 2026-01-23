@@ -181,13 +181,11 @@ const TransactionOptionWidgetComponent = ({
 												: "Click to view contacts"}
 									</p>
 								)}
-							</div>
 
-							{item.iban && (
-								<div className="flex-1 min-w-0">
-									<h4 className="font-medium text-white">{item.iban}</h4>
-								</div>
-							)}
+								{item.iban && (
+									<p className="text-sm text-gray-400 mt-1">{item.iban}</p>
+								)}
+							</div>
 
 							<IoChevronForward className="text-gray-500" size={20} />
 						</div>

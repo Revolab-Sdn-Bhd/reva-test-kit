@@ -127,7 +127,7 @@ function generateAccountNumber(): string {
 		.padStart(2, "0");
 
 	let accountDigits = "";
-	for (let i = 0; i < 22; i++) {
+	for (let i = 0; i < 10; i++) {
 		accountDigits += Math.floor(Math.random() * 10);
 	}
 

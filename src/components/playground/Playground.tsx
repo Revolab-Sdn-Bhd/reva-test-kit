@@ -40,11 +40,11 @@ import {
 } from "@/components/playground/PlaygroundTile";
 import { TranscriptionTile } from "@/components/transcriptions/TranscriptionTile";
 import { useConfig } from "@/hooks/useConfig";
-import { useLivekitData } from "@/hooks/useLivekitData";
 import { useEscalatedChannel } from "@/hooks/useEscalatedChannel";
+import { useLivekitData } from "@/hooks/useLivekitData";
 import tailwindTheme from "../../lib/tailwindTheme.preval";
-import SessionExpiringDialog from "../dialog/SessionExpiringDialog";
 import LiveAgentEscalationDialog from "../dialog/LiveAgentEscalationDialog";
+import SessionExpiringDialog from "../dialog/SessionExpiringDialog";
 
 export interface PlaygroundMeta {
 	name: string;
@@ -76,7 +76,6 @@ export default function Playground({
 	const tracks = useTracks();
 	const room = useRoomContext();
 
-
 	const [rpcMethod, setRpcMethod] = useState("");
 	const [rpcPayload, setRpcPayload] = useState("");
 	const [showRpc, setShowRpc] = useState(false);
@@ -88,12 +87,10 @@ export default function Playground({
 		}
 	}, [config, localParticipant, roomState]);
 
-	const {
-		sessionExpiring,
-		clearSessionExpiring,
-	} = useLivekitData(room);
+	const { sessionExpiring, clearSessionExpiring } = useLivekitData(room);
 
-	const [isOldEscalatedDialogOpen, setIsOldEscalatedDialogOpen] = useState(false);
+	const [isOldEscalatedDialogOpen, setIsOldEscalatedDialogOpen] =
+		useState(false);
 	const [isEscalatedDialogOpen, setIsEscalatedDialogOpen] = useState(false);
 	const escalationChannelData = useEscalatedChannel({
 		onEscalated: (d) => {
@@ -103,7 +100,7 @@ export default function Playground({
 				setIsEscalatedDialogOpen(true);
 			}
 		},
-	})
+	});
 
 	const agentVideoTrack = tracks.find(
 		(trackRef) =>
@@ -367,7 +364,7 @@ export default function Playground({
 										key,
 										value: String(value),
 									}))}
-									onAttributesChange={() => { }}
+									onAttributesChange={() => {}}
 									themeColor={config.settings.theme_color}
 									disabled={true}
 								/>
@@ -606,10 +603,11 @@ export default function Playground({
 					/>
 				</div>
 				<div
-					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${!config.settings.outputs.audio && !config.settings.outputs.video
-						? "hidden"
-						: "flex"
-						}`}
+					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${
+						!config.settings.outputs.audio && !config.settings.outputs.video
+							? "hidden"
+							: "flex"
+					}`}
 				>
 					{/* {config.settings.outputs.video && (
 						<PlaygroundTile

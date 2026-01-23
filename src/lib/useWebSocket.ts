@@ -482,6 +482,7 @@ export enum EventType {
 
 	PRE_CONFIRMATION = "PRE_CONFIRMATION",
 	CANCEL_TRANSACTION = "CANCEL_TRANSACTION",
+	SELECT_SAVED_BENEFICIARY = "SELECT_SAVED_BENEFICIARY",
 }
 
 export const useWebSocket = () => {
@@ -684,6 +685,7 @@ export const useWebSocket = () => {
 					case EventType.SELECT_PURPOSE:
 					case EventType.SELECT_BANK:
 					case EventType.CANCEL_TRANSACTION:
+					case EventType.SELECT_SAVED_BENEFICIARY:
 						break;
 					case EventType.PRE_CONFIRMATION:
 						{
