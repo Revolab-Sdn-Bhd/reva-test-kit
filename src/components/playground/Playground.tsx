@@ -45,6 +45,7 @@ import { useLivekitData } from "@/hooks/useLivekitData";
 import tailwindTheme from "../../lib/tailwindTheme.preval";
 import LiveAgentEscalationDialog from "../dialog/LiveAgentEscalationDialog";
 import SessionExpiringDialog from "../dialog/SessionExpiringDialog";
+import { useRouter } from "next/navigation";
 
 export interface PlaygroundMeta {
 	name: string;
@@ -64,6 +65,7 @@ export default function Playground({
 	themeColors,
 	onConnect,
 }: PlaygroundProps) {
+	const router = useRouter();
 	const { config, setUserSettings } = useConfig();
 	const { name } = useRoomInfo();
 	const [transcripts, setTranscripts] = useState<ChatMessageType[]>([]);
@@ -87,7 +89,7 @@ export default function Playground({
 		}
 	}, [config, localParticipant, roomState]);
 
-	const { sessionExpiring, clearSessionExpiring } = useLivekitData(room);
+	const { sessionExpiring, clearSessionExpiring, sendSessionEnd } = useLivekitData(room);
 
 	const [isOldEscalatedDialogOpen, setIsOldEscalatedDialogOpen] =
 		useState(false);
@@ -364,7 +366,7 @@ export default function Playground({
 										key,
 										value: String(value),
 									}))}
-									onAttributesChange={() => {}}
+									onAttributesChange={() => { }}
 									themeColor={config.settings.theme_color}
 									disabled={true}
 								/>
@@ -603,11 +605,10 @@ export default function Playground({
 					/>
 				</div>
 				<div
-					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${
-						!config.settings.outputs.audio && !config.settings.outputs.video
-							? "hidden"
-							: "flex"
-					}`}
+					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${!config.settings.outputs.audio && !config.settings.outputs.video
+						? "hidden"
+						: "flex"
+						}`}
 				>
 					{/* {config.settings.outputs.video && (
 						<PlaygroundTile
@@ -657,8 +658,14 @@ export default function Playground({
 
 			<LiveAgentEscalationDialog
 				isOpen={isEscalatedDialogOpen}
-				sessionId={escalationChannelData.sessionId}
 				onClose={() => setIsEscalatedDialogOpen(false)}
+				onConfirm={() => {
+					sendSessionEnd();
+					router.push(
+						`/dashboard/post-login/?sessionId=${escalationChannelData.sessionId}`,
+					);
+					setIsOldEscalatedDialogOpen(false);
+				}}
 			/>
 
 			<SessionExpiringDialog
@@ -667,7 +674,6 @@ export default function Playground({
 					clearSessionExpiring();
 				}}
 			/>
-			<button onClick={() => setIsEscalatedDialogOpen(true)}>test</button>
 		</>
 	);
 }
