@@ -1,22 +1,18 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 
 type LiveAgentEscalationDialogProps = {
 	isOpen: boolean;
 	onClose: () => void;
+	onConfirm: () => void;
 	mode?: "fullscreen" | "inline";
-
-	sessionId: string | null;
 };
 
 export default function LiveAgentEscalationDialog({
 	isOpen,
 	onClose,
-	sessionId,
+	onConfirm,
 	mode = "fullscreen",
 }: Readonly<LiveAgentEscalationDialogProps>) {
-	const router = useRouter();
-
 	const containerClass =
 		mode === "inline"
 			? "absolute inset-0 z-40 bg-black bg-opacity-50"
@@ -58,12 +54,7 @@ export default function LiveAgentEscalationDialog({
 							<div className="flex justify-center">
 								<button
 									type="button"
-									onClick={() => {
-										router.push(
-											`/dashboard/post-login/?sessionId=${sessionId}`,
-										);
-										onClose();
-									}}
+									onClick={onConfirm}
 									className="p-3 duration-300 bg-green-500 rounded-full cursor-pointer hover:shadow-lg hover:bg-green-800"
 								>
 									Confirm
