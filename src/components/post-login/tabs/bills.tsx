@@ -48,6 +48,7 @@ const BillsSection: React.FC<BillsSectionProps> = ({ isConnected }) => {
 	const [nickName, setNickName] = useState("");
 	const [customerProviderIdentifier, setCustomerProviderIdentifier] =
 		useState("");
+	const [dueAmount, setDueAmount] = useState("");
 
 	const serviceTypes = [
 		{ value: "Electricity", label: "Electricity" },
@@ -95,7 +96,8 @@ const BillsSection: React.FC<BillsSectionProps> = ({ isConnected }) => {
 			!billerCode ||
 			!customerIdentifier ||
 			!nickName ||
-			!customerProviderIdentifier
+			!customerProviderIdentifier ||
+			!dueAmount
 		) {
 			notifications.show({
 				title: "Validation Error",
@@ -118,6 +120,7 @@ const BillsSection: React.FC<BillsSectionProps> = ({ isConnected }) => {
 						billerCode,
 						customerIdentifier,
 						nickName,
+						dueAmount,
 					},
 				],
 				customerProviderIdentifier,
@@ -150,6 +153,7 @@ const BillsSection: React.FC<BillsSectionProps> = ({ isConnected }) => {
 				setServiceType("Electricity");
 				setPaymentType("Postpaid");
 				setShowAddForm(false);
+				setDueAmount("");
 
 				fetchBillProfiles();
 			} else {
@@ -238,14 +242,24 @@ const BillsSection: React.FC<BillsSectionProps> = ({ isConnected }) => {
 						<Text size="sm" fw={600}>
 							Add New Bill Profile
 						</Text>
-						<TextInput
-							label="Biller Name"
-							placeholder="e.g., Madfooat2"
-							value={billerName}
-							onChange={(e) => setBillerName(e.target.value)}
-							required
-							size="xs"
-						/>
+						<Group grow>
+							<TextInput
+								label="Biller Name"
+								placeholder="e.g., Madfooat2"
+								value={billerName}
+								onChange={(e) => setBillerName(e.target.value)}
+								required
+								size="xs"
+							/>
+							<TextInput
+								label="Due Amount (JOD)"
+								placeholder="e.g., 100"
+								value={dueAmount}
+								onChange={(e) => setDueAmount(e.target.value)}
+								required
+								size="xs"
+							/>
+						</Group>
 						<Group grow>
 							<Select
 								label="Service Type"

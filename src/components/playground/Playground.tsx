@@ -13,6 +13,7 @@ import {
 	VideoTrack,
 } from "@livekit/components-react";
 import { ConnectionState, LocalParticipant, Track } from "livekit-client";
+import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import {
 	type ReactNode,
@@ -45,7 +46,6 @@ import { useLivekitData } from "@/hooks/useLivekitData";
 import tailwindTheme from "../../lib/tailwindTheme.preval";
 import LiveAgentEscalationDialog from "../dialog/LiveAgentEscalationDialog";
 import SessionExpiringDialog from "../dialog/SessionExpiringDialog";
-import { useRouter } from "next/navigation";
 
 export interface PlaygroundMeta {
 	name: string;
@@ -89,7 +89,8 @@ export default function Playground({
 		}
 	}, [config, localParticipant, roomState]);
 
-	const { sessionExpiring, clearSessionExpiring, sendSessionEnd } = useLivekitData(room);
+	const { sessionExpiring, clearSessionExpiring, sendSessionEnd } =
+		useLivekitData(room);
 
 	const [isOldEscalatedDialogOpen, setIsOldEscalatedDialogOpen] =
 		useState(false);
@@ -366,7 +367,7 @@ export default function Playground({
 										key,
 										value: String(value),
 									}))}
-									onAttributesChange={() => { }}
+									onAttributesChange={() => {}}
 									themeColor={config.settings.theme_color}
 									disabled={true}
 								/>
@@ -605,10 +606,11 @@ export default function Playground({
 					/>
 				</div>
 				<div
-					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${!config.settings.outputs.audio && !config.settings.outputs.video
-						? "hidden"
-						: "flex"
-						}`}
+					className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${
+						!config.settings.outputs.audio && !config.settings.outputs.video
+							? "hidden"
+							: "flex"
+					}`}
 				>
 					{/* {config.settings.outputs.video && (
 						<PlaygroundTile

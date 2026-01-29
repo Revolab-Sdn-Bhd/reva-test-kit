@@ -1,5 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAllSubAccounts } from "@/lib/cache";
+import {
+	type BillProfile,
+	getAllSubAccounts,
+	getBillProfileById,
+} from "@/lib/cache";
 
 interface BillRequest {
 	billerCode: string;
@@ -72,8 +76,11 @@ export default function handler(
 		}
 
 		const results: BillAnalysisResult[] = bills.map((bill: BillRequest) => {
-			// Generate random due amount between 50 and 150
-			const dueAmount = Math.floor(Math.random() * 100) + 50;
+			const billInfo: BillProfile | null = getBillProfileById(
+				bill.customerProviderIdentifier,
+			);
+
+			const dueAmount = Number(billInfo?.billingInfo[0]?.dueAmount) ?? 0;
 
 			// Check if primary account has sufficient balance
 			const hasSufficientBalance = primaryAccount.accountBalance >= dueAmount;

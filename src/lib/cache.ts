@@ -613,6 +613,7 @@ export interface BillingInfo {
 	billerCode: string;
 	customerIdentifier: string;
 	nickName: string;
+	dueAmount?: string;
 }
 
 export interface BillProfile {
