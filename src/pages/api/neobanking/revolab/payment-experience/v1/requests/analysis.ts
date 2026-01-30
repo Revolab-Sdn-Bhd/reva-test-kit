@@ -66,7 +66,17 @@ interface RequestAnalysisResponse {
 export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<
-		RequestAnalysisResponse | { error: string; message?: string }
+		| RequestAnalysisResponse
+		| { error: string; message?: string }
+		| {
+				code: string;
+				url: string;
+				errors: [
+					{ path: string; errorCode: string; message: string; url: string },
+				];
+				message: string;
+				id: string;
+		  }
 	>,
 ) {
 	if (req.method !== "POST") {
@@ -112,8 +122,19 @@ export default function handler(
 		// Mock receiver name lookup based on mobile number
 		const receiverName = getReceiverName(normalizedMobile);
 		if (receiverName === null) {
-			return res.status(404).json({
-				error: "Receiver not exist",
+			return res.status(400).json({
+				code: "010",
+				url: "",
+				errors: [
+					{
+						path: "",
+						errorCode: "400.010.PRFS1025",
+						message: "Receiver not found",
+						url: "",
+					},
+				],
+				message: "Receiver not found",
+				id: "",
 			});
 		}
 
