@@ -37,7 +37,10 @@ const CliqWidgetComponent = ({
 
 		if (button.id === "transfer" || button.id === "request") {
 			const amountValue = parseFloat(amount) || 0;
-			data = `Send ${amountValue.toFixed(3)} ${item.amount.currency}`;
+			data =
+				button.id === "transfer"
+					? `Transfer ${amountValue.toFixed(3)} ${item.amount.currency}`
+					: `Request ${amountValue.toFixed(3)} ${item.amount.currency}`;
 
 			sendMessage(
 				JSON.stringify({
