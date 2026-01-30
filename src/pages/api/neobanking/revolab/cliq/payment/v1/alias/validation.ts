@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getNameByAlias } from "@/lib/cache";
+import { getCliQNameByNumber, getNameByAlias } from "@/lib/cache";
 
 interface Creditor {
 	identification: {
@@ -53,29 +53,49 @@ export default function handler(
 ) {
 	if (req.method === "POST") {
 		try {
-			const { creditorInfo }: ValidateAliasRequest = req.body;
+			const { creditorInfo, paymentType }: ValidateAliasRequest = req.body;
+
+			if (!paymentType) {
+				return res.status(400).json({
+					error: "paymentType are required",
+				});
+			}
 
 			if (
 				!creditorInfo.identification.type ||
 				!creditorInfo.identification.value
 			) {
 				return res.status(400).json({
-					error: "identification.value and identification.type are required",
+					error: "identification.value and identification.type  are required",
 				});
 			}
 
-			if (creditorInfo.identification.type !== "ALIAS") {
+			if (paymentType !== "OUTWARD" && paymentType !== "REQUESTTOPAY") {
 				return res.status(400).json({
-					error: "identification.type not allowed",
+					error: "paymentType not allowed",
 				});
 			}
 
-			const creditorName = getNameByAlias(creditorInfo.identification.value);
+			let creditorName: any;
 
-			if (creditorName === null) {
-				return res.status(404).json({
-					error: "Alias profile not found",
-				});
+			if (creditorInfo.identification.type === "ALIAS") {
+				creditorName = getNameByAlias(creditorInfo.identification.value);
+
+				if (creditorName === null) {
+					return res.status(400).json({
+						error: "Alias profile not found",
+					});
+				}
+			}
+
+			if (creditorInfo.identification.type === "MOBL") {
+				creditorName = getCliQNameByNumber(creditorInfo.identification.value);
+
+				if (creditorName === null) {
+					return res.status(400).json({
+						error: "Alias profile not found",
+					});
+				}
 			}
 
 			const result: Creditor = {

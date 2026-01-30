@@ -30,7 +30,17 @@ interface RetrieveCliQProfileResponse {
 export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<
-		RetrieveCliQProfileResponse | { error: string; message?: string }
+		| RetrieveCliQProfileResponse
+		| { error: string; message?: string }
+		| {
+				code: string;
+				url: string;
+				errors: [
+					{ path: string; errorCode: string; message: string; url: string },
+				];
+				message: string;
+				id: string;
+		  }
 	>,
 ) {
 	if (req.method === "GET") {
@@ -40,7 +50,18 @@ export default function handler(
 
 			if (profiles === null) {
 				return res.status(400).json({
-					error: "CliQ profile not found",
+					code: "010",
+					url: "",
+					errors: [
+						{
+							path: "",
+							errorCode: "400.010.PRFS1025",
+							message: "Cliq profile not found",
+							url: "",
+						},
+					],
+					message: "Cliq profile not found",
+					id: "",
 				});
 			}
 
