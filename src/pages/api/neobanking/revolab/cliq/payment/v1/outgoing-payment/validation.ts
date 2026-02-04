@@ -80,7 +80,17 @@ interface PaymentAnalysisRequest {
 export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<
-		IbanAnalysisResponse | { error: string; message?: string }
+		| IbanAnalysisResponse
+		| { error: string; message?: string }
+		| {
+				code: string;
+				url: string;
+				errors: [
+					{ path: string; errorCode: string; message: string; url: string },
+				];
+				message: string;
+				id: string;
+		  }
 	>,
 ) {
 	if (req.method === "POST") {
@@ -135,7 +145,18 @@ export default function handler(
 			const user = getUser();
 			if (!user) {
 				return res.status(400).json({
-					error: "User account not found",
+					code: "010",
+					url: "",
+					errors: [
+						{
+							path: "",
+							errorCode: "400.010.PRFS1025",
+							message: "User account not found",
+							url: "",
+						},
+					],
+					message: "User account not found",
+					id: "",
 				});
 			}
 
@@ -145,8 +166,19 @@ export default function handler(
 					creditorInfo.identification.value,
 				);
 				if (creditorName === null) {
-					return res.status(404).json({
-						error: "Creditor not exist",
+					return res.status(400).json({
+						code: "010",
+						url: "",
+						errors: [
+							{
+								path: "",
+								errorCode: "400.010.PRFS1025",
+								message: "Creditor not exist",
+								url: "",
+							},
+						],
+						message: "Creditor not exist",
+						id: "",
 					});
 				}
 			}
@@ -154,8 +186,19 @@ export default function handler(
 			if (creditorInfo.identification.type === "ALIAS") {
 				creditorName = getNameByAlias(creditorInfo.identification.value);
 				if (creditorName === null) {
-					return res.status(404).json({
-						error: "Creditor not exist",
+					return res.status(400).json({
+						code: "010",
+						url: "",
+						errors: [
+							{
+								path: "",
+								errorCode: "400.010.PRFS1025",
+								message: "Creditor not exist",
+								url: "",
+							},
+						],
+						message: "Creditor not exist",
+						id: "",
 					});
 				}
 			}
@@ -166,8 +209,19 @@ export default function handler(
 				);
 				creditorName = getCliQNameByNumber(normalizedMobile);
 				if (creditorName === null) {
-					return res.status(404).json({
-						error: "Creditor not exist",
+					return res.status(400).json({
+						code: "010",
+						url: "",
+						errors: [
+							{
+								path: "",
+								errorCode: "400.010.PRFS1025",
+								message: "Creditor not exist",
+								url: "",
+							},
+						],
+						message: "Creditor not exist",
+						id: "",
 					});
 				}
 			}
