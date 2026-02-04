@@ -14,6 +14,7 @@ const InsufficientConfirmWidgetComponent = ({
 }) => {
 	const { sendMessage, sendAction } = useWebSocketContext();
 	const [selectedBank, setSelectedBank] = useState<string | null>(null);
+	const [isClicked, setIsClicked] = useState(false);
 
 	const handleButtonClick = (button: InsufficientConfirmButton) => {
 		if ("payload" in button && button.payload) {
@@ -24,6 +25,7 @@ const InsufficientConfirmWidgetComponent = ({
 				}),
 				button.payload.data,
 			);
+			setIsClicked(true);
 		}
 
 		if ("navigationId" in button && button.navigationId) {
@@ -104,7 +106,12 @@ const InsufficientConfirmWidgetComponent = ({
 					<button
 						key={button.id}
 						onClick={() => handleButtonClick(button)}
-						className="px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800"
+						disabled={isClicked}
+						className={`px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg ${
+							isClicked
+								? "bg-gray-600 cursor-not-allowed opacity-50"
+								: "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
+						}`}
 					>
 						{button.label}
 					</button>
