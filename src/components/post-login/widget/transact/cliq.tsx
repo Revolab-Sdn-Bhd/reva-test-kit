@@ -69,8 +69,8 @@ const CliqWidgetComponent = ({
 						className="rounded-2xl border border-gray-600 bg-gradient-to-br from-gray-700/40 to-gray-800/40 p-4"
 					>
 						{/* contact info section */}
-						<div className="">
-							<div className="">
+						<div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-600">
+							<div className="flex items-center gap-3">
 								{item.icon ? (
 									<img
 										src={item.icon}

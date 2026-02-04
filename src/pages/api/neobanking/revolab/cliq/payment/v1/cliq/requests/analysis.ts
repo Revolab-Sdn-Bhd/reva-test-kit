@@ -62,7 +62,17 @@ interface CliQPaymentAnalysisResponse {
 export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<
-		CliQPaymentAnalysisResponse | { error: string; message?: string }
+		| CliQPaymentAnalysisResponse
+		| { error: string; message?: string }
+		| {
+				code: string;
+				url: string;
+				errors: [
+					{ path: string; errorCode: string; message: string; url: string },
+				];
+				message: string;
+				id: string;
+		  }
 	>,
 ) {
 	if (req.method !== "POST") {
@@ -102,8 +112,19 @@ export default function handler(
 			receiverName = getNameByAlias(receiverInfo.identificationValue);
 
 			if (receiverName === null) {
-				return res.status(404).json({
-					error: "Receiver not found",
+				return res.status(400).json({
+					code: "010",
+					url: "",
+					errors: [
+						{
+							path: "",
+							errorCode: "400.010.PRFS1025",
+							message: "Receiver not found",
+							url: "",
+						},
+					],
+					message: "Receiver not found",
+					id: "",
 				});
 			}
 		}
@@ -114,8 +135,19 @@ export default function handler(
 			);
 			receiverName = getCliQNameByNumber(normalizedMobile);
 			if (receiverName === null) {
-				return res.status(404).json({
-					error: "Receiver not found",
+				return res.status(400).json({
+					code: "010",
+					url: "",
+					errors: [
+						{
+							path: "",
+							errorCode: "400.010.PRFS1025",
+							message: "Receiver not found",
+							url: "",
+						},
+					],
+					message: "Receiver not found",
+					id: "",
 				});
 			}
 		}

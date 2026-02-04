@@ -48,7 +48,17 @@ interface ValidateAliasResponse {
 export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<
-		ValidateAliasResponse | { error: string; message?: string }
+		| ValidateAliasResponse
+		| { error: string; message?: string }
+		| {
+				code: string;
+				url: string;
+				errors: [
+					{ path: string; errorCode: string; message: string; url: string },
+				];
+				message: string;
+				id: string;
+		  }
 	>,
 ) {
 	if (req.method === "POST") {
@@ -83,7 +93,18 @@ export default function handler(
 
 				if (creditorName === null) {
 					return res.status(400).json({
-						error: "Alias profile not found",
+						code: "010",
+						url: "",
+						errors: [
+							{
+								path: "",
+								errorCode: "400.010",
+								message: "Alias profile not found",
+								url: "",
+							},
+						],
+						message: "Alias profile not found",
+						id: "",
 					});
 				}
 			}
@@ -93,7 +114,18 @@ export default function handler(
 
 				if (creditorName === null) {
 					return res.status(400).json({
-						error: "Alias profile not found",
+						code: "010",
+						url: "",
+						errors: [
+							{
+								path: "",
+								errorCode: "400.010",
+								message: "Alias profile not found",
+								url: "",
+							},
+						],
+						message: "Alias profile not found",
+						id: "",
 					});
 				}
 			}
