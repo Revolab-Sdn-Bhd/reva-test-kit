@@ -126,36 +126,70 @@ function PostLoginContent() {
 		livekitDisconnect();
 	};
 
+	const handleConnectionToggle = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (isConnected) {
+			handleDisconnect();
+		} else {
+			handleConnect();
+		}
+	};
+
 	return (
 		<div className="flex h-full gap-4 p-3 bg-gray-900">
 			{/* Left Panel - Configuration & Logs */}
 			<div className="flex flex-col w-1/2 gap-4">
 				{/* Configuration */}
 				<div className="bg-gray-800 border border-gray-700 rounded-lg shadow">
-					<button
-						type="button"
-						onClick={() => setIsConfigCollapsed(!isConfigCollapsed)}
-						className="flex items-center justify-between w-full p-3 text-left"
-					>
-						<h2 className="text-xl font-bold text-white">
-							WebSocket Configuration
-						</h2>
-						<svg
-							className={`w-5 h-5 text-gray-400 transition-transform ${
-								isConfigCollapsed ? "" : "rotate-180"
-							}`}
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
+					<div className="flex items-center justify-between w-full p-3">
+						<button
+							type="button"
+							onClick={() => setIsConfigCollapsed(!isConfigCollapsed)}
+							className="flex items-center gap-3 flex-1 text-left"
 						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={2}
-								d="M19 9l-7 7-7-7"
-							/>
-						</svg>
-					</button>
+							<h2 className="text-xl font-bold text-white">
+								WebSocket Configuration
+							</h2>
+						</button>
+
+						<div className="flex items-center gap-2">
+							{activeTab !== ConfigTab.Connection && (
+								<button
+									type="button"
+									onClick={handleConnectionToggle}
+									className={`px-2 py-1 text-sm font-xs rounded transition-colors ${
+										isConnected
+											? "bg-red-600 hover:bg-red-700 text-white"
+											: "bg-green-600 hover:bg-green-700 text-white"
+									}`}
+								>
+									{isConnected ? "Disconnect" : "Connect"}
+								</button>
+							)}
+
+							<button
+								type="button"
+								onClick={() => setIsConfigCollapsed(!isConfigCollapsed)}
+								className="p-1"
+							>
+								<svg
+									className={`w-5 h-5 text-gray-400 transition-transform ${
+										isConfigCollapsed ? "" : "rotate-180"
+									}`}
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+										d="M19 9l-7 7-7-7"
+									/>
+								</svg>
+							</button>
+						</div>
+					</div>
 
 					{!isConfigCollapsed && (
 						<div className="px-6 pb-6 space-y-4">
