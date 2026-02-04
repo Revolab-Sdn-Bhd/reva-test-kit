@@ -37,7 +37,7 @@ const Tabs = [
 	{ label: "Connection", value: ConfigTab.Connection },
 	{ label: "User Account", value: ConfigTab.UserAccount },
 	{ label: "Bills", value: ConfigTab.Bills },
-	{ label: "Transfer Account", value: ConfigTab.TransferAccount },
+	{ label: "Transfer / Request", value: ConfigTab.TransferAccount },
 	{ label: "Custom JSON", value: ConfigTab.CustomJson },
 ];
 
