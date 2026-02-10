@@ -27,6 +27,11 @@ import ReflectWidgetComponent from "../widget/transact/reflect";
 import SavingSpaceWidgetComponent from "../widget/transact/saving-space";
 import TransactionOptionWidgetComponent from "../widget/transact/transaction-option";
 
+marked.use({
+	gfm: true,
+	breaks: true,
+});
+
 const ChatMessageSection = () => {
 	const { messages, sendAction, chatInfo } = useWebSocketContext();
 
