@@ -16,7 +16,7 @@ import {
 	type TransactionOptionWidget,
 } from "@/lib/useWebSocket";
 import { useWebSocketContext } from "@/lib/WebSocketProvider";
-import PreConfirmationCard from "../pre-confirm-card";
+import ConfirmationCard from "../pre-confirm-card";
 import ButtonWidgetComponent from "../widget/button";
 import BillPaymentWidgetComponent from "../widget/transact/bill-payment";
 import CliqWidgetComponent from "../widget/transact/cliq";
@@ -176,10 +176,10 @@ const ChatMessageSection = () => {
 				</div>
 			) : (
 				messages.map((msg) => {
-					const hasPreConfirmation = msg.eventType && msg.form && msg.payload;
+					const hasConfirmationForm = !!msg.form;
 					const hasWidgets = msg.widgets && msg.widgets.length > 0;
 
-					if (!msg.content && !hasPreConfirmation && !hasWidgets) return null;
+					if (!msg.content && !hasConfirmationForm && !hasWidgets) return null;
 					return (
 						<div
 							key={msg.id}
@@ -213,6 +213,17 @@ const ChatMessageSection = () => {
 											/>
 										</svg>
 										<span>{msg.info}</span>
+									</div>
+								)}
+
+								{msg.form && !msg.eventType && (
+									<div className="mb-3">
+										<ConfirmationCard
+											chatId={chatInfo?.chatId || ""}
+											messageId={msg.id}
+											eventType={msg.eventType}
+											form={msg.form}
+										/>
 									</div>
 								)}
 
@@ -285,8 +296,8 @@ const ChatMessageSection = () => {
 								)}
 
 								{/* Pre Confirm Section */}
-								{msg.eventType && msg.form && msg.payload && (
-									<PreConfirmationCard
+								{msg.form && msg.eventType && (
+									<ConfirmationCard
 										chatId={chatInfo?.chatId || ""}
 										messageId={msg.id}
 										eventType={msg.eventType}
