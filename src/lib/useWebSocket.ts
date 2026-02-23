@@ -483,6 +483,7 @@ export enum EventType {
 	PRE_CONFIRMATION = "PRE_CONFIRMATION",
 	CANCEL_TRANSACTION = "CANCEL_TRANSACTION",
 	SELECT_SAVED_BENEFICIARY = "SELECT_SAVED_BENEFICIARY",
+	POST_CONFIRMATION_STATUS = "POST_CONFIRMATION_STATUS",
 }
 
 export const useWebSocket = () => {
@@ -698,6 +699,20 @@ export const useWebSocket = () => {
 								eventType: msgData.eventType,
 								form: msgData.form,
 								payload: msgData.payload,
+							};
+							setMessages((prev) => [...prev, message]);
+						}
+						break;
+					case EventType.POST_CONFIRMATION_STATUS:
+						{
+							const msgData = parsed.data;
+							const message: ChatMessage = {
+								id: msgData.messageId || Date.now().toString(),
+								sender: "agent",
+								content: msgData.message,
+								timestamp: new Date().toLocaleTimeString(),
+								form: msgData.form,
+								actions: msgData.actions,
 							};
 							setMessages((prev) => [...prev, message]);
 						}
