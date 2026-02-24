@@ -36,7 +36,7 @@ const ConfirmationCard = ({
 					chatId: chatId,
 					eventType,
 					transactionId: "11111",
-					transactionStatus: "SUCCESS",
+					transactionStatus: "FAILED",
 				},
 				"POST_CONFIRMATION",
 			);
